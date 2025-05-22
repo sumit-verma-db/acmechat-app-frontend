@@ -1,0 +1,30 @@
+.scrollbar::-webkit-scrollbar {
+  width: 10px;
+  background-color: transparent;
+}
+
+.scrollbar::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  background-color: transparent;
+}
+
+.scrollbar:hover::-webkit-scrollbar-thumb {
+  border-radius: 20px;
+  background: #6c6b6b;
+}
+
+/* Add to your CSS or styled-components */
+@keyframes slideIn {
+  0% {
+    transform: translateX(100%); /* Start off-screen */
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(0); /* Final position */
+    opacity: 1;
+  }
+}
+
+.message {
+  animation: slideIn 0.5s ease-out forwards; /* Apply animation */
+}
