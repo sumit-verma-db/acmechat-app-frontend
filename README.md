@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # WeChat - React Js Chat App
 
 **live demo: [https://react-chat-app-kohl.vercel.app/app](https://react-chat-app-kohl.vercel.app/app)**
@@ -98,3 +99,6 @@ Happy Coding! 🚀
 ## Dark mode
 
 ![dark mode react js chat app](https://user-images.githubusercontent.com/59603716/236672907-66c3c842-66e8-40bb-9c44-ea1e6f7a29da.JPG)
+=======
+# acmechat-app-frontend
+>>>>>>> origin/main
