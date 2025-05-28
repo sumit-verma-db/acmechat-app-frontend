@@ -5,6 +5,8 @@ const ChatContext = createContext();
 export const ChatProvider = ({ children }) => {
   const [selectedMenu, setSelectedMenu] = useState(1); // by default 0 index button is selected
   const [chatList, setChatList] = useState([]);
+  const [groupList, setGroupList] = useState([]);
+
   const [selectedUser, setSelectedUser] = useState(null);
   const [chatData, setChatData] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
@@ -14,7 +16,9 @@ export const ChatProvider = ({ children }) => {
     <ChatContext.Provider
       value={{
         chatList,
+        groupList,
         setChatList,
+        setGroupList,
         selectedUser,
         setSelectedUser,
         resetSelectedUser,

@@ -1,19 +1,18 @@
 import { Box, Stack, Typography } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
-import Header from "./Header";
-import Footer from "./Footer";
-import Message from "./Message";
+
 import { axiosGet } from "../../services/apiServices";
-import Message1 from "./Message1";
-import Footer1 from "./Footer1";
+
 import { useChat } from "../../contexts/ChatContext";
-import Header1 from "./Header1";
 import { useCall } from "../../contexts/CallContext";
 import IncomingCallPopup from "./IncomingCallPopup";
 import { useCallSocket } from "../../contexts/CallSocketProvider";
+import Header1 from "./Header1";
+import Message1 from "./Message1";
+import Footer1 from "./Footer1";
 
-const Conversation = ({ selectedUser }) => {
+const GroupConversation = ({ selectedUser }) => {
   // console.log(selectedUser, "SELECTED USER");
   const theme = useTheme();
   const { chatData, setChatData } = useChat();
@@ -35,26 +34,44 @@ const Conversation = ({ selectedUser }) => {
   const handleReject = () => {
     rejectCall();
   };
-  const fetchMessages = async (userId) => {
-    console.log("API_HITTT", userId);
+  const fetchMessages = async (groupId) => {
+    const currentUserId = parseInt(localStorage.getItem("userId"));
     try {
-      const response = await axiosGet(`api/auth/messages/${userId}`);
+      const response = await axiosGet(`api/auth/group/messages/${groupId}`);
       if (response?.messages?.length > 0) {
-        const formattedMessages = response.messages.map((msg) => ({
-          id: msg.message_id,
-          message_id: msg.message_id,
-          delivered: msg.delivered,
-          type: "msg",
-          subtype: "text",
-          message: msg.message,
-          sender: msg.sender_id,
-          receiver: msg.receiver_id,
-          sent_at: msg.sent_at,
-          fromMe: msg.sender_id === currentUserId,
-          seen: msg.seen,
-        }));
+        const formattedMessages = response.messages.map((msg) => {
+          let messageContent = msg.message;
+
+          // 🔍 Parse JSON string if necessary
+          try {
+            const parsed = JSON.parse(msg.message);
+            if (typeof parsed === "object" && parsed.message) {
+              messageContent = parsed.message;
+            }
+          } catch (err) {
+            // It's a normal string, skip parsing
+          }
+
+          return {
+            id: msg.message_id,
+            message_id: msg.message_id,
+            type: "msg",
+            subtype: "text",
+            message: messageContent,
+            sender: msg.sender_id,
+            sender_name: `${msg.sender_first_name} ${msg.sender_last_name}`,
+            sent_at: msg.sent_at,
+            sender_id: msg.sender_id,
+            fromMe: msg.sender_id === currentUserId,
+            delivered: msg.delivered || false,
+            seen: msg.seen || false,
+            is_group: true,
+            group_id: msg.group_id,
+          };
+        });
+
         setChatData(formattedMessages);
-        console.log(formattedMessages, "fetchMessages-----API");
+        console.log(response?.messages, "fetchMessages-----API");
       } else {
         setChatData([]);
       }
@@ -62,10 +79,11 @@ const Conversation = ({ selectedUser }) => {
       console.error("Error fetching messages:", error);
     }
   };
+
   useEffect(() => {
     console.log(selectedUser, "SELECTYED USER------");
-    if (selectedUser?.user_id !== undefined) {
-      fetchMessages(selectedUser?.user_id);
+    if (selectedUser?.group_id !== undefined) {
+      fetchMessages(selectedUser?.group_id);
     }
   }, [selectedUser]);
 
@@ -115,4 +133,4 @@ const Conversation = ({ selectedUser }) => {
   );
 };
 
-export default Conversation;
+export default GroupConversation;

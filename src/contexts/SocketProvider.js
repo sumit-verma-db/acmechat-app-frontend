@@ -459,6 +459,7 @@ export const SocketProvider = ({ children }) => {
     onlineUsers,
     setOnlineUsers,
     resetSelectedUser,
+    setGroupList,
   } = useChat();
 
   const currentUserId = parseInt(localStorage.getItem("userId"));
@@ -508,7 +509,7 @@ export const SocketProvider = ({ children }) => {
 
   useEffect(() => {
     const sock = getSocket();
-    if (sock && selectedUser && userId) {
+    if (sock && selectedUser && userId && location.pathname === "/app") {
       const roomId = [userId, selectedUser.user_id]
         .sort((a, b) => a - b)
         .join("-");
@@ -517,10 +518,26 @@ export const SocketProvider = ({ children }) => {
     }
   }, [selectedUser, userId]);
 
+  // join Group
+  useEffect(() => {
+    const sock = getSocket();
+    if (sock && selectedUser && userId && location.pathname === "/group") {
+      const roomId = { group_id: selectedUser.group_id };
+      // .sort((a, b) => a - b)
+      // .join("-");
+      sock.emit("join_group_room", roomId);
+      console.log("Auto joined join_group_room on page load:", roomId);
+    }
+  }, [selectedUser, userId]);
+
   const sendMessage = (message) => {
     sock.emit("send_message", message);
   };
 
+  // Send Group Message
+  const sendGroupMessage = (id, message) => {
+    sock.emit("send_group_message", { group_id: id, message: message });
+  };
   useEffect(() => {
     const sock = getSocket();
     if (!currentUserId) return;
@@ -567,6 +584,32 @@ export const SocketProvider = ({ children }) => {
     };
   }, [currentUserId, selectedUser, location.pathname === "/app"]);
 
+  // get user group users
+  useEffect(() => {
+    const sock = getSocket();
+    if (!currentUserId) return;
+
+    // 🔁 Request group chats
+    sock.emit("get_user_groups");
+
+    // 🟢 Listener: receive group chat list
+    sock.on("user_groups", (groups) => {
+      console.log("Group Chats via Socket:", groups);
+      setGroupList(groups); // update state
+    });
+
+    // Optional: handle error
+    sock.on("user_groups_error", (error) => {
+      console.error("Error fetching group chats:", error);
+    });
+
+    // ✅ Cleanup
+    return () => {
+      sock.off("user_groups");
+      sock.off("user_groups_error");
+    };
+  }, [location.pathname === "/group"]);
+
   useEffect(() => {
     const sock = getSocket();
 
@@ -579,29 +622,32 @@ export const SocketProvider = ({ children }) => {
     };
 
     const handleReceiveMessage = (message) => {
-      console.log("RECEIVE NEW MESSAAGE---", message);
       const currentUserId = parseInt(localStorage.getItem("userId"));
-      const isPartOfCurrentChat =
-        selectedUser &&
-        (message.sender_id === selectedUser.user_id ||
-          message.receiver_id === selectedUser.user_id);
-      if (!isPartOfCurrentChat) return;
-
-      const formatted = {
+      console.log(message, "handleReceiveMessage");
+      const formattedMessage = {
         id: message.message_id,
         message_id: message.message_id,
-        delivered: message.delivered,
-        type: "msg",
-        subtype: "text",
         message: message.message,
+        sender_id: message.sender_id,
         sender: message.sender_id,
         receiver: message.receiver_id,
         sent_at: message.sent_at,
-        fromMe: message.sender_id === currentUserId,
-        seen: message.seen,
+        delivered: message.delivered || false,
+        seen: message.seen || false,
+        fromMe: message.sender_id === currentUserId, // 👈 Always false for server messages
+        type: "msg",
+        subtype: "text",
+        is_group: message.is_group,
+        group_id: message.group_id,
       };
 
-      setChatData((prev) => [...prev, formatted]);
+      // Prevent duplicates
+      setChatData((prev) => {
+        const exists = prev.some(
+          (m) => m.message_id === formattedMessage.message_id
+        );
+        return exists ? prev : [...prev, formattedMessage];
+      });
     };
 
     const handleSeenUpdate = ({ message_id }) => {
@@ -657,7 +703,13 @@ export const SocketProvider = ({ children }) => {
 
   return (
     <SocketContext.Provider
-      value={{ connectSocketWithAuth, onlineUsers, joinRoom, sendMessage }}
+      value={{
+        connectSocketWithAuth,
+        onlineUsers,
+        joinRoom,
+        sendMessage,
+        sendGroupMessage,
+      }}
     >
       {children}
     </SocketContext.Provider>
