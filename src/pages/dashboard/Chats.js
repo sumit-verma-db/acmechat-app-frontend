@@ -79,6 +79,8 @@ const dummyChatData = [
 const Chats = () => {
   const { setSelectedUser, chatList, setChatList, setSelectedMenu } = useChat();
   const [loading, setLoading] = useState(false);
+  const [searchTerm, setSearchTerm] = useState("");
+
   const { joinRoom } = useSocket();
   const navigate = useNavigate();
   const handleUserClick = (user) => {
@@ -90,7 +92,10 @@ const Chats = () => {
     setSelectedMenu(1);
     navigate("/app");
   };
-
+  const filteredChats = chatList.filter((chat) => {
+    const fullName = `${chat.first_name} ${chat.last_name}`.toLowerCase();
+    return fullName.includes(searchTerm.toLowerCase());
+  });
   const theme = useTheme();
   return (
     <Box
@@ -122,6 +127,8 @@ const Chats = () => {
               <MagnifyingGlass color="#709CE6" />
             </SearchIconWrapper>
             <StyledInputBase
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search..."
               inputProps={{ "aria-label": "search" }}
             />
@@ -157,8 +164,8 @@ const Chats = () => {
             </Typography>
             {loading ? (
               <CircularProgress size={24} sx={{ alignSelf: "center" }} />
-            ) : chatList.length > 0 ? (
-              chatList.map((chat) => (
+            ) : filteredChats.length > 0 ? (
+              filteredChats.map((chat) => (
                 <ChatElement
                   key={chat.user_id}
                   {...chat}

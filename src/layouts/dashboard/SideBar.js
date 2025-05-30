@@ -60,7 +60,7 @@ const getMenuPath = (index) => {
 };
 
 const SideBar = () => {
-  const { logout } = useAuth();
+  const { logout, userData } = useAuth();
   const {
     setChatList,
     setSelectedUser,
@@ -103,7 +103,15 @@ const SideBar = () => {
   const theme = useTheme();
   const navigate = useNavigate();
   const location = useLocation(); // gets current location (url path)
+  useEffect(() => {
+    const path = location.pathname;
 
+    if (path.includes("/group")) {
+      setSelectedMenu(2);
+    } else if (path.includes("/app")) {
+      setSelectedMenu(1);
+    }
+  }, [location.pathname]);
   // state for selected button
   // const [selected, setSelected] = useState(1); // by default 0 index button is selected
   //switch themes
@@ -211,14 +219,15 @@ const SideBar = () => {
           </Stack>
         </Stack>
 
-        <Stack spacing={4}>
+        <Stack spacing={4} direction="column" alignItems="center" spacing={0.5}>
           <AntSwitch
             onChange={() => {
               onToggleMode();
             }}
             defaultChecked
           />
-          <Avatar
+
+          {/* <Avatar
             id="basic-button"
             sx={{ cursor: "pointer" }}
             src={faker.image.avatar()}
@@ -226,7 +235,25 @@ const SideBar = () => {
             aria-haspopup="true"
             aria-expanded={open ? "true" : undefined}
             onClick={handleClick}
-          />
+          /> */}
+          <Avatar
+            id="basic-button"
+            aria-haspopup="true"
+            aria-expanded={open ? "true" : undefined}
+            aria-controls={open ? "basic-menu" : undefined}
+            sx={{ cursor: "pointer" }}
+            onClick={handleClick}
+          >
+            {userData?.username?.[0] || "U"}
+          </Avatar>
+          <Box>
+            <Box sx={{ fontSize: 12, fontWeight: 600, textAlign: "center" }}>
+              {userData?.username || "Username"}
+            </Box>
+            <Box sx={{ fontSize: 10, color: "gray", textAlign: "center" }}>
+              {userData?.email || "email@example.com"}
+            </Box>
+          </Box>
           <Menu
             id="basic-menu"
             anchorEl={anchorEl}

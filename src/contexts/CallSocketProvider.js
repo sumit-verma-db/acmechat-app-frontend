@@ -90,6 +90,70 @@ export function CallSocketProvider({ children }) {
     setCallAccepted(false);
     setCallEnded(true);
   };
+  const callGroup = async (group_id) => {
+    console.log("[callGroup] Starting group call to group:=====", group_id);
+    if (!(await checkMic())) {
+      alert("Microphone access is required.");
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setLocalStream(stream);
+      setShowCallPopup(true);
+      setIsIncomingCall(false);
+
+      const pc = setupPeerConnection(stream);
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      socket.emit("call_group", { group_id, signal: offer });
+    } catch (err) {
+      console.error("[callGroup] Error accessing mic:", err);
+      alert("Cannot start group call.");
+    }
+  };
+
+  const answerGroupCall = async () => {
+    console.log("[answerGroupCall] Answering group call");
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setLocalStream(stream);
+
+      const pc = setupPeerConnection(stream);
+      await pc.setRemoteDescription(
+        new RTCSessionDescription(callIncoming.signal)
+      );
+
+      pendingCandidates.current.forEach((c) =>
+        pc.addIceCandidate(new RTCIceCandidate(c)).catch(console.error)
+      );
+      pendingCandidates.current = [];
+
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      socket.emit("answer_group_call", {
+        callerId: callIncoming.from,
+        group_id: callIncoming.group_id,
+        signal: answer,
+      });
+
+      setCallAccepted(true);
+      setActiveCall(true);
+    } catch (err) {
+      console.error("[answerGroupCall] Error:", err);
+      alert("Could not join group call.");
+    }
+  };
+
+  const endGroupCall = () => {
+    console.log("[endGroupCall] Ending group call");
+    socket.emit("end_group_call", {
+      group_id: callIncoming.group_id,
+    });
+    cleanupCall();
+  };
 
   const checkMic = async () => {
     try {
@@ -298,10 +362,67 @@ export function CallSocketProvider({ children }) {
       socket.off("call_ended", cleanupCall);
     };
   }, [socket]);
+  // === Group Call: Incoming call ===
+  useEffect(() => {
+    if (!socket) return;
+    const handleIncomingGroupCall = ({ from, group_id, signal }) => {
+      console.log(
+        "[socket] Incoming group call from:",
+        from,
+        "Group:",
+        group_id
+      );
+      playRingtone();
+      setCallIncoming({ from, signal, group_id });
+      setIsIncomingCall(true);
+      setShowCallPopup(true);
+      setCallerName(`${from} (Group ${group_id})`);
+    };
+
+    // === Group Call: Answer received ===
+    const handleGroupCallAnswered = async ({ from, group_id, signal }) => {
+      console.log(
+        "[socket] Group call answered by:",
+        from,
+        "for group:",
+        group_id
+      );
+      const pc = peerConnection.current;
+      if (!pc) return;
+      await pc.setRemoteDescription(new RTCSessionDescription(signal));
+      setCallAccepted(true);
+    };
+
+    // === Group Call: Ended ===
+    const handleGroupCallEnded = ({ from, group_id }) => {
+      console.log("[socket] Group call ended by:", from, "Group ID:", group_id);
+      cleanupCall();
+    };
+
+    // Add these listeners
+    socket.on("incoming_group_call", handleIncomingGroupCall);
+    socket.on("group_call_answered", handleGroupCallAnswered);
+    socket.on("group_call_ended", handleGroupCallEnded);
+
+    // // Cleanup on unmount
+    return () => {
+      socket.off("incoming_group_call", handleIncomingGroupCall);
+      socket.off("group_call_answered", handleGroupCallAnswered);
+      socket.off("group_call_ended", handleGroupCallEnded);
+    };
+  }, [socket]);
 
   return (
     <CallSocketContext.Provider
-      value={{ callUser, answerCall, rejectCall, cleanupCall }}
+      value={{
+        callUser,
+        answerCall,
+        rejectCall,
+        cleanupCall,
+        callGroup,
+        answerGroupCall,
+        endGroupCall,
+      }}
     >
       {children}
     </CallSocketContext.Provider>

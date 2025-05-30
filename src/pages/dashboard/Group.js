@@ -30,10 +30,15 @@ const Group = () => {
   const [openDialog, setOpenDialog] = useState(false);
   const { groupList, setSelectedUser, selectedUser } = useChat();
   const { sidebar } = useSelector((store) => store.app); // access our store inside component
+  const [searchTerm, setSearchTerm] = useState("");
+  console.log(groupList, "GROUP list");
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
   };
+  const filteredGroups = groupList.filter((group) =>
+    group.group_name.toLowerCase().includes(searchTerm.toLowerCase())
+  );
   const handleGroupClick = (user) => {
     console.log(user, "USERRRRRRR------>");
     // const roomId = joinRoom(user.user_id);
@@ -68,6 +73,8 @@ const Group = () => {
                   <MagnifyingGlass color="#709CE6" />
                 </SearchIconWrapper>
                 <StyledInputBase
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search..."
                   inputProps={{ "aria-label": "search" }}
                 />
@@ -113,7 +120,7 @@ const Group = () => {
                     All Groups
                   </Typography>
                   {/* Chat List */}
-                  {groupList
+                  {filteredGroups
                     .filter((el) => !el.pinned)
                     .map((group) => {
                       return (

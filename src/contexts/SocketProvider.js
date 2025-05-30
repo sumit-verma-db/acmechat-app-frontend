@@ -481,10 +481,12 @@ export const SocketProvider = ({ children }) => {
     });
 
     socket.on("user_online", ({ userId }) => {
+      console.log(userId, "user_online");
       setOnlineUsers((prev) => new Set([...prev, userId]));
     });
 
     socket.on("user_offline", ({ userId }) => {
+      console.log(userId, "user_offline");
       setOnlineUsers((prev) => {
         const updated = new Set(prev);
         updated.delete(userId);

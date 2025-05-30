@@ -9,8 +9,9 @@ import { useCall } from "../../contexts/CallContext";
 import IncomingCallPopup from "./IncomingCallPopup";
 import { useCallSocket } from "../../contexts/CallSocketProvider";
 import Header1 from "./Header1";
-import Message1 from "./Message1";
+// import Message1 from "./Message1";
 import Footer1 from "./Footer1";
+import Message1 from "../Conversation/Message1";
 
 const GroupConversation = ({ selectedUser }) => {
   // console.log(selectedUser, "SELECTED USER");
@@ -125,9 +126,7 @@ const GroupConversation = ({ selectedUser }) => {
         {/* <Message menu={true} /> */}
       </Box>
       {/* Chat footer */}
-      {selectedUser && (
-        <Footer1 selectedUser={selectedUser} setChatData={setChatData} />
-      )}
+      {selectedUser && <Footer1 selectedUser={selectedUser} />}
       {/* <Footer /> */}
     </Stack>
   );

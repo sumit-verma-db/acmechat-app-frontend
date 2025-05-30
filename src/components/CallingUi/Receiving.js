@@ -28,7 +28,7 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
   const { chatList } = useChat();
   const findCallerName = chatList.find(
     (ele) => ele.user_id == callerName
-  ).first_name;
+  )?.first_name;
   // console.log(chatList, "CHAT LIST", findCallerName);
   useEffect(() => {
     const timer = setInterval(() => {

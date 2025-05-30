@@ -6,7 +6,13 @@ import {
   Divider,
   Stack,
 } from "@mui/material";
-import { CaretDown, MagnifyingGlass, Phone, VideoCamera } from "phosphor-react";
+import {
+  CaretDown,
+  MagnifyingGlass,
+  Phone,
+  VideoCamera,
+  UsersThree,
+} from "phosphor-react";
 import React from "react";
 import { useTheme } from "@mui/material/styles";
 import StyledBadge from "../StyledBadge";
@@ -23,18 +29,22 @@ const Header1 = () => {
   const theme = useTheme();
 
   const { selectedUser, onlineUsers } = useChat();
-
-  const { callUser } = useCallSocket();
+  const { callUser, callGroup } = useCallSocket();
 
   if (!selectedUser) return null;
 
-  const isGroup = selectedUser?.isGroup;
+  const isGroup = selectedUser?.group_id;
 
+  console.log(isGroup, "CHECK IS GROUP======");
   const handleCall = async () => {
     try {
-      const socketInstance = await connectVoiceSocket(authToken);
-      console.log(socketInstance, "SOCKET CONNECTION READY");
-      callUser(selectedUser.user_id, selectedUser.first_name);
+      await connectVoiceSocket(authToken); // Reuse the connection
+      // if (isGroup) {
+      callGroup(selectedUser.group_id); // group_id expected in selectedUser
+      // }
+      // else {
+      //   callUser(selectedUser.user_id, selectedUser.first_name);
+      // }
     } catch (err) {
       console.error("Socket connection failed:", err);
     }
@@ -97,7 +107,11 @@ const Header1 = () => {
         </Stack>
 
         <Stack direction="row" alignItems="center" spacing={3}>
-          {!isGroup && (
+          {isGroup ? (
+            <IconButton onClick={handleCall}>
+              <UsersThree />
+            </IconButton>
+          ) : (
             <>
               <IconButton>
                 <VideoCamera />

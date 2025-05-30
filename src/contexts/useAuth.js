@@ -7,9 +7,25 @@ export const AuthProvider = ({ children }) => {
   const [authToken, setAuthToken] = useState(() =>
     localStorage.getItem("authToken")
   );
+  const [userData, setUserData] = useState({
+    userName: "",
+    userEmail: "",
+  });
+  console.log(userData, "USERADATA");
   const [refreshToken, setRefreshToken] = useState(() =>
     localStorage.getItem("refreshToken")
   );
+  const decodeToken = (token) => {
+    try {
+      const base64Payload = token.split(".")[1];
+      const decodedPayload = JSON.parse(atob(base64Payload));
+      return decodedPayload;
+    } catch (err) {
+      console.error("Invalid token:", err);
+      return null;
+    }
+  };
+
   const [userId, setUserId] = useState(() => localStorage.getItem("userId"));
   const [isAuthenticated, setIsAuthenticated] = useState(
     () => !!localStorage.getItem("authToken")
@@ -19,7 +35,8 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (authToken) localStorage.setItem("authToken", authToken);
     else localStorage.removeItem("authToken");
-
+    const userPayload = decodeToken(authToken);
+    setUserData(userPayload);
     if (refreshToken) localStorage.setItem("refreshToken", refreshToken);
     else localStorage.removeItem("refreshToken");
 
@@ -58,6 +75,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         isAuthenticated,
         authToken,
+        userData,
         refreshToken,
         userId,
         login,

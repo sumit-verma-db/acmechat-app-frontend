@@ -9,12 +9,47 @@ const Message1 = ({ chatData, selectedUser }) => {
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   };
-  useEffect(() => {
-    console.log(chatData, "--------chatData-----");
-  }, [chatData]);
+
   useEffect(() => {
     scrollToBottom();
   }, [chatData]);
+
+  // Format date to YYYY-MM-DD
+  const formatDateKey = (date) => new Date(date).toISOString().split("T")[0];
+
+  // Get readable label
+  const getReadableDate = (dateStr) => {
+    const today = new Date();
+    const date = new Date(dateStr);
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+
+    const sameDay = (a, b) =>
+      a.getDate() === b.getDate() &&
+      a.getMonth() === b.getMonth() &&
+      a.getFullYear() === b.getFullYear();
+
+    if (sameDay(date, today)) return "Today";
+    if (sameDay(date, yesterday)) return "Yesterday";
+    return date.toLocaleDateString(undefined, {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+  };
+
+  // Filter for current group
+  const groupMessages = chatData.filter(
+    (msg) => msg.is_group && msg.group_id === selectedUser?.group_id
+  );
+
+  // Group by date
+  const groupedByDate = {};
+  groupMessages.forEach((msg) => {
+    const key = formatDateKey(msg.sent_at);
+    if (!groupedByDate[key]) groupedByDate[key] = [];
+    groupedByDate[key].push(msg);
+  });
 
   return (
     <Box
@@ -28,73 +63,80 @@ const Message1 = ({ chatData, selectedUser }) => {
       }}
     >
       <Stack spacing={2}>
-        {chatData
-          .filter((msg) => {
-            return msg.is_group && msg.group_id === selectedUser?.group_id;
-          })
-          .map((el, index) => (
-            <Box
-              key={index}
-              sx={{
-                display: "flex",
-                justifyContent: el.fromMe ? "flex-end" : "flex-start",
-              }}
+        {Object.entries(groupedByDate).map(([date, messages]) => (
+          <React.Fragment key={date}>
+            <Typography
+              align="center"
+              sx={{ fontSize: 13, color: "#888", my: 1 }}
             >
-              <Box
-                sx={{
-                  maxWidth: "60%",
-                  padding: "8px 12px",
-                  borderRadius: "8px",
-                  backgroundColor: el.fromMe ? "#DCF8C6" : "#EAEAEA",
-                  color: "#000",
-                }}
-              >
-                {/* Group: show sender name */}
-                {selectedUser?.group_id && !el.fromMe && (
-                  <Typography
-                    variant="caption"
-                    sx={{
-                      fontWeight: "bold",
-                      color: "#1976d2",
-                      display: "block",
-                      marginBottom: "2px",
-                    }}
-                  >
-                    {el.sender_id || `User ${el.sender_id}`}
-                  </Typography>
-                )}
+              {getReadableDate(date)}
+            </Typography>
 
-                {/* Message text */}
-                <Typography variant="body1">{el.message}</Typography>
-
-                {/* Timestamp + Seen/Delivered for sender */}
+            {messages.map((el, index) => {
+              const fromMe = el.sender_id === currentUserId;
+              return (
                 <Box
+                  key={index}
                   sx={{
                     display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    gap: 0.5,
+                    justifyContent: fromMe ? "flex-end" : "flex-start",
                   }}
                 >
-                  <Typography variant="caption" sx={{ color: "#555" }}>
-                    {new Date(el.sent_at).toLocaleTimeString()}
-                  </Typography>
+                  <Box
+                    sx={{
+                      maxWidth: "60%",
+                      padding: "8px 12px",
+                      borderRadius: "8px",
+                      backgroundColor: fromMe ? "#DCF8C6" : "#EAEAEA",
+                      color: "#000",
+                      boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
+                    }}
+                  >
+                    {!fromMe && (
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          fontWeight: "bold",
+                          color: "#1976d2",
+                          display: "block",
+                          marginBottom: "2px",
+                        }}
+                      >
+                        {el.sender_name || `User ${el.sender_id}`}
+                      </Typography>
+                    )}
 
-                  {el.fromMe && (
-                    <>
-                      {el.seen ? (
-                        <Checks size={14} weight="bold" color="blue" />
-                      ) : el.delivered ? (
-                        <Checks size={14} weight="bold" />
-                      ) : (
-                        <Check size={14} weight="regular" />
+                    <Typography variant="body1">{el.message}</Typography>
+
+                    <Box
+                      sx={{
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center",
+                        gap: 0.5,
+                      }}
+                    >
+                      <Typography variant="caption" sx={{ color: "#555" }}>
+                        {new Date(el.sent_at).toLocaleTimeString()}
+                      </Typography>
+                      {fromMe && (
+                        <>
+                          {el.seen ? (
+                            <Checks size={14} weight="bold" color="blue" />
+                          ) : el.delivered ? (
+                            <Checks size={14} weight="bold" />
+                          ) : (
+                            <Check size={14} weight="regular" />
+                          )}
+                        </>
                       )}
-                    </>
-                  )}
+                    </Box>
+                  </Box>
                 </Box>
-              </Box>
-            </Box>
-          ))}
+              );
+            })}
+          </React.Fragment>
+        ))}
         <div ref={messagesEndRef} />
       </Stack>
     </Box>
