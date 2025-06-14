@@ -5,6 +5,7 @@ import {
   IconButton,
   Divider,
   Stack,
+  useMediaQuery,
 } from "@mui/material";
 import {
   CaretDown,
@@ -12,6 +13,7 @@ import {
   Phone,
   VideoCamera,
   UsersThree,
+  ArrowLeft,
 } from "phosphor-react";
 import React from "react";
 import { useTheme } from "@mui/material/styles";
@@ -22,11 +24,14 @@ import { useChat } from "../../contexts/ChatContext";
 import { useCallSocket } from "../../contexts/CallSocketProvider";
 import { connectVoiceSocket } from "../../voiceSocket";
 import { useAuth } from "../../contexts/useAuth";
+import useSettings from "../../hooks/useSettings";
 
 const Header1 = () => {
   const { authToken } = useAuth();
   const dispatch = useDispatch();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // ✅ Detect mobile
+  const { chatDrawer, onToggleChatDrawer } = useSettings();
 
   const { selectedUser, onlineUsers } = useChat();
   const { callUser, callGroup } = useCallSocket();
@@ -69,13 +74,22 @@ const Header1 = () => {
         sx={{ width: "100%", height: "100%" }}
       >
         <Stack
-          onClick={() => {
-            dispatch(ToggleSidebar());
-          }}
+          // onClick={() => {
+          //   dispatch(ToggleSidebar());
+          // }}
           direction={"row"}
           spacing={2}
         >
-          <Box>
+          {isMobile && (
+            <IconButton onClick={onToggleChatDrawer}>
+              <ArrowLeft />
+            </IconButton>
+          )}
+          <Box
+            onClick={() => {
+              dispatch(ToggleSidebar());
+            }}
+          >
             {isGroup ? (
               <Avatar>{selectedUser.first_name?.[0]}</Avatar>
             ) : (
@@ -124,10 +138,10 @@ const Header1 = () => {
           <IconButton>
             <MagnifyingGlass />
           </IconButton>
-          <Divider orientation="vertical" flexItem />
-          <IconButton>
+          {/* <Divider orientation="vertical" flexItem /> */}
+          {/* <IconButton>
             <CaretDown />
-          </IconButton>
+          </IconButton> */}
         </Stack>
       </Stack>
     </Box>

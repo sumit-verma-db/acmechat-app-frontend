@@ -6,6 +6,7 @@ import {
   VideoCamera,
   Microphone,
   VideoCameraSlash,
+  SpeakerHigh,
 } from "phosphor-react";
 import {
   Box,
@@ -21,6 +22,12 @@ const dots = keyframes`0% { content: ''; }
   33% { content: '.'; }
   66% { content: '..'; }
   100% { content: '...'; }`;
+const pulse = keyframes`
+  0% { box-shadow: 0 0 0 0 rgba(255,255,255, 0.5); }
+  70% { box-shadow: 0 0 0 10px rgba(255,255,255, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(255,255,255, 0); }
+`;
+
 const Dialing = ({
   callerName = "John Doe",
   handleCancel,
@@ -53,12 +60,21 @@ const Dialing = ({
   //   const handleCancel = () => {
   //     console.log("Call cancelled");
   //   };
-
+  const getButtonColor = (type) => {
+    if (type === "cancel") return { bg: "#ef4444", hover: "#dc2626" }; // red
+    if (type === "mute") return { bg: "#1e293b", hover: "#0f172a" }; // dark blue-gray
+    return { bg: "#1e3a8a", hover: "#1d4ed8" }; // blue (for video)
+  };
   return (
     <Box
       sx={{
         // height: "100vh",
-        backgroundColor: "#16a34a", // tailwind's green-600
+        // background: "linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b)",
+        background: "linear-gradient(135deg, #3b82f6, #9333ea)", // blue to purple
+        // background: `linear-gradient(135deg, #1f2937, #4b5563)`, // subtle green blend
+        background: "linear-gradient(135deg, #60a5fa,rgb(233, 226, 241))",
+
+        // backgroundColor: "#16a34a", // tailwind's green-600
         position: "relative",
         overflow: "hidden",
         borderRadius: 2,
@@ -74,7 +90,8 @@ const Dialing = ({
         sx={{
           position: "absolute",
           inset: 0,
-          backgroundColor: "#15803d", // green-700
+          background: `radial-gradient(circle at 40% 20%, rgba(255,255,255,0.05), transparent 70%)`,
+          // backgroundColor: "#15803d", // green-700
           opacity: 0.2,
           transform: "rotate(45deg)",
           zIndex: 0,
@@ -100,12 +117,16 @@ const Dialing = ({
           sx={{
             width: 112,
             height: 112,
-            bgcolor: "#4ade80", // green-400
+            // bgcolor: "#4ade80", // green-400
             mb: 2,
             border: "4px solid white",
             fontSize: 36,
             fontWeight: "bold",
+
+            animation: `${pulse} 2s infinite`,
+            bgcolor: "#0ea5e9", // cyan
             color: "white",
+            boxShadow: "0 0 0 5px rgba(255,255,255,0.3)",
           }}
         >
           {callerName.charAt(0)}
@@ -127,50 +148,83 @@ const Dialing = ({
               },
             }}
           >
-            {userOnline ? "Ringing" : "Calling"}
+            {userOnline ? "Ringing" : "Requesting"}
           </Typography>
         )}
       </Box>
 
       {/* Action Buttons */}
-      <Box sx={{ zIndex: 1, mb: 8 }}>
-        <Stack direction="row" spacing={4} justifyContent="center">
-          <IconButton
-            onClick={handleCancel}
-            sx={{
-              bgcolor: "#ef4444", // red-500
-              color: "white",
-              "&:hover": { bgcolor: "#dc2626" }, // red-600
-              p: 2,
-            }}
-          >
-            <X size={28} />
-          </IconButton>
-          <IconButton
-            onClick={toggleMute}
-            sx={{
-              bgcolor: "#374151", // gray-700
-              color: "white",
-              "&:hover": { bgcolor: "#1f2937" }, // gray-800
-              p: 2,
-            }}
-          >
-            {muted ? <MicrophoneSlash size={28} /> : <Microphone size={28} />}
-            {/* <MicrophoneSlash size={28} /> */}
-          </IconButton>
-          <IconButton
-            sx={{
-              bgcolor: "#374151",
-              color: "white",
-              "&:hover": { bgcolor: "#1f2937" },
-              p: 2,
-            }}
-          >
-            <VideoCamera size={28} />
-            {/* {muted ? <VideoCameraSlash size={28} /> : <VideoCamera size={28} />} */}
-            {/* <VideoCamera size={28} /> */}
-            {/* <VideoCameraSlash size={28} /> */}
-          </IconButton>
+      <Box
+        sx={{ zIndex: 1, mb: 4, flexDirection: "row", alignItems: "center" }}
+      >
+        <Stack direction="row" spacing={4} alignItems="center">
+          {/* <Stack alignItems="center">
+            <IconButton
+              sx={{
+                bgcolor: "#a855f7",
+                color: "white",
+                "&:hover": { bgcolor: "#9333ea" },
+                p: 2,
+              }}
+            >
+              <SpeakerHigh size={24} />
+            </IconButton>
+            <Typography variant="caption" color="white">
+              Speaker
+            </Typography>
+          </Stack> */}
+
+          <Stack alignItems="center">
+            <IconButton
+              sx={{
+                bgcolor: "#ffffff",
+                color: "#9333ea",
+                "&:hover": { bgcolor: "#f3e8ff" },
+                p: 2,
+              }}
+            >
+              <VideoCameraSlash size={24} />
+            </IconButton>
+            <Typography variant="caption" color="white">
+              Start Video
+            </Typography>
+          </Stack>
+
+          <Stack alignItems="center">
+            <IconButton
+              onClick={toggleMute}
+              sx={{
+                bgcolor: "#a855f7",
+                color: "white",
+                "&:hover": { bgcolor: "#9333ea" },
+                p: 2,
+              }}
+            >
+              {muted ? <MicrophoneSlash size={28} /> : <Microphone size={28} />}
+
+              {/* {muted ? <MicrophoneSlash size={24} /> : <Microphone size={24} />} */}
+            </IconButton>
+            <Typography variant="caption" color="white">
+              Mute
+            </Typography>
+          </Stack>
+
+          <Stack alignItems="center">
+            <IconButton
+              onClick={handleCancel}
+              sx={{
+                bgcolor: "#ef4444",
+                color: "white",
+                "&:hover": { bgcolor: "#dc2626" },
+                p: 2,
+              }}
+            >
+              <Phone size={24} />
+            </IconButton>
+            <Typography variant="caption" color="white">
+              End Call
+            </Typography>
+          </Stack>
         </Stack>
       </Box>
     </Box>

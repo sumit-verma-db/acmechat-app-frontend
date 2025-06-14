@@ -627,6 +627,7 @@ export const SocketProvider = ({ children }) => {
       const currentUserId = parseInt(localStorage.getItem("userId"));
       console.log(message, "handleReceiveMessage");
       const formattedMessage = {
+        ...message,
         id: message.message_id,
         message_id: message.message_id,
         message: message.message,
@@ -637,7 +638,7 @@ export const SocketProvider = ({ children }) => {
         delivered: message.delivered || false,
         seen: message.seen || false,
         fromMe: message.sender_id === currentUserId, // 👈 Always false for server messages
-        type: "msg",
+        type: message.type,
         subtype: "text",
         is_group: message.is_group,
         group_id: message.group_id,
@@ -648,6 +649,33 @@ export const SocketProvider = ({ children }) => {
         const exists = prev.some(
           (m) => m.message_id === formattedMessage.message_id
         );
+        return exists ? prev : [...prev, formattedMessage];
+      });
+    };
+    const handleReceiveFile = (message) => {
+      const currentUserId = parseInt(localStorage.getItem("userId"));
+      console.log(message, "handleReceiveFile");
+      const formattedMessage = {
+        ...message,
+        id: message.message_id,
+        message_id: message.message_id,
+        message: message.message,
+        sender_id: message.sender_id,
+        sender: message.sender_id,
+        receiver: message.receiver_id,
+        sent_at: message.sent_at,
+        delivered: message.delivered || false,
+        seen: message.seen || false,
+        fromMe: message.sender_id === currentUserId, // 👈 Always false for server messages
+        type: message.type,
+        subtype: "text",
+        is_group: message.is_group,
+        group_id: message.group_id,
+      };
+
+      // Prevent duplicates
+      setChatData((prev) => {
+        const exists = prev.some((m) => m.file_id === formattedMessage.file_id);
         return exists ? prev : [...prev, formattedMessage];
       });
     };
@@ -665,6 +693,7 @@ export const SocketProvider = ({ children }) => {
         .off("delivered_update")
         .on("delivered_update", handleDeliveredUpdate);
       sock.off("receive_message").on("receive_message", handleReceiveMessage);
+      sock.off("receive_file").on("receive_file", handleReceiveFile);
       sock.off("mark_seen").on("mark_seen", handleSeenUpdate);
     };
 
@@ -678,6 +707,7 @@ export const SocketProvider = ({ children }) => {
         sock.off("connect", bindSocketEvents);
         sock.off("delivered_update", handleDeliveredUpdate);
         sock.off("receive_message", handleReceiveMessage);
+        sock.off("receive_file", handleReceiveFile);
         sock.off("mark_seen", handleSeenUpdate);
       }
     };

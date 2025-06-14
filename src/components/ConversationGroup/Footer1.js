@@ -61,6 +61,9 @@ const Footer1 = ({ selectedUser, setChatData }) => {
       p={2}
       sx={{
         width: "100%",
+        position: "sticky",
+        bottom: { xs: 56, sm: 0 }, // Push above mobile navbar (56px is typical BottomNav height)
+        zIndex: 10,
         backgroundColor:
           theme.palette.mode === "light"
             ? "#F8FAFF"
@@ -74,7 +77,7 @@ const Footer1 = ({ selectedUser, setChatData }) => {
         </Box>
       )}
 
-      <Stack direction="row" alignItems="center" spacing={3}>
+      <Stack direction="row" alignItems="center" spacing={2}>
         <TextField
           fullWidth
           placeholder="Write a message..."
@@ -84,6 +87,18 @@ const Footer1 = ({ selectedUser, setChatData }) => {
           onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
           InputProps={{
             disableUnderline: true,
+            sx: {
+              padding: "10px 14px",
+              backgroundColor:
+                theme.palette.mode === "light"
+                  ? "#F0F4FA"
+                  : theme.palette.background.default,
+              borderRadius: 2,
+              "& .MuiInputBase-input": {
+                padding: 0,
+                fontSize: 16,
+              },
+            },
             endAdornment: (
               <InputAdornment position="end">
                 <IconButton onClick={() => setOpenPicker(!openPicker)}>
@@ -96,8 +111,8 @@ const Footer1 = ({ selectedUser, setChatData }) => {
 
         <Box
           sx={{
-            height: 48,
-            width: 48,
+            // height: 48,
+            // width: 48,
             backgroundColor: theme.palette.primary.main,
             borderRadius: 1.5,
           }}

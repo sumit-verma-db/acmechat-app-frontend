@@ -23,6 +23,17 @@ const dots = keyframes`0% { content: ''; }
   33% { content: '.'; }
   66% { content: '..'; }
   100% { content: '...'; }`;
+const pulseRing = keyframes`
+  0% {
+    box-shadow: 0 0 0 0 rgba(255,255,255, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(255,255,255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255,255,255, 0);
+  }
+`;
 const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
   const [callDuration, setCallDuration] = useState(0);
   const { chatList } = useChat();
@@ -53,7 +64,8 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
     <Box
       sx={{
         // height: "100vh",
-        backgroundColor: "#16a34a", // tailwind's green-600
+        background: "linear-gradient(135deg, #3b82f6, #9333ea)", // blue to violet
+        // backgroundColor: "#16a34a", // tailwind's green-600
         position: "relative",
         overflow: "hidden",
         borderRadius: 2,
@@ -69,7 +81,9 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
         sx={{
           position: "absolute",
           inset: 0,
-          backgroundColor: "#15803d", // green-700
+          background: `radial-gradient(circle at 40% 20%, rgba(255,255,255,0.05), transparent 70%)`,
+
+          // backgroundColor: "#15803d", // green-700
           opacity: 0.2,
           transform: "rotate(45deg)",
           zIndex: 0,
@@ -92,12 +106,18 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
           sx={{
             width: 112,
             height: 112,
-            bgcolor: "#4ade80", // green-400
+            border: "4px solid rgba(255, 255, 255, 0.5)",
+            bgcolor: "#0ea5e9",
+
+            // bgcolor: "#4ade80", // green-400
             mb: 2,
             border: "4px solid white",
             fontSize: 36,
             fontWeight: "bold",
-            color: "white",
+            color: "#fff",
+            // color: "white",
+            animation: `${pulseRing} 1.5s infinite`,
+            boxShadow: "0 0 0 5px rgba(255,255,255,0.3)",
           }}
         >
           {findCallerName?.charAt(0)}
@@ -126,7 +146,54 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
       </Box>
 
       {/* Action Buttons */}
-      <Box sx={{ zIndex: 1, mb: 8 }}>
+      <Box
+        sx={{ zIndex: 1, mb: 4, flexDirection: "row", alignItems: "center" }}
+      >
+        <Stack direction="row" spacing={8} sx={{ zIndex: 1 }}>
+          <Stack alignItems="center">
+            <Box
+              sx={{
+                borderRadius: "50%",
+                animation: `${pulseRing} 1.6s infinite`,
+              }}
+            >
+              <IconButton
+                onClick={answerCall}
+                sx={{
+                  bgcolor: "#22c55e",
+                  color: "white",
+                  "&:hover": { bgcolor: "#16a34a" },
+                  width: 64,
+                  height: 64,
+                }}
+              >
+                <Phone size={28} />
+              </IconButton>
+            </Box>
+            <Typography variant="caption" color="white">
+              Accept
+            </Typography>
+          </Stack>
+          <Stack alignItems="center">
+            <IconButton
+              onClick={rejectCall}
+              sx={{
+                bgcolor: "#ef4444",
+                color: "white",
+                "&:hover": { bgcolor: "#dc2626" },
+                width: 64,
+                height: 64,
+              }}
+            >
+              <PhoneSlash size={28} />
+            </IconButton>
+            <Typography variant="caption" color="white">
+              Decline
+            </Typography>
+          </Stack>
+        </Stack>
+      </Box>
+      {/* <Box sx={{ zIndex: 1, mb: 8 }}>
         <Stack direction="row" spacing={4} justifyContent="center">
           <IconButton
             onClick={answerCall}
@@ -141,17 +208,7 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
           >
             <Phone size={28} />
           </IconButton>
-          {/* <IconButton
-            onClick={toggleMute}
-            sx={{
-              bgcolor: "#374151", // gray-700
-              color: "white",
-              "&:hover": { bgcolor: "#1f2937" }, // gray-800
-              p: 2,
-            }}
-          >
-            {muted ? <MicrophoneSlash size={28} /> : <Microphone size={28} />}
-          </IconButton> */}
+          
           <IconButton
             onClick={rejectCall}
             sx={{
@@ -162,10 +219,10 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
             }}
           >
             <PhoneSlash size={28} />
-            {/* <VideoCamera size={28} /> */}
+           
           </IconButton>
         </Stack>
-      </Box>
+      </Box> */}
     </Box>
   );
 };

@@ -9,6 +9,7 @@ import MainLayout from "../layouts/main";
 import { DEFAULT_PATH } from "../config";
 import LoadingScreen from "../components/LoadingScreen";
 import AllContacts from "../pages/dashboard/AllContacts";
+import Admin from "../pages/dashboard/Admin/Admin";
 //import Settings from "../pages/dashboard/Settings";
 
 const Loadable = (Component) => (props) => {
@@ -36,6 +37,7 @@ export default function Router() {
       element: <DashboardLayout />,
       children: [
         { element: <Navigate to={DEFAULT_PATH} replace />, index: true },
+        { path: "admin", element: <Admin /> },
         { path: "allContact", element: <AllContacts /> },
         { path: "app", element: <GeneralApp /> },
         { path: "settings", element: <Settings /> },

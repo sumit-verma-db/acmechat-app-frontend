@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography, useMediaQuery } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import Header from "./Header";
@@ -12,10 +12,14 @@ import Header1 from "./Header1";
 import { useCall } from "../../contexts/CallContext";
 import IncomingCallPopup from "./IncomingCallPopup";
 import { useCallSocket } from "../../contexts/CallSocketProvider";
+import Chats from "../../pages/dashboard/Chats";
+import NoChat from "../../assets/Illustration/NoChat";
 
 const Conversation = ({ selectedUser }) => {
   // console.log(selectedUser, "SELECTED USER");
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   const { chatData, setChatData } = useChat();
   // const [chatData, setChatData] = useState([]);
   const currentUserId = parseInt(localStorage.getItem("userId"));
@@ -41,11 +45,12 @@ const Conversation = ({ selectedUser }) => {
       const response = await axiosGet(`api/auth/messages/${userId}`);
       if (response?.messages?.length > 0) {
         const formattedMessages = response.messages.map((msg) => ({
+          ...msg,
           id: msg.message_id,
           message_id: msg.message_id,
           delivered: msg.delivered,
-          type: "msg",
-          subtype: "text",
+          type: msg.type,
+
           message: msg.message,
           sender: msg.sender_id,
           receiver: msg.receiver_id,
@@ -75,7 +80,21 @@ const Conversation = ({ selectedUser }) => {
   };
 
   return (
-    <Stack height={"100%"} maxHeight={"100vh"} width={"auto"}>
+    <Stack
+      height="100dvh" // ✅ Correct mobile viewport handling
+      width="100%"
+      sx={{
+        maxHeight: {
+          xs: "94vh", // mobile
+          sm: "100vh", // tablet and up
+        },
+        overflow: "hidden", // prevent scroll bleed
+        [theme.breakpoints.down("sm")]: {
+          width: "100vw",
+        },
+      }}
+    >
+      {/* // <Stack height={"100%"} maxHeight={"100vh"} width={"auto"}> */}
       <audio id="remoteAudio" autoPlay style={{ display: "none" }} />
       <IncomingCallPopup
         open={showCallPopup}
@@ -90,17 +109,63 @@ const Conversation = ({ selectedUser }) => {
       {/* Chat header */}
       {selectedUser ? (
         <Header1 />
+      ) : isMobile ? (
+        <Chats />
       ) : (
-        <Typography align="center" sx={{ p: 2 }}>
-          Select a user to start a conversation
-        </Typography>
+        <>
+          <Box
+            sx={{
+              p: 2,
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "100%", // Fill parent
+              background: (theme) =>
+                theme.palette.mode === "light"
+                  ? "url('/assets/bg-whatsapp-light.png'), #f0f2f5"
+                  : "url('/assets/bg-whatsapp-dark.png'), #222e35",
+              backgroundSize: "cover",
+              backgroundRepeat: "repeat",
+            }}
+          >
+            <NoChat />
+            <Typography variant="h6" mt={2} color="text.secondary">
+              Select a user to start a conversation
+            </Typography>
+          </Box>
+        </>
       )}
       {/* Msg */}
       <Box
         className="scrollbar"
+        width="100%"
+        sx={{
+          flexGrow: 1,
+
+          overflowY: "auto",
+          height: "100vh",
+          py: 2,
+
+          [theme.breakpoints.down("sm")]: {
+            height: "calc(100vh - 140px)", // adjust for header + footer
+          },
+        }}
+      >
+        {/* <Box
+        className="scrollbar"
         width={"100%"}
         sx={{ flexGrow: 1, height: "100%", overflowY: "scroll" }}
-      >
+      > */}
+        {/* <Box
+        className="scrollbar"
+        sx={{
+          flexGrow: 1,
+          minHeight: 100%,
+          overflowY: "auto",
+          px: 2,
+        }}
+      > */}
         {selectedUser ? (
           <Message1 chatData={chatData} selectedUser={selectedUser} />
         ) : null}

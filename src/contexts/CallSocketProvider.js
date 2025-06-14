@@ -30,6 +30,8 @@ export function CallSocketProvider({ children }) {
     callIncoming,
     setActiveCall,
     callerName,
+    setIsRinging,
+    isRinging,
   } = useCall();
   const { chatList = [] } = useChat() || {};
 
@@ -37,22 +39,53 @@ export function CallSocketProvider({ children }) {
   const pendingCandidates = useRef([]);
 
   const ringtoneRef = useRef(null);
+  const dialtoneRef = useRef(null);
 
-  const playRingtone = () => {
-    console.log("RINGTONE PLAYS ---====>");
-    if (!ringtoneRef.current) {
-      ringtoneRef.current = new Audio("../assets/audio/ringtone.mp3");
-      ringtoneRef.current.loop = true;
+  const dialRingtone = () => {
+    console.log("[dialRingtone] Playing dialing tone");
+    stopRingtone(); // Ensure ringtone is not playing
+    if (!dialtoneRef.current) {
+      dialtoneRef.current = new Audio("/audio/dialing.mp3");
+      dialtoneRef.current.loop = true;
     }
-    ringtoneRef.current.play().catch((err) => {
-      console.warn("Autoplay blocked. User interaction needed:", err);
+    dialtoneRef.current.play().catch((err) => {
+      console.warn("Autoplay blocked (dialtone):", err);
     });
   };
 
+  // const playRingtone = () => {
+  //   console.log("RINGTONE PLAYS ---====>");
+  //   if (!ringtoneRef.current) {
+  //     ringtoneRef.current = new Audio("/audio/ringtone.mp3");
+  //     ringtoneRef.current.loop = true;
+  //   }
+  //   ringtoneRef.current.play().catch((err) => {
+  //     console.warn("Autoplay blocked. User interaction needed:", err);
+  //   });
+  // };
+  const playRingtone = () => {
+    console.log("[playRingtone] Playing incoming ringtone");
+    stopDialtone(); // Ensure dialtone is not playing
+    if (!ringtoneRef.current) {
+      ringtoneRef.current = new Audio("/audio/ringtone.mp3");
+      ringtoneRef.current.loop = true;
+    }
+    ringtoneRef.current.play().catch((err) => {
+      console.warn("Autoplay blocked (incoming ringtone):", err);
+    });
+  };
   const stopRingtone = () => {
     if (ringtoneRef.current) {
       ringtoneRef.current.pause();
       ringtoneRef.current.currentTime = 0;
+    }
+  };
+
+  const stopDialtone = () => {
+    if (dialtoneRef.current) {
+      dialtoneRef.current.pause();
+      dialtoneRef.current.currentTime = 0;
+      dialtoneRef.current = null;
     }
   };
 
@@ -83,7 +116,8 @@ export function CallSocketProvider({ children }) {
       console.log("[cleanupCall] Emitting end_call");
       socket.emit("end_call", { peerId: callIncoming.from });
     }
-
+    stopRingtone();
+    stopDialtone();
     setCallIncoming(null);
     setShowCallPopup(false);
     setActiveCall(false);
@@ -229,7 +263,7 @@ export function CallSocketProvider({ children }) {
     setCallerName(receiverName);
     setShowCallPopup(true);
     setIsIncomingCall(false);
-
+    dialRingtone();
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       console.log("[callUser] Got local stream");
@@ -244,6 +278,7 @@ export function CallSocketProvider({ children }) {
     } catch (err) {
       console.error("[callUser] Error accessing microphone:", err);
       setShowCallPopup(false);
+      stopRingtone(); // 🔕 Stop on error
       alert("Cannot access mic.");
     }
   };
@@ -277,7 +312,8 @@ export function CallSocketProvider({ children }) {
         callerId: callIncoming.from,
         signal: answer,
       });
-
+      stopRingtone();
+      stopDialtone();
       setCallAccepted(true);
       setActiveCall(true);
     } catch (err) {
@@ -317,6 +353,7 @@ export function CallSocketProvider({ children }) {
       playRingtone();
       setCallIncoming({ from, signal });
       setIsIncomingCall(true);
+      setIsRinging(true);
       setShowCallPopup(true);
       setCallerName(`${from}`);
     };
@@ -327,7 +364,8 @@ export function CallSocketProvider({ children }) {
       if (!pc) return;
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
       setCallAccepted(true);
-
+      stopRingtone();
+      stopDialtone();
       pendingCandidates.current.forEach((c) =>
         pc.addIceCandidate(new RTCIceCandidate(c)).catch(console.error)
       );

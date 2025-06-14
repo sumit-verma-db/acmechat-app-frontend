@@ -1,12 +1,15 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { CircularProgress, Stack } from "@mui/material";
+import { CircularProgress, Stack, useMediaQuery } from "@mui/material";
+import { useTheme } from "@mui/material/styles";
 import SideBar from "./SideBar";
 import { useAuth } from "../../contexts/useAuth";
-
-// const isAuthenticated = true;
+import BottomNavBar from "./BottomNavBar";
 
 const DashboardLayout = () => {
   const { isAuthenticated, authToken } = useAuth();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+
   if (authToken === undefined) {
     return (
       <Stack
@@ -19,16 +22,20 @@ const DashboardLayout = () => {
       </Stack>
     );
   }
+
   if (!isAuthenticated) {
     return <Navigate to="/auth/login" />;
   }
 
   return (
-    <Stack direction="row">
-      {/* SideBar */}
-      <SideBar />
-      <Outlet />
-    </Stack>
+    <>
+      <Stack direction="row" sx={{ width: "100%", height: "100vh" }}>
+        {!isMobile && <SideBar />}
+        <Outlet />
+      </Stack>
+
+      {isMobile && <BottomNavBar />}
+    </>
   );
 };
 

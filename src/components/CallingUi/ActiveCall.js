@@ -22,6 +22,17 @@ const dots = keyframes`0% { content: ''; }
   33% { content: '.'; }
   66% { content: '..'; }
   100% { content: '...'; }`;
+const pulseRing = keyframes`
+  0% {
+    box-shadow: 0 0 0 0 rgba(255,255,255, 0.5);
+  }
+  70% {
+    box-shadow: 0 0 0 20px rgba(255,255,255, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(255,255,255, 0);
+  }
+`;
 const ActiveCall = ({
   callerName = "John Doe",
   handleCancel,
@@ -56,7 +67,8 @@ const ActiveCall = ({
     <Box
       sx={{
         // height: "100vh",
-        backgroundColor: "#16a34a", // tailwind's green-600
+        background: "linear-gradient(135deg, #3b82f6, #9333ea)", // blue to violet
+        // backgroundColor: "#16a34a", // tailwind's green-600
         position: "relative",
         overflow: "hidden",
         borderRadius: 2,
@@ -72,7 +84,10 @@ const ActiveCall = ({
         sx={{
           position: "absolute",
           inset: 0,
-          backgroundColor: "#15803d", // green-700
+          // backgroundColor: "#15803d",
+          background: `radial-gradient(circle at 40% 20%, rgba(255,255,255,0.05), transparent 70%)`,
+
+          // backgroundColor: "#15803d", // green-700
           opacity: 0.2,
           transform: "rotate(45deg)",
           zIndex: 0,
@@ -95,12 +110,18 @@ const ActiveCall = ({
           sx={{
             width: 112,
             height: 112,
-            bgcolor: "#4ade80", // green-400
+            bgcolor: "#0ea5e9",
+
+            // bgcolor: "#4ade80", // green-400
             mb: 2,
             border: "4px solid white",
             fontSize: 36,
             fontWeight: "bold",
-            color: "white",
+            color: "#fff",
+            color: "#fff",
+            animation: `${pulseRing} 1.5s infinite`,
+
+            boxShadow: "0 0 0 5px rgba(255,255,255,0.3)",
           }}
         >
           {findCallerName?.charAt(0)}

@@ -1,187 +1,288 @@
+import React, { useState } from "react";
 import {
   Box,
   IconButton,
   Stack,
   Typography,
-  InputBase,
   Button,
   Divider,
-  Avatar,
-  Badge,
   CircularProgress,
+  useMediaQuery,
+  Drawer,
+  InputAdornment,
 } from "@mui/material";
-import { ArchiveBox, CircleDashed, MagnifyingGlass } from "phosphor-react";
+import { ArchiveBox, CircleDashed, MagnifyingGlass, X } from "phosphor-react";
 import { useTheme } from "@mui/material/styles";
-import React, { useState } from "react";
-import { faker } from "@faker-js/faker";
-import { ChatList } from "../../data";
+import { useChat } from "../../contexts/ChatContext";
+import { useNavigate } from "react-router-dom";
+import { useSocket } from "../../contexts/SocketProvider";
+import useSettings from "../../hooks/useSettings";
 import {
   Search,
   SearchIconWrapper,
   StyledInputBase,
 } from "../../components/Search";
 import ChatElement from "../../components/ChatElement";
-import { useChat } from "../../contexts/ChatContext";
-import { useNavigate } from "react-router-dom";
-import { useSocket } from "../../contexts/SocketProvider";
 
-const dummyChatData = [
-  {
-    user_id: 1,
-    first_name: "John",
-    last_name: "Doe",
-    img: "https://i.pravatar.cc/150?img=1",
-    email: "john.doe@example.com",
-    city: "New York",
-    msg: "Hey, are we still on for the meeting?",
-    time: "10:30 AM",
-    online: true,
-    unread: 2,
-  },
-  {
-    user_id: 2,
-    first_name: "Jane",
-    last_name: "Smith",
-    img: "https://i.pravatar.cc/150?img=2",
-    email: "jane.smith@example.com",
-    city: "San Francisco",
-    msg: "Let me know once you check the file.",
-    time: "9:45 AM",
-    online: false,
-    unread: 0,
-  },
-  {
-    user_id: 3,
-    first_name: "Alex",
-    last_name: "Johnson",
-    img: "https://i.pravatar.cc/150?img=3",
-    email: "alex.johnson@example.com",
-    city: "Chicago",
-    msg: "Great job on the presentation!",
-    time: "Yesterday",
-    online: true,
-    unread: 4,
-  },
-  {
-    user_id: 4,
-    first_name: "Emily",
-    last_name: "Williams",
-    img: "https://i.pravatar.cc/150?img=4",
-    email: "emily.williams@example.com",
-    city: "Boston",
-    msg: "I'll call you in 5 mins.",
-    time: "Monday",
-    online: false,
-    unread: 0,
-  },
-];
+const Chats = ({ onSelect }) => {
+  const { setSelectedUser, selectedUser, chatList, setSelectedMenu } =
+    useChat();
+  console.log(chatList, "CHATLIST");
+  const { chatCollapsed, onToggleChatCollapse, onToggleChatDrawer } =
+    useSettings();
 
-const Chats = () => {
-  const { setSelectedUser, chatList, setChatList, setSelectedMenu } = useChat();
   const [loading, setLoading] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const { joinRoom } = useSocket();
+  const theme = useTheme();
   const navigate = useNavigate();
-  const handleUserClick = (user) => {
-    // console.log(user, "USERRRRRRR------>");
-    // const roomId = joinRoom(user.user_id);
-    // console.log(roomId, "ROOOOMID---->");
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  const handleUserClick = (user) => {
     setSelectedUser(user);
     setSelectedMenu(1);
     navigate("/app");
+    // if (isMobile) onToggleChatCollapse(); // auto-close on mobile
+    if (isMobile) onToggleChatDrawer();
   };
+
   const filteredChats = chatList.filter((chat) => {
     const fullName = `${chat.first_name} ${chat.last_name}`.toLowerCase();
     return fullName.includes(searchTerm.toLowerCase());
   });
-  const theme = useTheme();
+
+  // const chatContent = (
+  //   <Box
+  //     sx={{
+  //       width: 320,
+  //       height: "100vh",
+  //       backgroundColor:
+  //         theme.palette.mode === "light"
+  //           ? "#F8FAFF"
+  //           : theme.palette.background.paper,
+  //       boxShadow: "0px 0px 2px rgba(0,0,0,0.25)",
+  //     }}
+  //   >
+  //     <Stack p={3} spacing={2} sx={{ height: "100%" }}>
+  //       <Stack
+  //         direction="row"
+  //         alignItems="center"
+  //         justifyContent="space-between"
+  //       >
+  //         <Typography variant="h5">Chats</Typography>
+  //         <IconButton>
+  //           <CircleDashed />
+  //         </IconButton>
+  //       </Stack>
+
+  //       <Stack sx={{ width: "100%" }}>
+  //         <Search>
+  //           <SearchIconWrapper>
+  //             <MagnifyingGlass color="#709CE6" />
+  //           </SearchIconWrapper>
+  //           <StyledInputBase
+  //             value={searchTerm}
+  //             onChange={(e) => setSearchTerm(e.target.value)}
+  //             placeholder="Search..."
+  //             inputProps={{ "aria-label": "search" }}
+  //           />
+  //         </Search>
+  //       </Stack>
+
+  //       <Stack spacing={1}>
+  //         <Stack direction="row" alignItems="center" spacing={1.5}>
+  //           <ArchiveBox size={24} />
+  //           <Button>Archive</Button>
+  //         </Stack>
+  //         <Divider />
+  //       </Stack>
+
+  //       <Stack
+  //         className="scrollbar"
+  //         spacing={2}
+  //         direction="column"
+  //         sx={{ flexGrow: 1, overflow: "auto", height: "100%" }}
+  //       >
+  //         <Stack spacing={2.4}>
+  //           <Typography variant="subtitle2" sx={{ color: "#676767" }}>
+  //             All Chats
+  //           </Typography>
+  //           {loading ? (
+  //             <CircularProgress size={24} sx={{ alignSelf: "center" }} />
+  //           ) : filteredChats.length > 0 ? (
+  //             filteredChats.map((chat) => (
+  //               <ChatElement
+  //                 key={chat.user_id}
+  //                 {...chat}
+  //                 onSelect={handleUserClick}
+  //               />
+  //             ))
+  //           ) : (
+  //             <Typography align="center">No User found</Typography>
+  //           )}
+  //         </Stack>
+  //       </Stack>
+  //     </Stack>
+  //   </Box>
+  // );
+
+  // Mobile: render in Drawer
+  // if (isMobile) {
+  //   return (
+  //     <Drawer
+  //       anchor="left"
+  //       open={chatCollapsed}
+  //       onClose={onToggleChatCollapse}
+  //       ModalProps={{ keepMounted: true }}
+  //       sx={{
+  //         "& .MuiDrawer-paper": {
+  //           width: 320,
+  //           left: 100, // offset after sidebar
+  //         },
+  //       }}
+  //     >
+  //       {chatContent}
+  //     </Drawer>
+  //   );
+  // }
+
+  // Desktop: render as regular box
+  if (chatCollapsed) return null;
+
   return (
-    <Box
-      sx={{
-        position: "relative",
-        width: 320,
-        backgroundColor:
-          theme.palette.mode === "light"
-            ? "#F8FAFF"
-            : theme.palette.background.paper,
-        boxShadow: "0px 0px 2px rgba(0,0,0,0.25)",
-      }}
-    >
-      <Stack p={3} spacing={2} sx={{ height: "100vh" }}>
-        <Stack
-          direction="row"
-          alignItems="center"
-          justifyContent="space-between"
-        >
-          <Typography variant="h5">Chats</Typography>
-          <IconButton>
-            <CircleDashed />
-          </IconButton>
-        </Stack>
-
-        <Stack sx={{ width: "100%" }}>
-          <Search>
-            <SearchIconWrapper>
-              <MagnifyingGlass color="#709CE6" />
-            </SearchIconWrapper>
-            <StyledInputBase
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search..."
-              inputProps={{ "aria-label": "search" }}
-            />
-          </Search>
-        </Stack>
-
-        <Stack spacing={1}>
-          <Stack direction="row" alignItems="center" spacing={1.5}>
-            <ArchiveBox size={24} />
-            <Button>Archive</Button>
-          </Stack>
-          <Divider />
-        </Stack>
-
-        <Stack
-          className="scrollbar"
-          spacing={2}
-          direction="column"
-          sx={{ flexGrow: 1, overflow: "scroll", height: "100%" }}
-        >
-          {/* <Stack spacing={2.4}>
-            <Typography variant="subtitle2" sx={{ color: "#676767" }}>
-              Pinned
+    <>
+      <Box
+        sx={{
+          width: isMobile ? "100%" : 320,
+          height: "100vh",
+          backgroundColor:
+            theme.palette.mode === "light"
+              ? "#F8FAFF"
+              : theme.palette.background.paper,
+          boxShadow: "0px 2px 10px rgba(0,0,0,0.05)",
+          // borderRadius: "8px",
+          borderRight: `1px solid ${theme.palette.divider}`,
+          // transition: "all 0.3s ease",
+          overflow: "hidden",
+          // borderRight: "2px solid red",
+        }}
+      >
+        {/* <Box
+        sx={{
+          width: isMobile ? "100%" : 320,
+          // minWidth: 320,
+          // maxWidth: "100%",
+          // width: "100vw",
+          height: "100vh",
+          backgroundColor:
+            theme.palette.mode === "light"
+              ? "#F8FAFF"
+              : theme.palette.background.paper,
+          boxShadow: "0px 0px 2px rgba(0,0,0,0.25)",
+        }}
+      > */}
+        <Stack p={3} spacing={2} sx={{ height: "100%" }}>
+          <Stack
+            direction="row"
+            alignItems="center"
+            justifyContent="space-between"
+          >
+            <Typography variant="h5" fontWeight={600}>
+              Chats
             </Typography>
-            {ChatList.filter((el) => el.pinned).map((el) => {
-              return <ChatElement {...el} />;
-            })}
-          </Stack> */}
 
-          <Stack spacing={2.4}>
-            <Typography variant="subtitle2" sx={{ color: "#676767" }}>
-              All Chats
-            </Typography>
-            {loading ? (
-              <CircularProgress size={24} sx={{ alignSelf: "center" }} />
-            ) : filteredChats.length > 0 ? (
-              filteredChats.map((chat) => (
-                <ChatElement
-                  key={chat.user_id}
-                  {...chat}
-                  onSelect={handleUserClick}
-                />
-              ))
-            ) : (
-              <Typography align="center">No User found</Typography>
-            )}
-            {/* {ChatList.filter((el) => !el.pinned).map((el) => {
-              return <ChatElement {...el} onSelect={handleUserClick} />;
-            })} */}
+            {/* <IconButton>
+              <CircleDashed />
+            </IconButton> */}
+          </Stack>
+
+          <Stack sx={{ width: "100%" }}>
+            <Search
+              sx={{ boxShadow: "0px 1px 4px rgba(0,0,0,0.1)", borderRadius: 2 }}
+            >
+              <SearchIconWrapper>
+                <MagnifyingGlass color="#709CE6" />
+              </SearchIconWrapper>
+              <StyledInputBase
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Search..."
+                inputProps={{ "aria-label": "search" }}
+                endAdornment={
+                  searchTerm && (
+                    <InputAdornment position="end">
+                      <IconButton
+                        size="small"
+                        onClick={() => setSearchTerm("")}
+                        aria-label="clear search"
+                        edge="end"
+                      >
+                        <X size={18} />
+                      </IconButton>
+                    </InputAdornment>
+                  )
+                }
+              />
+            </Search>
+          </Stack>
+
+          <Stack spacing={1}>
+            {/* <Stack direction="row" alignItems="center" spacing={1.5}>
+              <ArchiveBox size={24} />
+              <Button>Archive</Button>
+            </Stack> */}
+            <Divider />
+          </Stack>
+
+          <Stack
+            className="scrollbar"
+            spacing={2}
+            direction="column"
+            sx={{
+              flexGrow: 1,
+              overflow: "auto",
+              height: "100%",
+              px: 1,
+            }}
+          >
+            <Stack spacing={2}>
+              {/* <Typography variant="subtitle2" sx={{ color: "#676767" }}>
+                All Chats
+              </Typography> */}
+              <Typography variant="subtitle2" color="textSecondary">
+                All Chats
+              </Typography>
+
+              {loading ? (
+                <CircularProgress size={24} sx={{ alignSelf: "center" }} />
+              ) : filteredChats.length > 0 ? (
+                filteredChats.map((chat) => (
+                  <ChatElement
+                    key={chat.user_id}
+                    {...chat}
+                    isActive={selectedUser?.user_id === chat.user_id}
+                    onSelect={handleUserClick}
+                    sx={{
+                      transition: "transform 0.2s, box-shadow 0.2s",
+                      boxShadow: "0px 1px 4px rgba(0,0,0,0.1)",
+                    }}
+                  />
+                ))
+              ) : (
+                <Typography
+                  align="center"
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mt: 2 }}
+                >
+                  No User found
+                </Typography>
+              )}
+            </Stack>
           </Stack>
         </Stack>
-      </Stack>
-    </Box>
+      </Box>
+    </>
   );
 };
 

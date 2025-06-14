@@ -22,7 +22,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const CreateGroup = ({ open, handleClose }) => {
+const CreateGroup = ({ open, handleClose, policyOptions }) => {
   return (
     <Dialog
       fullWidth
@@ -37,7 +37,11 @@ const CreateGroup = ({ open, handleClose }) => {
       {/* Content */}
       <DialogContent>
         {/* Form */}
-        <CreateGroupForm handleClose={handleClose} open={open} />
+        <CreateGroupForm
+          handleClose={handleClose}
+          open={open}
+          policyOptions={policyOptions}
+        />
       </DialogContent>
     </Dialog>
   );

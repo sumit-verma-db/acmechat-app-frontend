@@ -1,4 +1,4 @@
-import { Box, Stack, Typography } from "@mui/material";
+import { Box, Stack, Typography, useMediaQuery } from "@mui/material";
 import React, { useEffect, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 
@@ -9,13 +9,16 @@ import { useCall } from "../../contexts/CallContext";
 import IncomingCallPopup from "./IncomingCallPopup";
 import { useCallSocket } from "../../contexts/CallSocketProvider";
 import Header1 from "./Header1";
-// import Message1 from "./Message1";
+import Message1 from "./Message1";
 import Footer1 from "./Footer1";
-import Message1 from "../Conversation/Message1";
+// import Message1 from "../Conversation/Message1";
+import Chats from "../../pages/dashboard/Chats";
+import GroupChats from "../../pages/dashboard/GroupChats";
 
 const GroupConversation = ({ selectedUser }) => {
   // console.log(selectedUser, "SELECTED USER");
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { chatData, setChatData } = useChat();
   // const [chatData, setChatData] = useState([]);
   const currentUserId = parseInt(localStorage.getItem("userId"));
@@ -94,7 +97,20 @@ const GroupConversation = ({ selectedUser }) => {
   };
 
   return (
-    <Stack height={"100%"} maxHeight={"100vh"} width={"auto"}>
+    <Stack
+      height="100dvh" // ✅ Correct mobile viewport handling
+      width="100%"
+      sx={{
+        maxHeight: {
+          xs: "94vh", // mobile
+          sm: "100vh", // tablet and up
+        },
+        overflow: "hidden", // prevent scroll bleed
+        [theme.breakpoints.down("sm")]: {
+          width: "100vw",
+        },
+      }}
+    >
       <audio id="remoteAudio" autoPlay style={{ display: "none" }} />
       <IncomingCallPopup
         open={showCallPopup}
@@ -109,6 +125,8 @@ const GroupConversation = ({ selectedUser }) => {
       {/* Chat header */}
       {selectedUser ? (
         <Header1 />
+      ) : isMobile ? (
+        <GroupChats />
       ) : (
         <Typography align="center" sx={{ p: 2 }}>
           Select a user to start a conversation

@@ -49,6 +49,9 @@ const SettingsProvider = ({ children }) => {
     themeContrast: initialState.themeContrast,
     themeDirection: initialState.themeDirection,
     themeColorPresets: initialState.themeColorPresets,
+
+    // chatCollapsed: false,
+    chatDrawer: true,
   });
 
   const isArabic = localStorage.getItem("i18nextLng") === "ar";
@@ -68,7 +71,18 @@ const SettingsProvider = ({ children }) => {
       themeMode: settings.themeMode === "light" ? "dark" : "light",
     });
   };
-
+  const onToggleChatCollapse = () => {
+    setSettings({
+      ...settings,
+      chatCollapsed: !settings.chatCollapsed,
+    });
+  };
+  const onToggleChatDrawer = () => {
+    setSettings({
+      ...settings,
+      chatDrawer: !settings.chatDrawer,
+    });
+  };
   const onChangeMode = (event) => {
     setSettings({
       ...settings,
@@ -196,6 +210,10 @@ const SettingsProvider = ({ children }) => {
 
         // Reset
         onResetSetting,
+        // chatCollapsed: settings.chatCollapsed,
+        // onToggleChatCollapse,
+        onToggleChatDrawer,
+        chatDrawer: settings.chatDrawer,
       }}
     >
       {children}
@@ -203,6 +221,6 @@ const SettingsProvider = ({ children }) => {
   );
 };
 
-export {SettingsContext};
+export { SettingsContext };
 
 export default SettingsProvider;

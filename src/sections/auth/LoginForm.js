@@ -35,6 +35,20 @@ const LoginForm = () => {
     email: "",
     password: "",
   };
+  const warmupRingtone = () => {
+    const audio = new Audio("/audio/ringtone.mp3");
+    audio.volume = 0;
+    audio
+      .play()
+      .then(() => {
+        audio.pause();
+        audio.currentTime = 0;
+        console.log("🔊 Ringtone unlocked.");
+      })
+      .catch(() => {
+        console.warn("⚠️ Audio warmup failed");
+      });
+  };
 
   const methods = useForm({
     resolver: yupResolver(loginSchema),
@@ -52,8 +66,12 @@ const LoginForm = () => {
     console.log(data, "Login data");
     // login();
     try {
+      let payload = {
+        ...data,
+        source: "web",
+      };
       //submit data to backend
-      const response = await postFetch("/api/auth/login", data);
+      const response = await postFetch("/api/auth/login", payload);
       console.log(response, "response");
       if (response.status) {
         const { accessToken, refreshToken, user_id } = response.data;
@@ -65,11 +83,8 @@ const LoginForm = () => {
           refreshToken,
           user_id,
         });
-        // 👇 Emit register_user to backend
-        // socket.emit("register_user", response.data.user_id);
-        localStorage.setItem("authToken", accessToken);
-        localStorage.setItem("refreshToken", refreshToken);
-        localStorage.setItem("userId", response.data.user_id);
+
+        warmupRingtone();
       }
     } catch (error) {
       console.log(error);
@@ -83,7 +98,7 @@ const LoginForm = () => {
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={3}>
+      <Stack spacing={4} sx={{ width: "100%" }}>
         {!!errors.afterSubmit && (
           <Alert severity="error">{errors.afterSubmit.message}</Alert>
         )}
@@ -120,12 +135,14 @@ const LoginForm = () => {
         </Link>
       </Stack>
       <Button
+        disabled={isSubmitting}
         fullWidth
         color="inherit"
         size="large"
         type="submit"
         variant="contained"
         sx={{
+          mt: 2,
           bgcolor: "text.primary",
           color: (theme) =>
             theme.palette.mode === "light" ? "common.white" : "grey.800",
@@ -135,8 +152,18 @@ const LoginForm = () => {
               theme.palette.mode === "light" ? "common.white" : "grey.800",
           },
         }}
+        // sx={{
+        //   bgcolor: "text.primary",
+        //   color: (theme) =>
+        //     theme.palette.mode === "light" ? "common.white" : "grey.800",
+        //   "&:hover": {
+        //     bgcolor: "text.primary",
+        //     color: (theme) =>
+        //       theme.palette.mode === "light" ? "common.white" : "grey.800",
+        //   },
+        // }}
       >
-        Login
+        {isSubmitting ? "Logging in..." : "Login"}
       </Button>
     </FormProvider>
   );

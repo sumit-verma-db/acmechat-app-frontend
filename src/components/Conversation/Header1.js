@@ -5,9 +5,16 @@ import {
   IconButton,
   Divider,
   Stack,
+  useMediaQuery,
 } from "@mui/material";
-import { CaretDown, MagnifyingGlass, Phone, VideoCamera } from "phosphor-react";
-import React from "react";
+import {
+  ArrowLeft,
+  CaretDown,
+  MagnifyingGlass,
+  Phone,
+  VideoCamera,
+} from "phosphor-react";
+import React, { useRef } from "react";
 import { useTheme } from "@mui/material/styles";
 import StyledBadge from "../StyledBadge";
 import { ToggleSidebar } from "../../redux/slices/app";
@@ -17,13 +24,17 @@ import { useCallSocket } from "../../contexts/CallSocketProvider";
 import { connectVoiceSocket } from "../../voiceSocket";
 import { useAuth } from "../../contexts/useAuth";
 import { useCall } from "../../contexts/CallContext";
+import useSettings from "../../hooks/useSettings";
 
 const Header1 = () => {
   // console.log(user, "USSSSSS", isOnline);
+  const audioRef = (useRef < HTMLAudioElement) | (null > null);
   const { authToken, refreshToken, userId } = useAuth();
 
   const dispatch = useDispatch();
   const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm")); // ✅ Detect mobile
+
   const {
     setChatData,
     selectedUser,
@@ -34,36 +45,28 @@ const Header1 = () => {
   } = useChat();
   const { setIsIncomingCall, setActiveCall, setShowCallPopup, setCallerName } =
     useCall();
+  const { chatDrawer, onToggleChatDrawer } = useSettings();
 
   const { callUser } = useCallSocket();
   if (!selectedUser) return null; // Prevent rendering if no user is selected
 
-  // const handleCall = (user) => {
-  //   console.log(user, "USR------>");
-  //   const socketInstance = connectVoiceSocket(authToken);
-  //   console.log(socketInstance, "SOCKET CONNNCTION-------");
-  //   callUser(selectedUser.user_id, selectedUser.first_name); // send name for UI
-  //   // setIsIncomingCall(true);
-  //   // setShowCallPopup(true);
-  //   // setActiveCall(false);
-  //   // setCallerName(user);
-  // };
-
-  const handleCall = async (user) => {
+  const handleCall = (user) => {
     console.log(user, "USR------>");
-    try {
-      const socketInstance = await connectVoiceSocket(authToken);
-      console.log(socketInstance, "SOCKET CONNECTION READY");
-      callUser(selectedUser.user_id, selectedUser.first_name); // send name for UI
-    } catch (err) {
-      console.error("Socket connection failed:", err);
-    }
+    const socketInstance = connectVoiceSocket(authToken);
+    console.log(socketInstance, "SOCKET CONNNCTION-------");
+    callUser(selectedUser.user_id, selectedUser.first_name); // send name for UI
+    // setIsIncomingCall(true);
+    // setShowCallPopup(true);
+    // setActiveCall(false);
+    // setCallerName(user);
   };
+
   return (
     <Box
       p={2}
       sx={{
         width: "100%",
+        minHeight: 64, // ✅ ensures enough space
         backgroundColor:
           theme.palette.mode === "light"
             ? "#F8FAFF"
@@ -77,14 +80,25 @@ const Header1 = () => {
         justifyContent={"space-between"}
         sx={{ width: "100%", height: "100%" }}
       >
-        <Stack
-          onClick={() => {
-            dispatch(ToggleSidebar());
-          }}
-          direction={"row"}
-          spacing={2}
-        >
-          <Box>
+        {/* <Stack
+        alignItems="center"
+        direction="row"
+        justifyContent="space-between"
+        flexWrap="wrap" // ✅ allows icon group to wrap below if needed
+        sx={{ width: "100%" }}
+      > */}
+        <Stack direction={"row"} spacing={2}>
+          {/* 👇 Show back button only on mobile */}
+          {isMobile && (
+            <IconButton onClick={onToggleChatDrawer}>
+              <ArrowLeft />
+            </IconButton>
+          )}
+          <Box
+            onClick={() => {
+              dispatch(ToggleSidebar());
+            }}
+          >
             <StyledBadge
               overlap="circular"
               anchorOrigin={{
@@ -132,10 +146,10 @@ const Header1 = () => {
           <IconButton>
             <MagnifyingGlass />
           </IconButton>
-          <Divider orientation="vertical" flexItem />
-          <IconButton>
+          {/* <Divider orientation="vertical" flexItem /> */}
+          {/* <IconButton>
             <CaretDown />
-          </IconButton>
+          </IconButton> */}
         </Stack>
       </Stack>
     </Box>

@@ -1,6 +1,7 @@
 import { Box, Stack, Typography } from "@mui/material";
 import React, { useEffect, useRef } from "react";
-import { Check, Checks } from "phosphor-react";
+// import { Check, Checks } from "phosphor-react";
+import { DocMsg, LinkMsg, MediaMsg, ReplyMsg, TextMsg } from "./MsgTypes1";
 
 const Message1 = ({ chatData, selectedUser }) => {
   const messagesEndRef = useRef(null);
@@ -55,7 +56,32 @@ const Message1 = ({ chatData, selectedUser }) => {
       year: "numeric",
     });
   };
+  const renderMessage = (el, fromMe) => {
+    switch (el.type) {
+      case "text":
+        return <TextMsg el={el} fromMe={fromMe} menu={false} />;
 
+      case "document":
+        // if it's an image file (mime starts with "image/"), show MediaMsg
+        if (el.file_type?.startsWith("image/")) {
+          return <MediaMsg el={el} fromMe={fromMe} menu={false} />;
+        }
+        // otherwise use your document bubble
+        return <DocMsg el={el} fromMe={fromMe} menu={false} />;
+
+      case "link":
+        return <LinkMsg el={el} fromMe={fromMe} menu={false} />;
+
+      case "reply":
+        return <ReplyMsg el={el} fromMe={fromMe} menu={false} />;
+
+      // you can add more custom types here…
+
+      default:
+        // fallback to plain text
+        return <TextMsg el={el} fromMe={fromMe} menu={false} />;
+    }
+  };
   return (
     <Box
       p={3}
@@ -65,6 +91,8 @@ const Message1 = ({ chatData, selectedUser }) => {
         justifyContent: "flex-end",
         minHeight: "100%",
         minWidth: "2rem",
+
+        overflowY: "auto",
       }}
     >
       <Stack spacing={2}>
@@ -88,13 +116,16 @@ const Message1 = ({ chatData, selectedUser }) => {
                     justifyContent: fromMe ? "flex-end" : "flex-start",
                   }}
                 >
-                  <Box
+                  {/* <Box
                     sx={{
-                      maxWidth: "60%",
+                      maxWidth: { xs: "85%", sm: "70%", md: "60%" }, // ✅ responsive width
+                      // maxWidth: "60%",
                       padding: "8px 12px",
                       borderRadius: "8px",
                       backgroundColor: fromMe ? "#DCF8C6" : "#EAEAEA",
                       color: "#000",
+                      whiteSpace: "pre-wrap", // ✅ allow line breaks
+                      wordBreak: "break-word", // ✅ prevent overflow
                     }}
                   >
                     {isGroup && !fromMe && (
@@ -136,7 +167,8 @@ const Message1 = ({ chatData, selectedUser }) => {
                         </>
                       )}
                     </Box>
-                  </Box>
+                  </Box> */}
+                  {renderMessage(el, fromMe)}
                 </Box>
               );
             })}

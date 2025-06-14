@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { AxiosGetWithParams } from "../../services/apiServices";
-import { Box, Stack, useTheme } from "@mui/material";
+import { Box, Stack, useMediaQuery, useTheme } from "@mui/material";
 import Chats from "./Chats";
 import { useSelector } from "react-redux";
 import Conversation from "../../components/Conversation";
 import socket from "../../socket";
 import { useChat } from "../../contexts/ChatContext";
+import useSettings from "../../hooks/useSettings";
 
 export default function AllContacts() {
   const theme = useTheme();
@@ -20,6 +21,10 @@ export default function AllContacts() {
   const { sidebar } = useSelector((store) => store.app); // access our store inside component
   // const [chatList, setChatList] = useState([]); // Stores all chats
   const [searchQuery, setSearchQuery] = useState("");
+
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const { chatDrawer, onToggleChatDrawer } = useSettings();
+
   // const [selectedUser, setSelectedUser] = useState(null);
   // const [onlineUsers, setOnlineUsers] = useState([]);
 
@@ -108,26 +113,66 @@ export default function AllContacts() {
 
   return (
     <>
-      <Stack direction="row" sx={{ width: "100%" }}>
-        <Chats
-          chatList={chatList}
-          setChatList={setChatList}
-          // isOnline={onlineUsers}
-        />
-        <Box
-          sx={{
-            height: "100%",
-            width: sidebar.open ? "calc(100vw - 740px)" : "calc(100vw - 420px)",
-            backgroundColor:
-              theme.palette.mode === "light"
-                ? "#F0F4FA"
-                : theme.palette.background.default,
-          }}
-        >
-          {/* Conversation */}
+      {isMobile ? (
+        chatDrawer ? (
+          <Chats chatList={chatList} setChatList={setChatList} />
+        ) : (
           <Conversation selectedUser={selectedUser} />
-        </Box>
-      </Stack>
+        )
+      ) : (
+        <Stack direction="row" sx={{ width: "100%" }}>
+          <Chats chatList={chatList} setChatList={setChatList} />
+          <Box
+            sx={{
+              height: "100%",
+              width: sidebar.open
+                ? "calc(100vw - 740px)"
+                : "calc(100vw - 420px)",
+              backgroundColor:
+                theme.palette.mode === "light"
+                  ? "#F0F4FA"
+                  : theme.palette.background.default,
+            }}
+          >
+            <Conversation selectedUser={selectedUser} />
+          </Box>
+          {/* {sidebar.open &&
+            (() => {
+              switch (sidebar.type) {
+                case "CONTACT":
+                  return <Contact />;
+                case "STARRED":
+                  return <StarredMessages />;
+                case "SHARED":
+                  return <SharedMessages />;
+                default:
+                  return null;
+              }
+            })()} */}
+        </Stack>
+      )}
     </>
+    // <>
+    //   <Stack direction="row" sx={{ width: "100%" }}>
+    //     <Chats
+    //       chatList={chatList}
+    //       setChatList={setChatList}
+    //       // isOnline={onlineUsers}
+    //     />
+    //     <Box
+    //       sx={{
+    //         height: "100%",
+    //         width: sidebar.open ? "calc(100vw - 740px)" : "calc(100vw - 420px)",
+    //         backgroundColor:
+    //           theme.palette.mode === "light"
+    //             ? "#F0F4FA"
+    //             : theme.palette.background.default,
+    //       }}
+    //     >
+    //       {/* Conversation */}
+    //       <Conversation selectedUser={selectedUser} />
+    //     </Box>
+    //   </Stack>
+    // </>
   );
 }

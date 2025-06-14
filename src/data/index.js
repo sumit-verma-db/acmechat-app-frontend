@@ -8,6 +8,7 @@ import {
   User,
   Users,
   AddressBook,
+  Command,
 } from "phosphor-react";
 
 const Profile_Menu = [
@@ -29,24 +30,33 @@ const Nav_Buttons = [
   {
     index: 0,
     icon: <AddressBook />,
+    title: "AllContacts",
   },
   {
     index: 1,
     icon: <ChatCircleDots />,
+    title: "Recent Chats",
   },
   {
     index: 2,
     icon: <Users />,
+    title: "Group",
   },
   {
     index: 3,
     icon: <Phone />,
+    title: "Call",
+  },
+  {
+    index: 4,
+    icon: <Command />,
+    title: "Admin",
   },
 ];
 
 const Nav_Setting = [
   {
-    index: 4,
+    index: 5,
     icon: <GearSix />,
   },
 ];

@@ -10,6 +10,8 @@ import React, {
 const CallContext = createContext();
 
 export const CallProvider = ({ children }) => {
+  const [isRinging, setIsRinging] = useState(false);
+
   const [callIncoming, setCallIncoming] = useState(null); // { from, offer }
   const [localStream, setLocalStream] = useState(null);
   const [activeCall, setActiveCall] = useState(false);
@@ -49,6 +51,8 @@ export const CallProvider = ({ children }) => {
     <CallContext.Provider
       value={{
         showCallPopup,
+        setIsRinging,
+        isRinging,
         setShowCallPopup,
         isIncomingCall,
         setCallerName,

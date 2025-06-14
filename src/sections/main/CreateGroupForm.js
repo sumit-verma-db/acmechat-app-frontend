@@ -3,24 +3,27 @@ import { useForm } from "react-hook-form";
 import * as Yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 
-import { Button, Stack } from "@mui/material";
+import { Button, MenuItem, Stack, TextField } from "@mui/material";
 
 import FormProvider from "../../components/hook-form/FormProvider";
 import { RHFTextField } from "../../components/hook-form";
 import RHFAutocomplete from "../../components/hook-form/RHFAutocomplete";
 import { AxiosGetWithParams, postFetch } from "../../services/apiServices";
-const CreateGroupForm = ({ handleClose, open }) => {
+const CreateGroupForm = ({ handleClose, open, policyOptions = [] }) => {
   const [members, setMembers] = useState([]);
   const [fetched, setFetched] = useState(false);
 
   const NewGroupSchema = Yup.object().shape({
     title: Yup.string().required("Title is required"),
     members: Yup.array().min(2, "Must have at least 2 members"),
+    policy_id: Yup.string().required("Policy is required"),
   });
 
   const defaultValues = {
     title: "",
     members: [],
+    policy_id: "",
+    policy_name: "",
   };
 
   const methods = useForm({
@@ -80,6 +83,35 @@ const CreateGroupForm = ({ handleClose, open }) => {
           options={members}
           ChipProps={{ size: "medium" }}
         />
+        {policyOptions.length > 0 && (
+          <TextField
+            select
+            fullWidth
+            label="Policy"
+            name="policy_id"
+            value={methods.watch("policy_id")}
+            onChange={(e) => {
+              const selectedId = e.target.value;
+              const selectedPolicy = policyOptions.find(
+                (p) => String(p.policy_id) === String(selectedId)
+              );
+              methods.setValue("policy_id", selectedPolicy?.policy_id || "");
+              methods.setValue(
+                "policy_name",
+                selectedPolicy?.policy_name || ""
+              );
+            }}
+            required
+            margin="normal"
+          >
+            {policyOptions.map((policy) => (
+              <MenuItem key={policy.policy_id} value={policy.policy_id}>
+                {policy.policy_name}
+              </MenuItem>
+            ))}
+          </TextField>
+        )}
+
         <Stack direction="row" justifyContent="flex-end" spacing={2}>
           <Button onClick={handleCloseModal}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={isSubmitting}>

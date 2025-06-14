@@ -52,8 +52,8 @@ export const AuthProvider = ({ children }) => {
     setRefreshToken(refreshToken);
     setUserId(user_id);
     setIsAuthenticated(true);
-    const socketInstance = connectSocketWithAuth(accessToken, refreshToken); // ? tokens passed
-    socketInstance.emit("register_user"); // ? use returned socket
+    // const socketInstance = connectSocketWithAuth(accessToken, refreshToken);
+    // socketInstance.emit("register_user");
     // connectSocketWithAuth(); // ? connect socket
     socket.emit("register_user"); // ? mark user online
     console.log("?? Emitted 'register_user' with user_id:", user_id);
