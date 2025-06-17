@@ -9,14 +9,32 @@ import SharedMessages from "../../components/SharedMessages";
 import StarredMessages from "../../components/StarredMessages";
 import { useChat } from "../../contexts/ChatContext";
 import useSettings from "../../hooks/useSettings";
+import ChatListPane from "../../components/commonComponent/ChatListPane";
+import { useNavigate } from "react-router-dom";
+import ConversationChat from "../../components/commonComponent/ConversationChat";
 
 const GeneralApp = () => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { chatDrawer, onToggleChatDrawer } = useSettings();
   const { sidebar } = useSelector((store) => store.app); // access our store inside component
-  const { chatList, setChatList, selectedUser, setSelectedUser } = useChat();
+  const {
+    chatList,
+    setChatList,
+    selectedUser,
+    setSelectedUser,
+    setSelectedMenu,
+  } = useChat();
+  const navigate = useNavigate();
 
+  const handleUserClick = (user) => {
+    console.log(user, "SELECTED ISER_---");
+    setSelectedUser(user);
+    setSelectedMenu(1);
+    navigate("/app");
+    // if (isMobile) onToggleChatCollapse(); // auto-close on mobile
+    if (isMobile) onToggleChatDrawer();
+  };
   // useEffect(() => {
   //   if (selectedUser !== null) {
   //     console.log(selectedUser, "SELECTED USER GENERAL APP======>");
@@ -28,13 +46,26 @@ const GeneralApp = () => {
     <>
       {isMobile ? (
         chatDrawer ? (
-          <Chats isOnline={onlineUsers} />
+          // <Chats isOnline={onlineUsers} />
+          <ChatListPane
+            mode="user"
+            title="Chats"
+            data={chatList}
+            selectedId={selectedUser?.user_id}
+            onSelect={handleUserClick}
+          />
         ) : (
-          <Conversation selectedUser={selectedUser} />
+          <ConversationChat selectedUser={selectedUser} />
         )
       ) : (
         <Stack direction="row" sx={{ width: "100%" }}>
-          <Chats isOnline={onlineUsers} />
+          <ChatListPane
+            mode="user"
+            title="Chats"
+            data={chatList}
+            selectedId={selectedUser?.user_id}
+            onSelect={handleUserClick}
+          />
 
           <Box
             sx={{
@@ -48,7 +79,8 @@ const GeneralApp = () => {
                   : theme.palette.background.default,
             }}
           >
-            <Conversation selectedUser={selectedUser} />
+            {/* <Conversation selectedUser={selectedUser} /> */}
+            <ConversationChat selectedUser={selectedUser} />
           </Box>
           {sidebar.open &&
             (() => {

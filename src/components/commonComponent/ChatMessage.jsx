@@ -1,11 +1,21 @@
 import { Box, Stack, Typography } from "@mui/material";
 import React, { useEffect, useRef } from "react";
-// import { Check, Checks } from "phosphor-react";
-import { DocMsg, LinkMsg, MediaMsg, ReplyMsg, TextMsg } from "./MsgTypes1";
+import { Check, Checks } from "phosphor-react";
+import {
+  TextMsg,
+  DocMsg,
+  LinkMsg,
+  MediaMsg,
+  ReplyMsg,
+} from "../Conversation/MsgTypes1";
+// import { DocMsg, LinkMsg, MediaMsg, ReplyMsg, TextMsg } from "./MsgTypes1";
 
-const Message1 = ({ chatData, selectedUser }) => {
+const ChatMessages = ({ chatData, selectedUser, selectedGroup }) => {
   const messagesEndRef = useRef(null);
   const currentUserId = parseInt(localStorage.getItem("userId"));
+  const isGroup = Boolean(selectedGroup);
+  console.log(chatData, "ChatDATAT", selectedUser, selectedGroup, isGroup);
+  const chatTarget = selectedUser || selectedGroup;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -15,11 +25,9 @@ const Message1 = ({ chatData, selectedUser }) => {
     scrollToBottom();
   }, [chatData]);
 
-  const isGroup = selectedUser?.group_id !== undefined;
-
   const filteredMessages = chatData.filter((msg) => {
     if (isGroup) {
-      return msg.is_group && msg.group_id === selectedUser.group_id;
+      return msg.group_id && msg.group_id === selectedGroup.group_id;
     } else {
       return (
         (msg.sender_id === selectedUser?.user_id &&
@@ -29,13 +37,12 @@ const Message1 = ({ chatData, selectedUser }) => {
       );
     }
   });
-
-  // Group messages by date
+  console.log(filteredMessages, "FILTERED MESSAGEG__-");
   const groupedByDate = {};
   filteredMessages.forEach((msg) => {
-    const dateKey = new Date(msg.sent_at).toISOString().split("T")[0];
-    if (!groupedByDate[dateKey]) groupedByDate[dateKey] = [];
-    groupedByDate[dateKey].push(msg);
+    const key = new Date(msg.sent_at).toISOString().split("T")[0];
+    if (!groupedByDate[key]) groupedByDate[key] = [];
+    groupedByDate[key].push(msg);
   });
 
   const getReadableDate = (dateStr) => {
@@ -57,32 +64,25 @@ const Message1 = ({ chatData, selectedUser }) => {
       year: "numeric",
     });
   };
+
   const renderMessage = (el, fromMe) => {
     switch (el.type) {
       case "text":
         return <TextMsg el={el} fromMe={fromMe} menu={false} />;
-
       case "document":
-        // if it's an image file (mime starts with "image/"), show MediaMsg
         if (el.file_type?.startsWith("image/")) {
           return <MediaMsg el={el} fromMe={fromMe} menu={false} />;
         }
-        // otherwise use your document bubble
         return <DocMsg el={el} fromMe={fromMe} menu={false} />;
-
       case "link":
         return <LinkMsg el={el} fromMe={fromMe} menu={false} />;
-
       case "reply":
         return <ReplyMsg el={el} fromMe={fromMe} menu={false} />;
-
-      // you can add more custom types here…
-
       default:
-        // fallback to plain text
         return <TextMsg el={el} fromMe={fromMe} menu={false} />;
     }
   };
+
   return (
     <Box
       p={3}
@@ -92,7 +92,6 @@ const Message1 = ({ chatData, selectedUser }) => {
         justifyContent: "flex-end",
         minHeight: "100%",
         minWidth: "2rem",
-
         overflowY: "auto",
       }}
     >
@@ -109,6 +108,7 @@ const Message1 = ({ chatData, selectedUser }) => {
             {messages.map((el, index) => {
               const fromMe =
                 el.sender === currentUserId || el.sender_id === currentUserId;
+
               return (
                 <Box
                   key={index}
@@ -117,59 +117,22 @@ const Message1 = ({ chatData, selectedUser }) => {
                     justifyContent: fromMe ? "flex-end" : "flex-start",
                   }}
                 >
-                  {/* <Box
-                    sx={{
-                      maxWidth: { xs: "85%", sm: "70%", md: "60%" }, // ✅ responsive width
-                      // maxWidth: "60%",
-                      padding: "8px 12px",
-                      borderRadius: "8px",
-                      backgroundColor: fromMe ? "#DCF8C6" : "#EAEAEA",
-                      color: "#000",
-                      whiteSpace: "pre-wrap", // ✅ allow line breaks
-                      wordBreak: "break-word", // ✅ prevent overflow
-                    }}
-                  >
+                  <Box sx={{ maxWidth: "100%" }}>
                     {isGroup && !fromMe && (
                       <Typography
                         variant="caption"
                         sx={{
                           fontWeight: "bold",
                           color: "#1976d2",
-                          display: "block",
-                          marginBottom: "2px",
+                          mb: 0.5,
+                          ml: 1,
                         }}
                       >
-                        {el.sender_name || `User ${el.sender_id || el.sender}`}
+                        {el.sender_name || `User ${el.sender_id}`}
                       </Typography>
                     )}
-
-                    <Typography variant="body1">{el.message}</Typography>
-
-                    <Box
-                      sx={{
-                        display: "flex",
-                        justifyContent: "flex-end",
-                        alignItems: "center",
-                        gap: 0.5,
-                      }}
-                    >
-                      <Typography variant="caption" sx={{ color: "#555" }}>
-                        {new Date(el.sent_at).toLocaleTimeString()}
-                      </Typography>
-                      {fromMe && (
-                        <>
-                          {el.seen ? (
-                            <Checks size={14} weight="bold" color="blue" />
-                          ) : el.delivered ? (
-                            <Checks size={14} weight="bold" />
-                          ) : (
-                            <Check size={14} weight="regular" />
-                          )}
-                        </>
-                      )}
-                    </Box>
-                  </Box> */}
-                  {renderMessage(el, fromMe)}
+                    {renderMessage(el, fromMe)}
+                  </Box>
                 </Box>
               );
             })}
@@ -181,4 +144,4 @@ const Message1 = ({ chatData, selectedUser }) => {
   );
 };
 
-export default Message1;
+export default ChatMessages;

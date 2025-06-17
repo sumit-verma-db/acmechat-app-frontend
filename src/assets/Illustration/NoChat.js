@@ -16,8 +16,16 @@ function NoChat({ ...other }) {
         width="360"
         height="360"
         viewBox="0 0 750 750"
-        fill="none"
+        // fill="none"
+
         xmlns="http://www.w3.org/2000/svg"
+        sx={{
+          animation: "fadeIn 0.6s ease",
+          "@keyframes fadeIn": {
+            from: { opacity: 0 },
+            to: { opacity: 1 },
+          },
+        }}
       >
         <path
           fill-rule="evenodd"

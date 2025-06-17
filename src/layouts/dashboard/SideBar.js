@@ -153,7 +153,14 @@ const SideBar = ({ onToggleChat }) => {
         p={2}
         sx={{
           position: "relative", // ✅ required for absolute arrow
-          backgroundColor: theme.palette.background.paper,
+          // backgroundColor: theme.palette.background.paper,
+          // backgroundColor: "#48c9b0",
+          backgroundImage: "linear-gradient(to bottom, #eaf1fb, #ffffff)",
+
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          transition: "background-image 0.4s ease-in-out",
+
           boxShadow: "0px 0px 2px rgba(0,0,0,0.25)",
           height: "100vh",
           width: 100,
@@ -239,7 +246,7 @@ const SideBar = ({ onToggleChat }) => {
                 </Tooltip>
               ))}
               <Divider sx={{ width: "48px" }} />
-              <Tooltip title="Setting" placement="right">
+              <Tooltip title="Setting" placement="right" enterDelay={500}>
                 <AnimatedSidebarIconButton
                   active={selectedMenu === 5}
                   onClick={() => {
@@ -310,18 +317,35 @@ const SideBar = ({ onToggleChat }) => {
             aria-expanded={open ? "true" : undefined}
             onClick={handleClick}
           /> */}
-            <Tooltip title={userData?.username || "Username"} placement="right">
-              <Avatar
-                id="basic-button"
-                aria-haspopup="true"
-                aria-expanded={open ? "true" : undefined}
-                aria-controls={open ? "basic-menu" : undefined}
-                sx={{ cursor: "pointer" }}
-                onClick={handleClick}
+            <Box position="relative">
+              <Tooltip
+                title={userData?.username || "Username"}
+                placement="right"
               >
-                {userData?.username?.[0] || "U"}
-              </Avatar>
-            </Tooltip>
+                <Avatar
+                  id="basic-button"
+                  aria-haspopup="true"
+                  aria-expanded={open ? "true" : undefined}
+                  aria-controls={open ? "basic-menu" : undefined}
+                  sx={{ cursor: "pointer" }}
+                  onClick={handleClick}
+                >
+                  {userData?.username?.[0] || "U"}
+                  <Box
+                    sx={{
+                      position: "absolute",
+                      bottom: 0,
+                      right: 0,
+                      width: 12,
+                      height: 12,
+                      backgroundColor: "#34D399", // green
+                      borderRadius: "50%",
+                      border: "2px solid #F4F7FE",
+                    }}
+                  />
+                </Avatar>
+              </Tooltip>
+            </Box>
             <Box>
               <Box sx={{ fontSize: 12, fontWeight: 600, textAlign: "center" }}>
                 {userData?.username || "Username"}

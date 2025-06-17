@@ -103,11 +103,11 @@ const GroupChats = () => {
           </Stack>
 
           <Stack spacing={1}>
-            <Stack direction="row" alignItems="center" spacing={1.5}>
+            {/* <Stack direction="row" alignItems="center" spacing={1.5}>
               <ArchiveBox size={24} />
               <Button>Archive</Button>
-            </Stack>
-            <Stack
+            </Stack> */}
+            {/* <Stack
               direction={"row"}
               alignItems={"center"}
               justifyContent={"space-between"}
@@ -122,7 +122,7 @@ const GroupChats = () => {
               >
                 <Plus style={{ color: theme.palette.primary.main }} />
               </IconButton>
-            </Stack>
+            </Stack> */}
             <Divider />
           </Stack>
 

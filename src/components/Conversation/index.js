@@ -127,11 +127,22 @@ const Conversation = ({ selectedUser }) => {
                   : "url('/assets/bg-whatsapp-dark.png'), #222e35",
               backgroundSize: "cover",
               backgroundRepeat: "repeat",
+              color: "text.secondary",
             }}
           >
             <NoChat />
             <Typography variant="h6" mt={2} color="text.secondary">
               Select a user to start a conversation
+            </Typography>
+            <Typography
+              variant="body2"
+              color="text.disabled"
+              mt={1}
+              textAlign="center"
+              maxWidth={280}
+            >
+              Your recent messages will appear here. Start chatting by selecting
+              a user from the list.
             </Typography>
           </Box>
         </>

@@ -21,12 +21,12 @@ const MainLayout = () => {
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
-          backgroundColor: "#f9fafb", // optional: soft light background
+          backgroundColor: "#f3f4f6", // optional: soft light background
           px: 2, // mobile-safe padding
         }}
       >
         <Container sx={{}} maxWidth="sm">
-          <Stack spacing={5} alignItems="center">
+          {/* <Stack spacing={5} alignItems="center">
             <Box
               component="img"
               src={Logo}
@@ -37,7 +37,7 @@ const MainLayout = () => {
                 objectFit: "contain",
               }}
             />
-          </Stack>
+          </Stack> */}
           <Outlet />
         </Container>
       </Box>

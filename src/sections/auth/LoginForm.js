@@ -1,40 +1,65 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import * as Yup from "yup";
 import { useForm } from "react-hook-form";
-import FormProvider from "../../components/hook-form/FormProvider";
 import { yupResolver } from "@hookform/resolvers/yup";
+
 import {
   Alert,
   Button,
   IconButton,
   InputAdornment,
-  Link,
   Stack,
+  Box,
+  Typography,
+  TextField,
 } from "@mui/material";
-import { RHFTextField } from "../../components/hook-form";
-import { Eye, EyeSlash } from "phosphor-react";
+import { ArrowsCounterClockwise, Eye, EyeSlash } from "phosphor-react";
 import { Link as RouterLink } from "react-router-dom";
+
+import FormProvider from "../../components/hook-form/FormProvider";
+import { RHFTextField } from "../../components/hook-form";
 import { useAuth } from "../../contexts/useAuth";
 import { postFetch } from "../../services/apiServices";
-import socket from "../../socket";
 
 const LoginForm = () => {
   const { login } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
+  const [generatedCaptcha, setGeneratedCaptcha] = useState("");
 
-  //validation rules
+  const generateCaptcha = () => {
+    const newCaptcha = Math.floor(1000 + Math.random() * 9000).toString();
+    setGeneratedCaptcha(newCaptcha);
+  };
+
+  useEffect(() => {
+    generateCaptcha();
+  }, []);
+
   const loginSchema = Yup.object().shape({
-    email: Yup.string()
-      .required("Email is required")
-      .email("Email must be a valid email address"),
+    identifier: Yup.string().required("Login ID is required"),
     password: Yup.string().required("Password is required"),
+    captcha: Yup.string().required("Enter the captcha"),
   });
 
   const defaultValues = {
-    email: "",
+    identifier: "",
     password: "",
+    captcha: "",
   };
+
+  const methods = useForm({
+    resolver: yupResolver(loginSchema),
+    defaultValues,
+  });
+
+  const {
+    reset,
+    setError,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = methods;
+
   const warmupRingtone = () => {
     const audio = new Audio("/audio/ringtone.mp3");
     audio.volume = 0;
@@ -50,71 +75,69 @@ const LoginForm = () => {
       });
   };
 
-  const methods = useForm({
-    resolver: yupResolver(loginSchema),
-    defaultValues,
-  });
-
-  const {
-    reset,
-    setError,
-    handleSubmit,
-    formState: { errors, isSubmitting, isSubmitSuccessful },
-  } = methods;
-
   const onSubmit = async (data) => {
-    console.log(data, "Login data");
-    // login();
+    if (data.captcha !== generatedCaptcha) {
+      setError("captcha", {
+        type: "manual",
+        message: "Captcha does not match",
+      });
+      return;
+    }
+
     try {
-      let payload = {
-        ...data,
+      const payload = {
+        email: data.identifier,
+        password: data.password,
         source: "web",
       };
-      //submit data to backend
+
       const response = await postFetch("/api/auth/login", payload);
-      console.log(response, "response");
       if (response.status) {
         const { accessToken, refreshToken, user_id } = response.data;
-        // console.log(accessToken, refreshToken, "ACCCCC___+++");
 
-        // ? Use upgraded login method from useAuth
         login({
           accessToken,
           refreshToken,
           user_id,
         });
+        // localStorage.setItem("user", JSON.stringify(user));
 
         warmupRingtone();
       }
     } catch (error) {
-      console.log(error);
       reset();
       setError("afterSubmit", {
         ...error,
-        message: error.message,
+        message: error.message || "Login failed",
       });
     }
   };
 
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
-      <Stack spacing={4} sx={{ width: "100%" }}>
+      <Stack spacing={3}>
         {!!errors.afterSubmit && (
           <Alert severity="error">{errors.afterSubmit.message}</Alert>
         )}
 
-        <RHFTextField name="email" label="Email address" />
+        <RHFTextField
+          name="identifier"
+          // label="Enter your registered email"
+          label="Login ID (Email / Mobile / User ID)"
+          placeholder="Enter your registered email"
+        />
+
         <RHFTextField
           name="password"
           label="Password"
+          placeholder="Enter your password"
           type={showPassword ? "text" : "password"}
           InputProps={{
             endAdornment: (
-              <InputAdornment>
+              <InputAdornment position="end">
                 <IconButton
-                  onClick={() => {
-                    setShowPassword(!showPassword);
-                  }}
+                  edge="end"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <Eye /> : <EyeSlash />}
                 </IconButton>
@@ -122,49 +145,88 @@ const LoginForm = () => {
             ),
           }}
         />
-      </Stack>
-      <Stack alignItems={"flex-end"} sx={{ my: 2 }}>
-        <Link
-          component={RouterLink}
-          to="/auth/reset-password"
-          variant="body2"
-          color="inherit"
-          underline="always"
-        >
-          Forgot Password?
-        </Link>
-      </Stack>
-      <Button
-        disabled={isSubmitting}
-        fullWidth
-        color="inherit"
-        size="large"
-        type="submit"
-        variant="contained"
-        sx={{
-          mt: 2,
-          bgcolor: "text.primary",
-          color: (theme) =>
-            theme.palette.mode === "light" ? "common.white" : "grey.800",
-          "&:hover": {
+
+        <Stack direction="row" spacing={1} alignItems="center">
+          <Box
+            sx={{
+              px: 2,
+              py: 1.5,
+              minWidth: 100,
+              textAlign: "center",
+              fontWeight: "bold",
+              fontSize: "1.1rem",
+              color: "#282f3c", // very dark text
+              bgcolor: "#f9fafb",
+              border: "1px solid #e5e7eb",
+              borderRadius: 1,
+              userSelect: "none",
+              pointerEvents: "none",
+            }}
+          >
+            {generatedCaptcha}
+          </Box>
+
+          {/* <Button
+            variant="outlined"
+            onClick={generateCaptcha}
+            sx={{ minWidth: 40 }}
+          >
+            ↻
+          </Button> */}
+          <IconButton
+            onClick={generateCaptcha}
+            sx={{
+              // border: "1px solid #cfd8dc",
+              borderRadius: 1,
+              height: "40px",
+              width: "40px",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <ArrowsCounterClockwise size={36} weight="bold" color="#374151" />
+          </IconButton>
+
+          <RHFTextField name="captcha" label="Enter Captcha" sx={{ flex: 1 }} />
+        </Stack>
+
+        {/* <Stack alignItems="flex-end">
+            <RouterLink
+              to="/auth/reset-password"
+              style={{
+                textDecoration: "underline",
+                fontSize: "0.9rem",
+                color: "#666",
+              }}
+            >
+              Forgot Password?
+            </RouterLink>
+          </Stack> */}
+
+        <Button
+          fullWidth
+          type="submit"
+          variant="contained"
+          size="large"
+          disabled={isSubmitting}
+          sx={{
+            mt: 2,
             bgcolor: "text.primary",
+            // bgcolor: "#6366f1",
+
             color: (theme) =>
-              theme.palette.mode === "light" ? "common.white" : "grey.800",
-          },
-        }}
-        // sx={{
-        //   bgcolor: "text.primary",
-        //   color: (theme) =>
-        //     theme.palette.mode === "light" ? "common.white" : "grey.800",
-        //   "&:hover": {
-        //     bgcolor: "text.primary",
-        //     color: (theme) =>
-        //       theme.palette.mode === "light" ? "common.white" : "grey.800",
-        //   },
-        // }}
-      >
-        {isSubmitting ? "Logging in..." : "Login"}
-      </Button>
+              theme.palette.mode === "light" ? "#fff" : "grey.800",
+            "&:hover": {
+              bgcolor: "text.primary",
+              // "&:hover": {
+              //   bgcolor: "#4f46e5",
+            },
+          }}
+        >
+          {isSubmitting ? "Logging in..." : "Login"}
+        </Button>
+      </Stack>
     </FormProvider>
   );
 };
