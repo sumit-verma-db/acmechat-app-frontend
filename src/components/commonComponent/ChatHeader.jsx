@@ -25,7 +25,7 @@ import { useAuth } from "../../contexts/useAuth";
 import useSettings from "../../hooks/useSettings";
 import { useChat } from "../../contexts/ChatContext";
 
-const ChatHeader = ({ selectedUser, selectedGroup }) => {
+const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -35,7 +35,6 @@ const ChatHeader = ({ selectedUser, selectedGroup }) => {
   const { callUser, callGroup } = useCallSocket();
   const { authToken } = useAuth();
 
-  const isGroup = Boolean(selectedGroup);
   const chat = selectedUser || selectedGroup;
 
   if (!chat) return null;
@@ -43,9 +42,13 @@ const ChatHeader = ({ selectedUser, selectedGroup }) => {
   const handleCall = async () => {
     try {
       await connectVoiceSocket(authToken);
-      if (chat.group_id) {
+      if (isGroup) {
+        console.log("CAllGROUP");
+
         callGroup(chat.group_id);
       } else {
+        console.log("callUser");
+
         callUser(chat.user_id, chat.first_name);
       }
     } catch (err) {
@@ -109,7 +112,7 @@ const ChatHeader = ({ selectedUser, selectedGroup }) => {
         </Stack>
 
         <Stack direction="row" alignItems="center" spacing={3}>
-          {chat.group_id ? (
+          {isGroup ? (
             <IconButton onClick={handleCall}>
               <UsersThree />
             </IconButton>

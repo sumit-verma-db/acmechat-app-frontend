@@ -71,7 +71,7 @@ const Group = () => {
             onSelect={handleGroupClick}
           />
         ) : (
-          <ConversationChat selectedGroup={selectedUser} />
+          <ConversationChat selectedGroup={selectedUser} isGroup={true} />
         )
       ) : (
         <Stack direction="row" sx={{ width: "100%" }}>
@@ -94,7 +94,7 @@ const Group = () => {
                   : theme.palette.background.default,
             }}
           >
-            <ConversationChat selectedGroup={selectedUser} />
+            <ConversationChat selectedGroup={selectedUser} isGroup={true} />
             {/* <GroupConversation selectedUser={selectedUser} /> */}
           </Box>
           {/* {sidebar.open &&

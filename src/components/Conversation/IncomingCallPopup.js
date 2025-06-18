@@ -7,7 +7,7 @@ import Dialing from "../CallingUi/Dialing";
 import Receiving from "../CallingUi/Receiving";
 import ActiveCall from "../CallingUi/ActiveCall";
 
-export default function IncomingCallPopup() {
+export default function IncomingCallPopup({ isGroup }) {
   const {
     showCallPopup,
     isIncomingCall,

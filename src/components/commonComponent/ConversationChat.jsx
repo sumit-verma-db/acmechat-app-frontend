@@ -18,8 +18,9 @@ import useSettings from "../../hooks/useSettings";
 import { useNavigate } from "react-router-dom";
 import ChatMessages from "./ChatMessage";
 import ChatFooter from "./ChatFooter";
+import IncomingCallPopupGroup from "../ConversationGroup/IncomingCallPopup";
 
-const ConversationChat = ({ selectedUser, selectedGroup }) => {
+const ConversationChat = ({ selectedUser, selectedGroup, isGroup }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { chatData, setChatData, groupList, chatList } = useChat();
@@ -113,22 +114,42 @@ const ConversationChat = ({ selectedUser, selectedGroup }) => {
       }}
     >
       <audio id="remoteAudio" autoPlay style={{ display: "none" }} />
-      <IncomingCallPopup
-        open={showCallPopup}
-        onClose={() => {
-          cleanupCall();
-          setShowCallPopup(false);
-        }}
-        onAccept={handleAccept}
-        onReject={handleReject}
-        isIncoming={isIncomingCall}
-        callerName={callerName}
-        remoteStream={remoteStream}
-      />
-
+      {isGroup ? (
+        <IncomingCallPopupGroup
+          isGroup={isGroup}
+          open={showCallPopup}
+          onClose={() => {
+            cleanupCall();
+            setShowCallPopup(false);
+          }}
+          onAccept={handleAccept}
+          onReject={handleReject}
+          isIncoming={isIncomingCall}
+          callerName={callerName}
+          remoteStream={remoteStream}
+        />
+      ) : (
+        <IncomingCallPopup
+          isGroup={isGroup}
+          open={showCallPopup}
+          onClose={() => {
+            cleanupCall();
+            setShowCallPopup(false);
+          }}
+          onAccept={handleAccept}
+          onReject={handleReject}
+          isIncoming={isIncomingCall}
+          callerName={callerName}
+          remoteStream={remoteStream}
+        />
+      )}
       {/* HEADER */}
       {showChat ? (
-        <ChatHeader selectedUser={selectedUser} selectedGroup={selectedGroup} />
+        <ChatHeader
+          selectedUser={selectedUser}
+          selectedGroup={selectedGroup}
+          isGroup={isGroup}
+        />
       ) : isMobile ? (
         <ChatListPane
           mode={selectedUser ? "user" : "group"}

@@ -55,7 +55,7 @@ const GeneralApp = () => {
             onSelect={handleUserClick}
           />
         ) : (
-          <ConversationChat selectedUser={selectedUser} />
+          <ConversationChat selectedUser={selectedUser} isGroup={false} />
         )
       ) : (
         <Stack direction="row" sx={{ width: "100%" }}>
@@ -80,7 +80,7 @@ const GeneralApp = () => {
             }}
           >
             {/* <Conversation selectedUser={selectedUser} /> */}
-            <ConversationChat selectedUser={selectedUser} />
+            <ConversationChat selectedUser={selectedUser} isGroup={false} />
           </Box>
           {sidebar.open &&
             (() => {
