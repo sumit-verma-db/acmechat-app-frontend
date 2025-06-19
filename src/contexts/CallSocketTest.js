@@ -177,12 +177,103 @@ export function CallSocketProvider({ children }) {
     }
   };
 
+  // const initializeVoiceSocket = (token) => {
+  //   if (socket) return; // avoid reinitializing
+  //   const authToken = token || localStorage.getItem("authToken");
+  //   if (authToken) {
+  //     const newSocket = connectVoiceSocket(authToken);
+  //     console.log("[Socket] Connected via init");
+  //     setSocket(newSocket);
+  //   }
+  // };
+  const setupSocketListeners = (socket) => {
+    socket.on("incoming_call", ({ from, signal }) => {
+      console.log("[socket] Incoming call from:", from);
+      playRingtone();
+      setCallIncoming({ from, signal });
+      setIsIncomingCall(true);
+      setIsRinging(true);
+      setShowCallPopup(true);
+      setCallerName(`${from}`);
+    });
+
+    socket.on("answer_call", async ({ answer }) => {
+      console.log("[socket] Received answer from callee");
+      const pc = peerConnection.current;
+      if (!pc) return;
+      await pc.setRemoteDescription(new RTCSessionDescription(answer));
+      setCallAccepted(true);
+      stopRingtone();
+      stopDialtone();
+      pendingCandidates.current.forEach((c) =>
+        pc.addIceCandidate(new RTCIceCandidate(c)).catch(console.error)
+      );
+      pendingCandidates.current = [];
+    });
+
+    socket.on("ice_candidate", ({ candidate }) => {
+      console.log("[socket] Received ICE candidate");
+      const pc = peerConnection.current;
+      if (!pc) return;
+      if (pc.remoteDescription?.type) {
+        pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
+      } else {
+        pendingCandidates.current.push(candidate);
+      }
+    });
+
+    socket.on("call_ended", () => {
+      console.log("[socket] Call ended");
+      cleanupCall();
+    });
+
+    // Group Calls
+    socket.on("incoming_group_call", ({ from, group_id, signal }) => {
+      console.log("[socket] Incoming group call:", group_id);
+      playRingtone();
+      setCallIncoming({ from, signal, group_id });
+      setIsIncomingCall(true);
+      setShowCallPopup(true);
+      setCallerName(`${from} (Group ${group_id})`);
+    });
+
+    socket.on("group_call_answered", async ({ from, group_id, signal }) => {
+      console.log("[socket] Group call answered by:", from);
+      const pc = peerConnection.current;
+      if (!pc) return;
+      await pc.setRemoteDescription(new RTCSessionDescription(signal));
+      setCallAccepted(true);
+    });
+
+    socket.on("group_call_ended", ({ from, group_id }) => {
+      console.log("[socket] Group call ended by:", from);
+      cleanupCall();
+    });
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     const newSocket = connectVoiceSocket(token);
-    console.log("[Socket] Connected");
-    setSocket(newSocket);
+    console.log("[Socket] Connecting voice socket...");
+
+    newSocket.on("connect", () => {
+      console.log("[Socket] Connected:", newSocket.id);
+      setSocket(newSocket); // only set after full connection
+
+      // Setup all listeners here directly
+      setupSocketListeners(newSocket);
+    });
+
+    return () => {
+      newSocket.disconnect();
+    };
   }, []);
+  // useEffect(() => {
+  //   const token = localStorage.getItem("authToken");
+  //   const newSocket = connectVoiceSocket(token);
+  //   console.log("[Socket] Connected");
+  //   setSocket(newSocket);
+  // }, []);
 
   const setupPeerConnection = (stream, toUserId = null) => {
     console.log("[setupPeerConnection] Setting up peer connection");
@@ -479,6 +570,7 @@ export function CallSocketProvider({ children }) {
         callGroup,
         answerGroupCall,
         endGroupCall,
+        // initializeVoiceSocket,
       }}
     >
       {children}
