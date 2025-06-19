@@ -178,16 +178,23 @@ export function CallSocketProvider({ children }) {
   };
 
   const initializeVoiceSocket = (token) => {
-    connectVoiceSocket(token); // ensures voiceSocket is created
-    const socketInstance = getVoiceSocket(); // get the singleton
-    setSocket(socketInstance); // save to state
+    if (token) {
+      const newSocket = connectVoiceSocket(token);
+      console.log("[Socket] Connected===============>");
+      setSocket(newSocket);
+    } else {
+      const token = localStorage.getItem("authToken");
+      const newSocket = connectVoiceSocket(token);
+      console.log("[Socket] Connected===============>");
+      setSocket(newSocket);
+    }
   };
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    const newSocket = connectVoiceSocket(token);
-    console.log("[Socket] Connected");
-    setSocket(newSocket);
-  }, []);
+  // useEffect(() => {
+  //   const token = localStorage.getItem("authToken");
+  //   const newSocket = connectVoiceSocket(token);
+  //   console.log("[Socket] Connected");
+  //   setSocket(newSocket);
+  // }, []);
 
   const setupPeerConnection = (stream, toUserId = null) => {
     console.log("[setupPeerConnection] Setting up peer connection");

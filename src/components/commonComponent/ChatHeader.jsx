@@ -50,7 +50,7 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
     try {
       console.log(authToken, "AUTH TOKEN------------------------");
 
-      await connectVoiceSocket(authToken);
+      await initializeVoiceSocket(authToken);
       if (isGroup) {
         console.log("CAllGROUP");
 
