@@ -37,10 +37,10 @@ const CreateGroupForm = ({ handleClose, open, policyOptions = [] }) => {
   } = methods;
 
   const onSubmit = async (data) => {
-    console.log("Group Create Payload:", data);
+    // console.log("Group Create Payload:", data);
     try {
       const response = await postFetch("/api/auth/create-group", data);
-      console.log("Group Created Successfully:", response.data);
+      // console.log("Group Created Successfully:", response.data);
       handleCloseModal(); // close modal on success
     } catch (error) {
       console.error("Failed to create group:", error);
@@ -55,7 +55,7 @@ const CreateGroupForm = ({ handleClose, open, policyOptions = [] }) => {
     const fetchMembers = async () => {
       try {
         const response = await AxiosGetWithParams("/api/auth/search");
-        console.log(response, "CHECK RESPONSE S");
+        // console.log(response, "CHECK RESPONSE S");
         const formatted = response.users.map((user) => ({
           label: `${user.first_name} ${user.last_name}`,
           value: user.user_id,

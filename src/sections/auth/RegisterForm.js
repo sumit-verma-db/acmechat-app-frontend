@@ -55,14 +55,14 @@ const RegisterForm = () => {
     try {
       //submit data to backend
       const response = await postFetch("/api/auth/signup", data);
-      console.log(response, "signup response");
+      // console.log(response, "signup response");
 
       if (response.status) {
       }
 
       // navigate("/auth/login");
     } catch (error) {
-      console.log(error);
+      // console.log(error);
       // reset();
       setError("afterSubmit", {
         ...error,

@@ -42,7 +42,7 @@ export function CallSocketProvider({ children }) {
   const dialtoneRef = useRef(null);
 
   const dialRingtone = () => {
-    console.log("[dialRingtone] Playing dialing tone");
+    // console.log("[dialRingtone] Playing dialing tone");
     stopRingtone(); // Ensure ringtone is not playing
     if (!dialtoneRef.current) {
       dialtoneRef.current = new Audio("/audio/dialing.mp3");
@@ -64,7 +64,7 @@ export function CallSocketProvider({ children }) {
   //   });
   // };
   const playRingtone = () => {
-    console.log("[playRingtone] Playing incoming ringtone");
+    // console.log("[playRingtone] Playing incoming ringtone");
     stopDialtone(); // Ensure dialtone is not playing
     if (!ringtoneRef.current) {
       ringtoneRef.current = new Audio("/audio/ringtone.mp3");
@@ -101,7 +101,7 @@ export function CallSocketProvider({ children }) {
   };
 
   const cleanupCall = () => {
-    console.log("[cleanupCall] Cleaning up the call");
+    // console.log("[cleanupCall] Cleaning up the call");
 
     peerConnection.current?.close();
     peerConnection.current = null;
@@ -113,7 +113,7 @@ export function CallSocketProvider({ children }) {
     setRemoteStream(null);
 
     if (socket && callIncoming?.from) {
-      console.log("[cleanupCall] Emitting end_call");
+      // console.log("[cleanupCall] Emitting end_call");
       socket.emit("end_call", { peerId: callIncoming.from });
     }
     stopRingtone();
@@ -126,7 +126,7 @@ export function CallSocketProvider({ children }) {
   };
 
   const answerGroupCall = async () => {
-    console.log("[answerGroupCall] Answering group call");
+    // console.log("[answerGroupCall] Answering group call");
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       setLocalStream(stream);
@@ -159,7 +159,7 @@ export function CallSocketProvider({ children }) {
   };
 
   const endGroupCall = () => {
-    console.log("[endGroupCall] Ending group call");
+    // console.log("[endGroupCall] Ending group call");
     socket.emit("end_group_call", {
       group_id: callIncoming.group_id,
     });
@@ -169,7 +169,7 @@ export function CallSocketProvider({ children }) {
   const checkMic = async () => {
     try {
       const status = await navigator.permissions.query({ name: "microphone" });
-      console.log("[checkMic] Microphone permission status:", status.state);
+      // console.log("[checkMic] Microphone permission status:", status.state);
       return ["granted", "prompt"].includes(status.state);
     } catch (err) {
       console.warn("[checkMic] Permission check failed:", err);
@@ -188,7 +188,7 @@ export function CallSocketProvider({ children }) {
   // };
   const setupSocketListeners = (socket) => {
     socket.on("incoming_call", ({ from, signal }) => {
-      console.log("[socket] Incoming call from:", from);
+      // console.log("[socket] Incoming call from:", from);
       playRingtone();
       setCallIncoming({ from, signal });
       setIsIncomingCall(true);
@@ -198,7 +198,7 @@ export function CallSocketProvider({ children }) {
     });
 
     socket.on("answer_call", async ({ answer }) => {
-      console.log("[socket] Received answer from callee");
+      // console.log("[socket] Received answer from callee");
       const pc = peerConnection.current;
       if (!pc) return;
       await pc.setRemoteDescription(new RTCSessionDescription(answer));
@@ -212,7 +212,7 @@ export function CallSocketProvider({ children }) {
     });
 
     socket.on("ice_candidate", ({ candidate }) => {
-      console.log("[socket] Received ICE candidate");
+      // console.log("[socket] Received ICE candidate");
       const pc = peerConnection.current;
       if (!pc) return;
       if (pc.remoteDescription?.type) {
@@ -223,13 +223,13 @@ export function CallSocketProvider({ children }) {
     });
 
     socket.on("call_ended", () => {
-      console.log("[socket] Call ended");
+      // console.log("[socket] Call ended");
       cleanupCall();
     });
 
     // Group Calls
     socket.on("incoming_group_call", ({ from, group_id, signal }) => {
-      console.log("[socket] Incoming group call:", group_id);
+      // console.log("[socket] Incoming group call:", group_id);
       playRingtone();
       setCallIncoming({ from, signal, group_id });
       setIsIncomingCall(true);
@@ -238,7 +238,7 @@ export function CallSocketProvider({ children }) {
     });
 
     socket.on("group_call_answered", async ({ from, group_id, signal }) => {
-      console.log("[socket] Group call answered by:", from);
+      // console.log("[socket] Group call answered by:", from);
       const pc = peerConnection.current;
       if (!pc) return;
       await pc.setRemoteDescription(new RTCSessionDescription(signal));
@@ -246,7 +246,7 @@ export function CallSocketProvider({ children }) {
     });
 
     socket.on("group_call_ended", ({ from, group_id }) => {
-      console.log("[socket] Group call ended by:", from);
+      // console.log("[socket] Group call ended by:", from);
       cleanupCall();
     });
   };
@@ -254,10 +254,10 @@ export function CallSocketProvider({ children }) {
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     const newSocket = connectVoiceSocket(token);
-    console.log("[Socket] Connecting voice socket...");
+    // console.log("[Socket] Connecting voice socket...");
 
     newSocket.on("connect", () => {
-      console.log("[Socket] Connected:", newSocket.id);
+      // console.log("[Socket] Connected:", newSocket.id);
       setSocket(newSocket); // only set after full connection
 
       // Setup all listeners here directly

@@ -37,7 +37,7 @@ export default function IncomingCallPopup({ isGroup }) {
     setMuted(!muted);
   };
   useEffect(() => {
-    console.log("CallACCEPTED=======>", callAccepted, activeCall);
+    // console.log("CallACCEPTED=======>", callAccepted, activeCall);
   }, [callAccepted, activeCall]);
 
   // const handleCancel = () => {
@@ -47,12 +47,12 @@ export default function IncomingCallPopup({ isGroup }) {
   // };
   const handleCancel = (event, reason) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") {
-      console.log("Clicked outside or pressed ESC. Just closing popup.");
+      // console.log("Clicked outside or pressed ESC. Just closing popup.");
       // setShowCallPopup(false);
       return;
     }
 
-    console.log("User cancelled call actively");
+    // console.log("User cancelled call actively");
     cleanupCall();
     // rejectCall();
     setShowCallPopup(false);

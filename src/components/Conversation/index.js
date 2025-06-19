@@ -40,7 +40,7 @@ const Conversation = ({ selectedUser }) => {
     rejectCall();
   };
   const fetchMessages = async (userId) => {
-    console.log("API_HITTT", userId);
+    // console.log("API_HITTT", userId);
     try {
       const response = await axiosGet(`api/auth/messages/${userId}`);
       if (response?.messages?.length > 0) {
@@ -59,7 +59,7 @@ const Conversation = ({ selectedUser }) => {
           seen: msg.seen,
         }));
         setChatData(formattedMessages);
-        console.log(formattedMessages, "fetchMessages-----API");
+        // console.log(formattedMessages, "fetchMessages-----API");
       } else {
         setChatData([]);
       }
@@ -68,7 +68,7 @@ const Conversation = ({ selectedUser }) => {
     }
   };
   useEffect(() => {
-    console.log(selectedUser, "SELECTYED USER------");
+    // console.log(selectedUser, "SELECTYED USER------");
     if (selectedUser?.user_id !== undefined) {
       fetchMessages(selectedUser?.user_id);
     }

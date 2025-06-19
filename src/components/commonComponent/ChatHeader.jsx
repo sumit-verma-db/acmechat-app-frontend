@@ -27,7 +27,7 @@ import { useChat } from "../../contexts/ChatContext";
 import { connectVoiceSocket } from "../../voiceSocket";
 
 const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
-  console.log(isGroup, "ISGROUP=======>");
+  // console.log(isGroup, "ISGROUP=======>");
 
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -48,15 +48,15 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
       return;
     }
     try {
-      console.log(authToken, "AUTH TOKEN------------------------");
+      // console.log(authToken, "AUTH TOKEN------------------------");
 
       await connectVoiceSocket(authToken);
       if (isGroup) {
-        console.log("CAllGROUP");
+        // console.log("CAllGROUP");
 
         callGroup(chat.group_id, chat.group_name);
       } else {
-        console.log("callUser");
+        // console.log("callUser");
 
         callUser(chat.user_id, chat.first_name);
       }

@@ -35,7 +35,7 @@ export default function GroupCreate() {
   const fetchGroups = async () => {
     try {
       const data = await axiosGet("/api/auth/getAll-groups");
-      console.log(data, "fetchGroups");
+      // console.log(data, "fetchGroups");
 
       setGroups(data.groups); // Adjust if your API returns { groups: [...] }
     } catch (err) {

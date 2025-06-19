@@ -241,7 +241,7 @@ export default function PolicyPage() {
     setFetchError("");
     try {
       const data = await axiosGet("/api/auth/policy-dd");
-      console.log(data, "fetchPolicies");
+      // console.log(data, "fetchPolicies");
       setPolicies(data?.policies || data); // use .policies if API wraps, else direct
     } catch (err) {
       setFetchError(err.response?.data?.message || "Failed to fetch policies.");

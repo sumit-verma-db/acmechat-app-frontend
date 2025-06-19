@@ -14,7 +14,7 @@ const ChatMessages = ({ chatData, selectedUser, isGroup }) => {
   const messagesEndRef = useRef(null);
   const currentUserId = parseInt(localStorage.getItem("userId"));
   // const isGroup = Boolean(selectedGroup);
-  console.log(chatData, "ChatDATAT", selectedUser, isGroup);
+  // console.log(chatData, "ChatDATAT", selectedUser, isGroup);
   const chatTarget = selectedUser;
 
   const scrollToBottom = () => {
@@ -37,7 +37,7 @@ const ChatMessages = ({ chatData, selectedUser, isGroup }) => {
       );
     }
   });
-  console.log(filteredMessages, "FILTERED MESSAGEG__-");
+  // console.log(filteredMessages, "FILTERED MESSAGEG__-");
   const groupedByDate = {};
   filteredMessages.forEach((msg) => {
     const key = new Date(msg.sent_at).toISOString().split("T")[0];

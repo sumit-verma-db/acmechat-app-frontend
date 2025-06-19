@@ -49,7 +49,7 @@ const GroupChats = () => {
     group.group_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const handleGroupClick = (user) => {
-    console.log(user, "USERRRRRRR------>");
+    // console.log(user, "USERRRRRRR------>");
     // const roomId = joinRoom(user.user_id);
     // console.log(roomId, "ROOOOMID---->");
     if (isMobile) onToggleChatDrawer();

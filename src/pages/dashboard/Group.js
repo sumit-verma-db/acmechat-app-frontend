@@ -48,7 +48,7 @@ const Group = () => {
   } = useChat();
   const { sidebar } = useSelector((store) => store.app); // access our store inside component
   const [searchTerm, setSearchTerm] = useState("");
-  console.log(groupList, "GROUP list");
+  // console.log(groupList, "GROUP list");
 
   const handleCloseDialog = () => {
     setOpenDialog(false);
@@ -57,7 +57,7 @@ const Group = () => {
     group.group_name.toLowerCase().includes(searchTerm.toLowerCase())
   );
   const handleGroupClick = (user) => {
-    console.log(user, "USERRRRRRR------>");
+    // console.log(user, "USERRRRRRR------>");
     // const roomId = joinRoom(user.user_id);
     // console.log(roomId, "ROOOOMID---->");
     if (isMobile) onToggleChatDrawer();

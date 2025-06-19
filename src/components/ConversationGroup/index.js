@@ -75,7 +75,7 @@ const GroupConversation = ({ selectedUser }) => {
         });
 
         setChatData(formattedMessages);
-        console.log(response?.messages, "fetchMessages-----API");
+        // console.log(response?.messages, "fetchMessages-----API");
       } else {
         setChatData([]);
       }
@@ -85,7 +85,7 @@ const GroupConversation = ({ selectedUser }) => {
   };
 
   useEffect(() => {
-    console.log(selectedUser, "SELECTYED USER------");
+    // console.log(selectedUser, "SELECTYED USER------");
     if (selectedUser?.group_id !== undefined) {
       fetchMessages(selectedUser?.group_id);
     }

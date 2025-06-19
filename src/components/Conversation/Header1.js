@@ -51,9 +51,9 @@ const Header1 = () => {
   if (!selectedUser) return null; // Prevent rendering if no user is selected
 
   const handleCall = (user) => {
-    console.log(user, "USR------>");
+    // console.log(user, "USR------>");
     const socketInstance = connectVoiceSocket(authToken);
-    console.log(socketInstance, "SOCKET CONNNCTION-------");
+    // console.log(socketInstance, "SOCKET CONNNCTION-------");
     callUser(selectedUser.user_id, selectedUser.first_name); // send name for UI
     // setIsIncomingCall(true);
     // setShowCallPopup(true);

@@ -27,7 +27,7 @@ import ChatElement from "../../components/ChatElement";
 const Chats = ({ onSelect }) => {
   const { setSelectedUser, selectedUser, chatList, setSelectedMenu } =
     useChat();
-  console.log(chatList, "CHATLIST");
+  // console.log(chatList, "CHATLIST");
   const { chatCollapsed, onToggleChatCollapse, onToggleChatDrawer } =
     useSettings();
 

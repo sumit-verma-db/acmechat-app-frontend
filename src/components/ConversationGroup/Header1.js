@@ -37,11 +37,11 @@ const Header1 = ({ isGroup }) => {
   const { callUser, callGroup } = useCallSocket();
 
   if (!selectedUser) return null;
-  console.log(selectedUser, "SELECTED USER");
+  // console.log(selectedUser, "SELECTED USER");
 
   // const isGroup = selectedUser?.group_id;
 
-  console.log(isGroup, "CHECK IS GROUP======");
+  // console.log(isGroup, "CHECK IS GROUP======");
   const handleCall = async () => {
     try {
       await connectVoiceSocket(authToken); // Reuse the connection

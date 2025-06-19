@@ -117,7 +117,7 @@ function CreateUser() {
   };
 
   const handleInputChange = (e) => {
-    console.log(e, "handleInputChange");
+    // console.log(e, "handleInputChange");
 
     const { name, value, type, checked } = e.target;
     setFormData((prev) => ({
@@ -180,7 +180,7 @@ function CreateUser() {
       //     const err = await res.json();
       //     throw new Error(err.message || "Failed to create user");
       //   }
-      console.log(res.data, "RESPONSE");
+      // console.log(res.data, "RESPONSE");
 
       //   const createdUser = await res.json();
       if (res.status) {
@@ -197,7 +197,7 @@ function CreateUser() {
     setLoading(true);
     AxiosGetWithParams("/api/auth/search") // API call for all chats
       .then((data) => {
-        console.log(data, "/api/auth/search");
+        // console.log(data, "/api/auth/search");
 
         setUsers(data.users);
       })

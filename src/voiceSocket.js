@@ -4,9 +4,15 @@ import { io } from "socket.io-client";
 let voiceSocket = null;
 
 export const connectVoiceSocket = (authToken) => {
+  // if (!authToken || typeof authToken !== "string") {
+  //   console.warn(
+  //     "⛔ No valid auth token provided. Skipping voice socket connection."
+  //   );
+  //   return null;
+  // }
   if (!voiceSocket) {
     const socketUrl = process.env.REACT_APP_CALL_URL1;
-    console.log("🔍 Connecting voice socket to:", socketUrl);
+    // console.log("🔍 Connecting voice socket to:", socketUrl);
     voiceSocket = io(socketUrl, {
       autoConnect: true,
       auth: { token: authToken },

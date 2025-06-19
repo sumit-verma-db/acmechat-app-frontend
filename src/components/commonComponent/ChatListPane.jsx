@@ -22,7 +22,7 @@ const ChatListPane = ({
   title = "Chats",
   loading = false,
 }) => {
-  console.log(data, "DDDDDAADAFDAFAF");
+  // console.log(data, "DDDDDAADAFDAFAF");
   const [searchTerm, setSearchTerm] = useState("");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));

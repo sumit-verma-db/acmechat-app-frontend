@@ -36,9 +36,9 @@ export default function IncomingCallPopupGroup() {
     localStream.getAudioTracks().forEach((t) => (t.enabled = muted));
     setMuted(!muted);
   };
-  useEffect(() => {
-    console.log("CallACCEPTED=======>", callAccepted, activeCall);
-  }, [callAccepted, activeCall]);
+  // useEffect(() => {
+  //   console.log("CallACCEPTED=======>", callAccepted, activeCall);
+  // }, [callAccepted, activeCall]);
 
   // const handleCancel = () => {
   //   // for caller: cancel before connect
@@ -47,12 +47,12 @@ export default function IncomingCallPopupGroup() {
   // };
   const handleCancel = (event, reason) => {
     if (reason === "backdropClick" || reason === "escapeKeyDown") {
-      console.log("Clicked outside or pressed ESC. Just closing popup.");
+      // console.log("Clicked outside or pressed ESC. Just closing popup.");
       // setShowCallPopup(false);
       return;
     }
 
-    console.log("User cancelled call actively");
+    // console.log("User cancelled call actively");
     cleanupCall();
     // rejectCall();
     setShowCallPopup(false);

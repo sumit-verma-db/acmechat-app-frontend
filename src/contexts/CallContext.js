@@ -18,32 +18,32 @@ export const CallProvider = ({ children }) => {
   const [remoteStream, setRemoteStream] = useState(null);
   const [callAccepted, setCallAccepted] = useState(false);
   const [callEnded, setCallEnded] = useState(false);
-
+  const [socket, setSocket] = useState(null);
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [isIncomingCall, setIsIncomingCall] = useState(false);
   const [callerName, setCallerName] = useState("");
 
-  useEffect(() => {
-    console.log("callIncoming:", callIncoming);
-    console.log("localStream:", localStream);
-    console.log("activeCall:", activeCall);
-    console.log("remoteStream:", remoteStream);
-    console.log("callAccepted:", callAccepted);
-    console.log("callEnded:", callEnded);
-    console.log("showCallPopup:", showCallPopup);
-    console.log("isIncomingCall:", isIncomingCall);
-    console.log("callerName:", callerName);
-  }, [
-    callIncoming,
-    localStream,
-    activeCall,
-    remoteStream,
-    callAccepted,
-    callEnded,
-    showCallPopup,
-    isIncomingCall,
-    callerName,
-  ]);
+  // useEffect(() => {
+  //   console.log("callIncoming:", callIncoming);
+  //   console.log("localStream:", localStream);
+  //   console.log("activeCall:", activeCall);
+  //   console.log("remoteStream:", remoteStream);
+  //   console.log("callAccepted:", callAccepted);
+  //   console.log("callEnded:", callEnded);
+  //   console.log("showCallPopup:", showCallPopup);
+  //   console.log("isIncomingCall:", isIncomingCall);
+  //   console.log("callerName:", callerName);
+  // }, [
+  //   callIncoming,
+  //   localStream,
+  //   activeCall,
+  //   remoteStream,
+  //   callAccepted,
+  //   callEnded,
+  //   showCallPopup,
+  //   isIncomingCall,
+  //   callerName,
+  // ]);
 
   const peerConnection = useRef(null);
 
@@ -71,6 +71,8 @@ export const CallProvider = ({ children }) => {
         callEnded,
         setCallEnded,
         peerConnection,
+        setSocket,
+        socket,
       }}
     >
       {children}

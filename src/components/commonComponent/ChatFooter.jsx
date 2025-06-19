@@ -82,13 +82,13 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
         ? { group_id: selectedUser.group_id }
         : { receiver_id: selectedUser.user_id }),
     };
-    console.log(newMessage, "NEW MESSAGE");
+    // console.log(newMessage, "NEW MESSAGE");
 
     // ✅ Send via socket
     if (isGroup) {
       sendGroupMessage(selectedUser.group_id, newMessage);
     } else {
-      console.log("Test user");
+      // console.log("Test user");
 
       sendMessage(newMessage);
     }
@@ -116,7 +116,7 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
     setOpenAction(false);
   };
   const handleDocumentSend = () => {
-    console.log(filePreview, "FILEPREVIEW");
+    // console.log(filePreview, "FILEPREVIEW");
     const metadata = {
       sender_id: currentUserId,
       receiver_id: selectedUser.user_id,
@@ -134,7 +134,7 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
     };
 
     const sentMessage = sendMessage(payload); // Automatically joins and returns roomId
-    console.log(sentMessage, payload, "SENTMESSAGE------->");
+    // console.log(sentMessage, payload, "SENTMESSAGE------->");
 
     setFilePreview(null);
     setCaption("");

@@ -84,7 +84,7 @@ const Footer1 = ({ selectedUser, setChatData }) => {
         sent_at: new Date().toISOString(),
       };
       const sentMessage = sendMessage(newMessage); // Automatically joins and returns roomId
-      console.log(sentMessage, newMessage, "SENTMESSAGE------->");
+      // console.log(sentMessage, newMessage, "SENTMESSAGE------->");
 
       setMessage("");
       setOpenPicker(false);
@@ -133,7 +133,7 @@ const Footer1 = ({ selectedUser, setChatData }) => {
     setOpenAction(false);
   };
   const handleDocumentSend = () => {
-    console.log(filePreview, "FILEPREVIEW");
+    // console.log(filePreview, "FILEPREVIEW");
     const metadata = {
       sender_id: currentUserId,
       receiver_id: selectedUser.user_id,
@@ -151,7 +151,7 @@ const Footer1 = ({ selectedUser, setChatData }) => {
     };
 
     const sentMessage = sendMessage(payload); // Automatically joins and returns roomId
-    console.log(sentMessage, payload, "SENTMESSAGE------->");
+    // console.log(sentMessage, payload, "SENTMESSAGE------->");
 
     setFilePreview(null);
     setCaption("");

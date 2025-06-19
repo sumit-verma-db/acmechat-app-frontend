@@ -31,9 +31,9 @@ const ProfileForm = () => {
    const onSubmit = async (data) =>{
         try {
             //submit data to backend
-            console.log('Data', data)
+            // console.log('Data', data)
         } catch (error) {
-            console.log(error);
+            // console.log(error);
             reset();
             setError('afterSubmit',{
                 ...error,

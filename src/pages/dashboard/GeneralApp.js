@@ -28,7 +28,7 @@ const GeneralApp = () => {
   const navigate = useNavigate();
 
   const handleUserClick = (user) => {
-    console.log(user, "SELECTED ISER_---");
+    // console.log(user, "SELECTED ISER_---");
     setSelectedUser(user);
     setSelectedMenu(1);
     navigate("/app");

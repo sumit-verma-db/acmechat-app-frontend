@@ -31,7 +31,7 @@ const Footer1 = ({ selectedUser, setChatData }) => {
 
     // ✅ Send via socket
     sendGroupMessage(selectedUser.group_id, newMessage);
-    console.log("SENT MESSAGE --->", newMessage);
+    // console.log("SENT MESSAGE --->", newMessage);
 
     // ✅ Optimistically update chat UI
     // setChatData((prev) => [

@@ -1,5 +1,6 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { connectSocketWithAuth, getSocket } from "../socket"; // ?
+import { connectVoiceSocket } from "../voiceSocket";
 
 const AuthContext = createContext();
 
@@ -11,7 +12,7 @@ export const AuthProvider = ({ children }) => {
     userName: "",
     userEmail: "",
   });
-  console.log(userData, "USERADATA");
+  // console.log(userData, "USERADATA");
   const [refreshToken, setRefreshToken] = useState(() =>
     localStorage.getItem("refreshToken")
   );
@@ -56,7 +57,14 @@ export const AuthProvider = ({ children }) => {
     // socketInstance.emit("register_user");
     // connectSocketWithAuth(); // ? connect socket
     socket.emit("register_user"); // ? mark user online
-    console.log("?? Emitted 'register_user' with user_id:", user_id);
+    // ✅ Connect the voice socket explicitly
+    const voiceSocket = connectVoiceSocket(accessToken);
+    console.log(voiceSocket, "voicesocket");
+    if (voiceSocket) {
+      console.log("🎙️ Voice socket connected at login:", voiceSocket.id);
+    }
+
+    // console.log("?? Emitted 'register_user' with user_id:", user_id);
   };
 
   // Function to handle logout

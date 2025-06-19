@@ -35,7 +35,7 @@ const NewPasswordForm = () => {
         try {
             //submit data to backend
         } catch (error) {
-            console.log(error);
+            // console.log(error);
             reset();
             setError('afterSubmit',{
                 ...error,

@@ -80,7 +80,7 @@ const BottomNavBar = () => {
   const { chatDrawer, onToggleChatDrawer } = useSettings();
 
   const handleClick = (event) => {
-    console.log("HANDLE CLIK-------->");
+    // console.log("HANDLE CLIK-------->");
 
     setAnchorEl(event.currentTarget);
     navigate();

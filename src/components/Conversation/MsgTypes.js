@@ -49,7 +49,7 @@ const DocMsg: React.FC<DocMsgProps> = ({ el, menu }) => {
       const response = await axiosGet(`/api/auth/download/${id.file_id}`, {
         responseType: "blob",
       });
-      console.log(response, "RESPONSE");
+      // console.log(response, "RESPONSE");
 
       // Create a Blob URL from the PDF binary data
       const fileBlob = new Blob([response], { type: id.file_type });

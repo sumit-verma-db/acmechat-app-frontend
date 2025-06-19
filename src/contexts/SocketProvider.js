@@ -476,17 +476,17 @@ export const SocketProvider = ({ children }) => {
 
     const socket = connectSocketWithAuth(authToken, refreshToken);
     socket.on("connect", () => {
-      console.log("?? Socket connected. Registering user...");
+      // console.log("?? Socket connected. Registering user...");
       socket.emit("register_user");
     });
 
     socket.on("user_online", ({ userId }) => {
-      console.log(userId, "user_online");
+      // console.log(userId, "user_online");
       setOnlineUsers((prev) => new Set([...prev, userId]));
     });
 
     socket.on("user_offline", ({ userId }) => {
-      console.log(userId, "user_offline");
+      // console.log(userId, "user_offline");
       setOnlineUsers((prev) => {
         const updated = new Set(prev);
         updated.delete(userId);
@@ -496,7 +496,7 @@ export const SocketProvider = ({ children }) => {
 
     return () => {
       socket.disconnect();
-      console.log("? Socket disconnected (on unmount)");
+      // console.log("? Socket disconnected (on unmount)");
     };
   }, [authToken, refreshToken, userId]);
 
@@ -504,7 +504,7 @@ export const SocketProvider = ({ children }) => {
   const joinRoom = (otherUserId) => {
     if (!sock || !userId || !otherUserId) return;
     const roomId = [userId, otherUserId].sort((a, b) => a - b).join("-");
-    console.log("ROOM JOINED-----", roomId);
+    // console.log("ROOM JOINED-----", roomId);
     sock.emit("join_room", roomId);
     return roomId;
   };
@@ -516,7 +516,7 @@ export const SocketProvider = ({ children }) => {
         .sort((a, b) => a - b)
         .join("-");
       sock.emit("join_room", roomId);
-      console.log("Auto joined room on page load:", roomId);
+      // console.log("Auto joined room on page load:", roomId);
     }
   }, [selectedUser, userId]);
 
@@ -528,7 +528,7 @@ export const SocketProvider = ({ children }) => {
       // .sort((a, b) => a - b)
       // .join("-");
       sock.emit("join_group_room", roomId);
-      console.log("Auto joined join_group_room on page load:", roomId);
+      // console.log("Auto joined join_group_room on page load:", roomId);
     }
   }, [selectedUser, userId]);
 
@@ -547,12 +547,12 @@ export const SocketProvider = ({ children }) => {
     sock.emit("get_recent_chats", currentUserId);
 
     sock.on("recent_chats", (chats) => {
-      console.log(chats, "RECENT CHATS__SOCKET");
+      // console.log(chats, "RECENT CHATS__SOCKET");
       setChatList(chats);
     });
 
     sock.on("refresh_recent", ({ sender_id, receiver_id }) => {
-      console.log(sender_id, receiver_id, "refresh_recent");
+      // console.log(sender_id, receiver_id, "refresh_recent");
 
       if (sender_id === currentUserId || receiver_id === currentUserId) {
         sock.emit("get_recent_chats", currentUserId);
@@ -596,7 +596,7 @@ export const SocketProvider = ({ children }) => {
 
     // 🟢 Listener: receive group chat list
     sock.on("user_groups", (groups) => {
-      console.log("Group Chats via Socket:", groups);
+      // console.log("Group Chats via Socket:", groups);
       setGroupList(groups); // update state
     });
 
@@ -625,7 +625,7 @@ export const SocketProvider = ({ children }) => {
 
     const handleReceiveMessage = (message) => {
       const currentUserId = parseInt(localStorage.getItem("userId"));
-      console.log(message, "handleReceiveMessage");
+      // console.log(message, "handleReceiveMessage");
       const formattedMessage = {
         ...message,
         id: message.message_id,
@@ -654,7 +654,7 @@ export const SocketProvider = ({ children }) => {
     };
     const handleReceiveFile = (message) => {
       const currentUserId = parseInt(localStorage.getItem("userId"));
-      console.log(message, "handleReceiveFile");
+      // console.log(message, "handleReceiveFile");
       const formattedMessage = {
         ...message,
         id: message.message_id,
@@ -681,10 +681,10 @@ export const SocketProvider = ({ children }) => {
     };
 
     const handleSeenUpdate = ({ message_id }) => {
-      console.log(
-        message_id,
-        "handleSeenUpdate======================================================================================================================================"
-      );
+      // console.log(
+      //   message_id,
+      //   "handleSeenUpdate======================================================================================================================================"
+      // );
 
       setChatData((prevData) =>
         prevData.map((msg) =>

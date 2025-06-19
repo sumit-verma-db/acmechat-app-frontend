@@ -19,6 +19,8 @@ import { useNavigate } from "react-router-dom";
 import ChatMessages from "./ChatMessage";
 import ChatFooter from "./ChatFooter";
 import IncomingCallPopupGroup from "../ConversationGroup/IncomingCallPopupGroup";
+import { connectVoiceSocket, getVoiceSocket } from "../../voiceSocket";
+import { useAuth } from "../../contexts/useAuth";
 
 const ConversationChat = ({ selectedUser, isGroup }) => {
   const theme = useTheme();
@@ -36,12 +38,16 @@ const ConversationChat = ({ selectedUser, isGroup }) => {
     setSelectedUser,
     setSelectedGroup,
     setSelectedMenu,
+    setSocket,
+    socket,
   } = useCall();
   const { answerCall, rejectCall, rejectGroupCall, cleanupCall } =
     useCallSocket();
   const { chatDrawer, onToggleChatDrawer } = useSettings();
+
   const navigate = useNavigate();
   const handleAccept = () => answerCall();
+  const { authToken } = useAuth();
   // const handleReject = () => rejectCall();
 
   const handleUserAccept = () => {
@@ -94,10 +100,16 @@ const ConversationChat = ({ selectedUser, isGroup }) => {
   }, [selectedUser]);
 
   const showChat = selectedUser;
-  console.log(selectedUser, "SHOWCHATT");
+  // console.log(selectedUser, "SHOWCHATT");
 
   const handleGroupClick = (user) => {
-    console.log(user, "USERRRRRRR------>");
+    // if (authToken) {
+    //   const newSocket = connectVoiceSocket(authToken);
+    //   setSocket(newSocket);
+    // }
+    // optionally: await wait for "connect"
+
+    // console.log(user, "USERRRRRRR------>");
     // const roomId = joinRoom(user.user_id);
     // console.log(roomId, "ROOOOMID---->");
     if (isMobile) onToggleChatDrawer();
@@ -107,6 +119,12 @@ const ConversationChat = ({ selectedUser, isGroup }) => {
     // navigate("/app");
   };
   const handleUserClick = (user) => {
+    // if (authToken) {
+    //   const newSocket = connectVoiceSocket(authToken);
+    //   setSocket(newSocket);
+    // }
+    // optionally: await wait for "connect"
+
     setSelectedUser(user);
     setSelectedMenu(1);
     navigate("/app");
