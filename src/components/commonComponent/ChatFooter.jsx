@@ -55,7 +55,7 @@ const Actions = [
     title: "Contact",
   },
 ];
-const ChatFooter = ({ selectedUser, setChatData }) => {
+const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
   const theme = useTheme();
   const [message, setMessage] = useState("");
   const [openPicker, setOpenPicker] = useState(false);
@@ -78,14 +78,14 @@ const ChatFooter = ({ selectedUser, setChatData }) => {
       message: message.trim(),
       type: "text",
       sent_at: new Date().toISOString(),
-      ...(selectedUser.group_id
+      ...(isGroup
         ? { group_id: selectedUser.group_id }
         : { receiver_id: selectedUser.user_id }),
     };
     console.log(newMessage, "NEW MESSAGE");
 
     // ✅ Send via socket
-    if (selectedUser.group_id) {
+    if (isGroup) {
       sendGroupMessage(selectedUser.group_id, newMessage);
     } else {
       console.log("Test user");

@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { useCall } from "./CallContext";
-import { connectVoiceSocket } from "../voiceSocket";
+import { connectVoiceSocket, getVoiceSocket } from "../voiceSocket";
 import { useChat } from "./ChatContext";
 
 const CallSocketContext = createContext();
@@ -124,29 +124,6 @@ export function CallSocketProvider({ children }) {
     setCallAccepted(false);
     setCallEnded(true);
   };
-  const callGroup = async (group_id) => {
-    console.log("[callGroup] Starting group call to group:=====", group_id);
-    if (!(await checkMic())) {
-      alert("Microphone access is required.");
-      return;
-    }
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      setLocalStream(stream);
-      setShowCallPopup(true);
-      setIsIncomingCall(false);
-
-      const pc = setupPeerConnection(stream);
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-
-      socket.emit("call_group", { group_id, signal: offer });
-    } catch (err) {
-      console.error("[callGroup] Error accessing mic:", err);
-      alert("Cannot start group call.");
-    }
-  };
 
   const answerGroupCall = async () => {
     console.log("[answerGroupCall] Answering group call");
@@ -200,6 +177,11 @@ export function CallSocketProvider({ children }) {
     }
   };
 
+  const initializeVoiceSocket = (token) => {
+    connectVoiceSocket(token); // ensures voiceSocket is created
+    const socketInstance = getVoiceSocket(); // get the singleton
+    setSocket(socketInstance); // save to state
+  };
   useEffect(() => {
     const token = localStorage.getItem("authToken");
     const newSocket = connectVoiceSocket(token);
@@ -282,7 +264,29 @@ export function CallSocketProvider({ children }) {
       alert("Cannot access mic.");
     }
   };
+  const callGroup = async (group_id, group_name) => {
+    console.log("[callGroup] Starting group call to group:=====", group_id);
+    if (!(await checkMic())) {
+      alert("Microphone access is required.");
+      return;
+    }
+    setCallerName(group_name);
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setLocalStream(stream);
+      setShowCallPopup(true);
+      setIsIncomingCall(false);
 
+      const pc = setupPeerConnection(stream);
+      const offer = await pc.createOffer();
+      await pc.setLocalDescription(offer);
+
+      socket.emit("call_group", { group_id, signal: offer });
+    } catch (err) {
+      console.error("[callGroup] Error accessing mic:", err);
+      alert("Cannot start group call.");
+    }
+  };
   const answerCall = async () => {
     console.log("[answerCall] Answering call from:", callIncoming?.from);
 
@@ -331,7 +335,26 @@ export function CallSocketProvider({ children }) {
 
     const findCallerId =
       chatList.length > 0 &&
-      chatList?.find((ele) => ele.first_name == callerName).user_id;
+      chatList?.find((ele) => ele.first_name == callerName)?.user_id;
+    // cleanupCall();
+    if (findCallerId) {
+      socket?.emit("end_call", { peerId: findCallerId });
+      cleanupCall();
+      // setCallIncoming(null);
+      // setShowCallPopup(false);
+      // setActiveCall(false);
+      // setCallAccepted(false);
+      // setCallEnded(true);
+    }
+    // socket?.emit("end_call", { peerId: callIncoming?.from });
+  };
+
+  const rejectGroupCall = () => {
+    console.log("[rejectCall] Call rejected by user", callIncoming, callerName);
+
+    const findCallerId =
+      chatList.length > 0 &&
+      chatList?.find((ele) => ele.group_name == callerName)?.group_id;
     // cleanupCall();
     if (findCallerId) {
       socket?.emit("end_call", { peerId: findCallerId });
@@ -456,10 +479,12 @@ export function CallSocketProvider({ children }) {
         callUser,
         answerCall,
         rejectCall,
+        rejectGroupCall,
         cleanupCall,
         callGroup,
         answerGroupCall,
         endGroupCall,
+        initializeVoiceSocket,
       }}
     >
       {children}

@@ -20,19 +20,22 @@ import { useDispatch } from "react-redux";
 import StyledBadge from "../StyledBadge";
 import { ToggleSidebar } from "../../redux/slices/app";
 import { useCallSocket } from "../../contexts/CallSocketProvider";
-import { connectVoiceSocket } from "../../voiceSocket";
+// import { connectVoiceSocket } from "../../voiceSocket";
 import { useAuth } from "../../contexts/useAuth";
 import useSettings from "../../hooks/useSettings";
 import { useChat } from "../../contexts/ChatContext";
+import { connectVoiceSocket } from "../../voiceSocket";
 
 const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
+  console.log(isGroup, "ISGROUP=======>");
+
   const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const { onlineUsers } = useChat();
   const { chatDrawer, onToggleChatDrawer } = useSettings();
-  const { callUser, callGroup } = useCallSocket();
+  const { callUser, callGroup, initializeVoiceSocket } = useCallSocket();
   const { authToken } = useAuth();
 
   const chat = selectedUser || selectedGroup;
@@ -40,12 +43,18 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
   if (!chat) return null;
 
   const handleCall = async () => {
+    if (!chat) {
+      console.warn("No chat data available");
+      return;
+    }
     try {
+      console.log(authToken, "AUTH TOKEN------------------------");
+
       await connectVoiceSocket(authToken);
       if (isGroup) {
         console.log("CAllGROUP");
 
-        callGroup(chat.group_id);
+        callGroup(chat.group_id, chat.group_name);
       } else {
         console.log("callUser");
 
@@ -99,10 +108,10 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
 
           <Stack spacing={0.2}>
             <Typography variant="subtitle2">
-              {chat.group_id ? chat.group_name : `${chat.first_name}`}
+              {isGroup ? chat.group_name : `${chat.first_name}`}
             </Typography>
             <Typography variant="caption">
-              {chat.group_id
+              {isGroup
                 ? "Group Chat"
                 : onlineUsers?.includes(chat.user_id)
                 ? "Online"

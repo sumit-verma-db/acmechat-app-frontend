@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Chats from "./Chats";
 import { Box, Stack, useMediaQuery } from "@mui/material";
-import Conversation from "../../components/Conversation";
 import { useTheme } from "@mui/material/styles";
 import Contact from "../../components/Contact";
 import { useSelector } from "react-redux";
@@ -12,6 +11,7 @@ import useSettings from "../../hooks/useSettings";
 import ChatListPane from "../../components/commonComponent/ChatListPane";
 import { useNavigate } from "react-router-dom";
 import ConversationChat from "../../components/commonComponent/ConversationChat";
+import Conversation from "../../components/Conversation";
 
 const GeneralApp = () => {
   const theme = useTheme();
@@ -56,6 +56,7 @@ const GeneralApp = () => {
           />
         ) : (
           <ConversationChat selectedUser={selectedUser} isGroup={false} />
+          // <Conversation selectedUser={selectedUser} />
         )
       ) : (
         <Stack direction="row" sx={{ width: "100%" }}>

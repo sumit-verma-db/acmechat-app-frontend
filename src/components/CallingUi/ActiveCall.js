@@ -67,7 +67,9 @@ const ActiveCall = ({
     <Box
       sx={{
         // height: "100vh",
-        background: "linear-gradient(135deg, #3b82f6, #9333ea)", // blue to violet
+        background: "linear-gradient(135deg, #60a5fa,rgb(233, 226, 241))",
+
+        // background: "linear-gradient(135deg, #3b82f6, #9333ea)", // blue to violet
         // backgroundColor: "#16a34a", // tailwind's green-600
         position: "relative",
         overflow: "hidden",

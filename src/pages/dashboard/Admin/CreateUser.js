@@ -117,35 +117,40 @@ function CreateUser() {
   };
 
   const handleInputChange = (e) => {
-    const { name, value, type, checked } = e.target;
+    console.log(e, "handleInputChange");
 
-    if (name in formData.user_access) {
-      setFormData((prev) => ({
-        ...prev,
-        user_access: {
-          ...prev.user_access,
-          [name]: checked,
-        },
-      }));
-    } else if (name in formData.file_access) {
-      setFormData((prev) => ({
-        ...prev,
-        file_access: {
-          ...prev.file_access,
-          [name]: checked,
-        },
-      }));
-    } else if (type === "checkbox" || type === "switch") {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: checked,
-      }));
-    } else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+    // if (name in formData.user_access) {
+    //   setFormData((prev) => ({
+    //     ...prev,
+    //     user_access: {
+    //       ...prev.user_access,
+    //       [name]: checked,
+    //     },
+    //   }));
+    // } else if (name in formData.file_access) {
+    //   setFormData((prev) => ({
+    //     ...prev,
+    //     file_access: {
+    //       ...prev.file_access,
+    //       [name]: checked,
+    //     },
+    //   }));
+    // } else if (type === "checkbox" || type === "switch") {
+    //   setFormData((prev) => ({
+    //     ...prev,
+    //     [name]: checked,
+    //   }));
+    // } else {
+    //   setFormData((prev) => ({
+    //     ...prev,
+    //     [name]: value,
+    //   }));
+    // }
   };
 
   const handleSubmit = async (e) => {
@@ -192,6 +197,8 @@ function CreateUser() {
     setLoading(true);
     AxiosGetWithParams("/api/auth/search") // API call for all chats
       .then((data) => {
+        console.log(data, "/api/auth/search");
+
         setUsers(data.users);
       })
       .catch((error) => console.error("Chat API Error:", error))
@@ -232,9 +239,9 @@ function CreateUser() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {users.map(({ id, first_name, last_name, email, role }) => (
-                <TableRow key={id}>
-                  <TableCell>{id}</TableCell>
+              {users.map(({ user_id, first_name, last_name, email, role }) => (
+                <TableRow key={user_id}>
+                  <TableCell>{user_id}</TableCell>
                   <TableCell>{first_name}</TableCell>
                   <TableCell>{last_name}</TableCell>
                   <TableCell>{email}</TableCell>

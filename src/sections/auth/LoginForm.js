@@ -86,7 +86,7 @@ const LoginForm = () => {
 
     try {
       const payload = {
-        email: data.identifier,
+        identifier: data.identifier,
         password: data.password,
         source: "web",
       };

@@ -26,7 +26,7 @@ import { connectVoiceSocket } from "../../voiceSocket";
 import { useAuth } from "../../contexts/useAuth";
 import useSettings from "../../hooks/useSettings";
 
-const Header1 = () => {
+const Header1 = ({ isGroup }) => {
   const { authToken } = useAuth();
   const dispatch = useDispatch();
   const theme = useTheme();
@@ -37,8 +37,9 @@ const Header1 = () => {
   const { callUser, callGroup } = useCallSocket();
 
   if (!selectedUser) return null;
+  console.log(selectedUser, "SELECTED USER");
 
-  const isGroup = selectedUser?.group_id;
+  // const isGroup = selectedUser?.group_id;
 
   console.log(isGroup, "CHECK IS GROUP======");
   const handleCall = async () => {
@@ -91,7 +92,7 @@ const Header1 = () => {
             }}
           >
             {isGroup ? (
-              <Avatar>{selectedUser.first_name?.[0]}</Avatar>
+              <Avatar>{selectedUser.group_name?.[0]}</Avatar>
             ) : (
               <StyledBadge
                 overlap="circular"
@@ -108,7 +109,7 @@ const Header1 = () => {
           </Box>
           <Stack spacing={0.2}>
             <Typography variant="subtitle2">
-              {selectedUser.first_name}
+              {isGroup ? selectedUser.group_name : selectedUser.first_name}
             </Typography>
             <Typography variant="caption">
               {isGroup

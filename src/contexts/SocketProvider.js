@@ -681,6 +681,11 @@ export const SocketProvider = ({ children }) => {
     };
 
     const handleSeenUpdate = ({ message_id }) => {
+      console.log(
+        message_id,
+        "handleSeenUpdate======================================================================================================================================"
+      );
+
       setChatData((prevData) =>
         prevData.map((msg) =>
           msg.message_id === message_id ? { ...msg, seen: true } : msg

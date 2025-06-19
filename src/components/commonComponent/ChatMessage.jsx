@@ -10,12 +10,12 @@ import {
 } from "../Conversation/MsgTypes1";
 // import { DocMsg, LinkMsg, MediaMsg, ReplyMsg, TextMsg } from "./MsgTypes1";
 
-const ChatMessages = ({ chatData, selectedUser, selectedGroup }) => {
+const ChatMessages = ({ chatData, selectedUser, isGroup }) => {
   const messagesEndRef = useRef(null);
   const currentUserId = parseInt(localStorage.getItem("userId"));
-  const isGroup = Boolean(selectedGroup);
-  console.log(chatData, "ChatDATAT", selectedUser, selectedGroup, isGroup);
-  const chatTarget = selectedUser || selectedGroup;
+  // const isGroup = Boolean(selectedGroup);
+  console.log(chatData, "ChatDATAT", selectedUser, isGroup);
+  const chatTarget = selectedUser;
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -27,7 +27,7 @@ const ChatMessages = ({ chatData, selectedUser, selectedGroup }) => {
 
   const filteredMessages = chatData.filter((msg) => {
     if (isGroup) {
-      return msg.group_id && msg.group_id === selectedGroup.group_id;
+      return msg.group_id && msg.group_id === selectedUser.group_id;
     } else {
       return (
         (msg.sender_id === selectedUser?.user_id &&

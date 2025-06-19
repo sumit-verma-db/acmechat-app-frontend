@@ -70,7 +70,7 @@ const Dialing = ({
       sx={{
         // height: "100vh",
         // background: "linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b)",
-        background: "linear-gradient(135deg, #3b82f6, #9333ea)", // blue to purple
+        // background: "linear-gradient(135deg, #3b82f6, #9333ea)", // blue to purple
         // background: `linear-gradient(135deg, #1f2937, #4b5563)`, // subtle green blend
         background: "linear-gradient(135deg, #60a5fa,rgb(233, 226, 241))",
 
@@ -129,7 +129,7 @@ const Dialing = ({
             boxShadow: "0 0 0 5px rgba(255,255,255,0.3)",
           }}
         >
-          {callerName.charAt(0)}
+          {callerName?.charAt(0)}
         </Avatar>
         <Typography variant="h5" color="white" fontWeight="bold">
           {callerName}

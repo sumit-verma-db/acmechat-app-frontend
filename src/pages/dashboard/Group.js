@@ -39,7 +39,13 @@ const Group = () => {
   const [loading, setLoading] = useState(false);
 
   const [openDialog, setOpenDialog] = useState(false);
-  const { groupList, setSelectedUser, selectedUser } = useChat();
+  const {
+    groupList,
+    setSelectedUser,
+    selectedUser,
+    selectedGroup,
+    setSelectedGroup,
+  } = useChat();
   const { sidebar } = useSelector((store) => store.app); // access our store inside component
   const [searchTerm, setSearchTerm] = useState("");
   console.log(groupList, "GROUP list");
@@ -67,11 +73,12 @@ const Group = () => {
             mode="group"
             title="Chats"
             data={groupList}
-            selectedId={selectedUser?.group_id}
+            selectedId={setSelectedUser?.group_id}
             onSelect={handleGroupClick}
           />
         ) : (
-          <ConversationChat selectedGroup={selectedUser} isGroup={true} />
+          // <GroupConversation selectedUser={selectedUser} />
+          <ConversationChat selectedUser={selectedUser} isGroup={true} />
         )
       ) : (
         <Stack direction="row" sx={{ width: "100%" }}>
@@ -79,7 +86,7 @@ const Group = () => {
             mode="group"
             title="Chats"
             data={groupList}
-            selectedId={selectedUser?.group_id}
+            selectedId={setSelectedUser?.group_id}
             onSelect={handleGroupClick}
           />
           <Box
@@ -94,10 +101,10 @@ const Group = () => {
                   : theme.palette.background.default,
             }}
           >
-            <ConversationChat selectedGroup={selectedUser} isGroup={true} />
+            <ConversationChat selectedUser={selectedUser} isGroup={true} />
             {/* <GroupConversation selectedUser={selectedUser} /> */}
           </Box>
-          {/* {sidebar.open &&
+          {/* {sidebar.open &&  
               (() => {
                 switch (sidebar.type) {
                   case "CONTACT":

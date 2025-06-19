@@ -93,7 +93,7 @@ export default function IncomingCallPopupGroup() {
             activeCall={callAccepted}
             toggleMute={toggleMute}
             callerName={callerName}
-            handleCancel={rejectCall}
+            handleCancel={handleCancel}
           />
         )}
 

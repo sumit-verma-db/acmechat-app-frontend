@@ -6,7 +6,7 @@ import { axiosGet } from "../../services/apiServices";
 
 import { useChat } from "../../contexts/ChatContext";
 import { useCall } from "../../contexts/CallContext";
-import IncomingCallPopup from "./IncomingCallPopup";
+import IncomingCallPopup from "./IncomingCallPopupGroup";
 import { useCallSocket } from "../../contexts/CallSocketProvider";
 import Header1 from "./Header1";
 import Message1 from "./Message1";
@@ -124,7 +124,7 @@ const GroupConversation = ({ selectedUser }) => {
 
       {/* Chat header */}
       {selectedUser ? (
-        <Header1 />
+        <Header1 isGroup={true} />
       ) : isMobile ? (
         <GroupChats />
       ) : (

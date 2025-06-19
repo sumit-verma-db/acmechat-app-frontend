@@ -8,6 +8,7 @@ export const ChatProvider = ({ children }) => {
   const [groupList, setGroupList] = useState([]);
 
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedGroup, setSelectedGroup] = useState(null);
   const [chatData, setChatData] = useState([]);
   const [onlineUsers, setOnlineUsers] = useState([]);
 
@@ -21,6 +22,8 @@ export const ChatProvider = ({ children }) => {
         setGroupList,
         selectedUser,
         setSelectedUser,
+        selectedGroup,
+        setSelectedGroup,
         resetSelectedUser,
         chatData,
         setChatData,

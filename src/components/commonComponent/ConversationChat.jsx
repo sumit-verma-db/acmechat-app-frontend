@@ -18,9 +18,9 @@ import useSettings from "../../hooks/useSettings";
 import { useNavigate } from "react-router-dom";
 import ChatMessages from "./ChatMessage";
 import ChatFooter from "./ChatFooter";
-import IncomingCallPopupGroup from "../ConversationGroup/IncomingCallPopup";
+import IncomingCallPopupGroup from "../ConversationGroup/IncomingCallPopupGroup";
 
-const ConversationChat = ({ selectedUser, selectedGroup, isGroup }) => {
+const ConversationChat = ({ selectedUser, isGroup }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { chatData, setChatData, groupList, chatList } = useChat();
@@ -34,13 +34,26 @@ const ConversationChat = ({ selectedUser, selectedGroup, isGroup }) => {
     callerName,
     remoteStream,
     setSelectedUser,
+    setSelectedGroup,
     setSelectedMenu,
   } = useCall();
-  const { answerCall, rejectCall, cleanupCall } = useCallSocket();
+  const { answerCall, rejectCall, rejectGroupCall, cleanupCall } =
+    useCallSocket();
   const { chatDrawer, onToggleChatDrawer } = useSettings();
   const navigate = useNavigate();
   const handleAccept = () => answerCall();
-  const handleReject = () => rejectCall();
+  // const handleReject = () => rejectCall();
+
+  const handleUserAccept = () => {
+    answerCall();
+  };
+  const handleReject = () => {
+    if (isGroup) {
+      rejectCall();
+    } else {
+      rejectGroupCall();
+    }
+  };
 
   const fetchUserMessages = async (userId) => {
     try {
@@ -73,22 +86,22 @@ const ConversationChat = ({ selectedUser, selectedGroup, isGroup }) => {
   };
 
   useEffect(() => {
-    if (selectedUser?.user_id) {
+    if (isGroup) {
+      fetchGroupMessages(selectedUser?.group_id);
+    } else if (selectedUser?.user_id) {
       fetchUserMessages(selectedUser.user_id);
-    } else if (selectedGroup?.group_id) {
-      fetchGroupMessages(selectedGroup.group_id);
     }
-  }, [selectedUser, selectedGroup]);
+  }, [selectedUser]);
 
-  const showChat = selectedUser || selectedGroup;
-  console.log(selectedUser, selectedGroup, showChat, "SHOWCHATT");
+  const showChat = selectedUser;
+  console.log(selectedUser, "SHOWCHATT");
 
   const handleGroupClick = (user) => {
     console.log(user, "USERRRRRRR------>");
     // const roomId = joinRoom(user.user_id);
     // console.log(roomId, "ROOOOMID---->");
     if (isMobile) onToggleChatDrawer();
-    setSelectedUser(user);
+    setSelectedGroup(user);
     // setSelectedMenu(1);
     // fetchGroupMessages(user.group_id); // ✅ FORCE FETCH
     // navigate("/app");
@@ -100,6 +113,10 @@ const ConversationChat = ({ selectedUser, selectedGroup, isGroup }) => {
     // if (isMobile) onToggleChatCollapse(); // auto-close on mobile
     if (isMobile) onToggleChatDrawer();
     // fetchUserMessages(user.user_id);
+  };
+  const onClose = () => {
+    cleanupCall(); // You can also pass it down as a prop
+    setShowCallPopup(false);
   };
   return (
     <Stack
@@ -116,12 +133,8 @@ const ConversationChat = ({ selectedUser, selectedGroup, isGroup }) => {
       <audio id="remoteAudio" autoPlay style={{ display: "none" }} />
       {isGroup ? (
         <IncomingCallPopupGroup
-          isGroup={isGroup}
           open={showCallPopup}
-          onClose={() => {
-            cleanupCall();
-            setShowCallPopup(false);
-          }}
+          onClose={onClose}
           onAccept={handleAccept}
           onReject={handleReject}
           isIncoming={isIncomingCall}
@@ -130,35 +143,29 @@ const ConversationChat = ({ selectedUser, selectedGroup, isGroup }) => {
         />
       ) : (
         <IncomingCallPopup
-          isGroup={isGroup}
           open={showCallPopup}
-          onClose={() => {
-            cleanupCall();
-            setShowCallPopup(false);
-          }}
-          onAccept={handleAccept}
+          onClose={onClose}
+          onAccept={handleUserAccept}
           onReject={handleReject}
           isIncoming={isIncomingCall}
           callerName={callerName}
-          remoteStream={remoteStream}
+          remoteStream={remoteStream} // Pass the remote stream here
         />
       )}
       {/* HEADER */}
       {showChat ? (
         <ChatHeader
           selectedUser={selectedUser}
-          selectedGroup={selectedGroup}
+          // selectedGroup={selectedGroup}
           isGroup={isGroup}
         />
       ) : isMobile ? (
         <ChatListPane
-          mode={selectedUser ? "user" : "group"}
+          mode={isGroup ? "group" : "user"}
           title="Chats"
-          data={selectedUser ? chatList : groupList}
-          selectedId={
-            selectedUser ? selectedUser?.user_id : selectedGroup?.group_id
-          }
-          onSelect={selectedUser ? handleUserClick : handleGroupClick}
+          data={isGroup ? groupList : chatList}
+          selectedId={isGroup ? selectedUser?.group_id : selectedUser?.user_id}
+          onSelect={isGroup ? handleUserClick : handleGroupClick}
         />
       ) : (
         <Box
@@ -169,16 +176,16 @@ const ConversationChat = ({ selectedUser, selectedGroup, isGroup }) => {
             justifyContent: "center",
             alignItems: "center",
             minHeight: "100%", // Fill parent
-            background: (theme) =>
-              theme.palette.mode === "light"
-                ? "url('/assets/bg-whatsapp-light.png'), #f0f2f5"
-                : "url('/assets/bg-whatsapp-dark.png'), #222e35",
+            // background: (theme) =>
+            //   theme.palette.mode === "light"
+            //     ? "url('/assets/bg-whatsapp-light.png'), #f0f2f5"
+            //     : "url('/assets/bg-whatsapp-dark.png'), #222e35",
             backgroundSize: "cover",
             backgroundRepeat: "repeat",
             color: "text.secondary",
           }}
         >
-          <NoChat />
+          {/* <NoChat /> */}
           <Typography variant="h6" mt={2} color="text.secondary">
             Select a user to start a conversation
           </Typography>
@@ -213,7 +220,8 @@ const ConversationChat = ({ selectedUser, selectedGroup, isGroup }) => {
           <ChatMessages
             chatData={chatData}
             selectedUser={selectedUser}
-            selectedGroup={selectedGroup}
+            isGroup={isGroup}
+            // selectedGroup={selectedGroup}
           />
         )}
       </Box>
@@ -221,11 +229,11 @@ const ConversationChat = ({ selectedUser, selectedGroup, isGroup }) => {
       {/* FOOTER */}
 
       {selectedUser && (
-        <ChatFooter selectedUser={selectedUser} setChatData={setChatData} />
+        <ChatFooter selectedUser={selectedUser} isGroup={isGroup} />
       )}
-      {selectedGroup && (
+      {/* {selectedGroup && (
         <ChatFooter selectedUser={selectedGroup} setChatData={setChatData} />
-      )}
+      )} */}
     </Stack>
   );
 };
