@@ -42,13 +42,13 @@ const Nav_Buttons = [
     icon: <Users />,
     title: "Group",
   },
+  // {
+  //   index: 3,
+  //   icon: <Phone />,
+  //   title: "Call",
+  // },
   {
     index: 3,
-    icon: <Phone />,
-    title: "Call",
-  },
-  {
-    index: 4,
     icon: <Command />,
     title: "Admin",
   },

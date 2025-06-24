@@ -17,9 +17,11 @@ export default function IncomingCallPopup({ isGroup }) {
     remoteStream,
     setShowCallPopup,
     callAccepted,
+    callIncoming,
   } = useCall();
 
-  const { answerCall, rejectCall, cleanupCall } = useCallSocket();
+  const { answerCall, rejectCall, cleanupCall, disconnectCall } =
+    useCallSocket();
   const audioRef = useRef(null);
   const [muted, setMuted] = useState(false);
 
@@ -37,7 +39,7 @@ export default function IncomingCallPopup({ isGroup }) {
     setMuted(!muted);
   };
   useEffect(() => {
-    // console.log("CallACCEPTED=======>", callAccepted, activeCall);
+    console.log("CallACCEPTED=======>", callAccepted, activeCall);
   }, [callAccepted, activeCall]);
 
   // const handleCancel = () => {
@@ -51,13 +53,17 @@ export default function IncomingCallPopup({ isGroup }) {
       // setShowCallPopup(false);
       return;
     }
-
+    disconnectCall();
     // console.log("User cancelled call actively");
-    cleanupCall();
+    // cleanupCall();
     // rejectCall();
     setShowCallPopup(false);
   };
-
+  const handleAccept = () => {
+    // roomId, userId
+    //  setCallIncoming({ fromUserId, callType, roomId });
+    answerCall(callIncoming?.roomId, callIncoming.fromUserId);
+  };
   return (
     <Modal
       open={showCallPopup}
@@ -87,13 +93,13 @@ export default function IncomingCallPopup({ isGroup }) {
         />
 
         {/* 1) Caller UI */}
-        {!isIncomingCall && !activeCall && (
+        {!isIncomingCall && (
           <Dialing
             muted={muted}
             activeCall={callAccepted}
             toggleMute={toggleMute}
             callerName={callerName}
-            handleCancel={rejectCall}
+            handleCancel={disconnectCall}
           />
         )}
 
@@ -102,8 +108,8 @@ export default function IncomingCallPopup({ isGroup }) {
           <>
             <Receiving
               callerName={callerName}
-              answerCall={answerCall}
-              rejectCall={handleCancel}
+              answerCall={handleAccept}
+              rejectCall={disconnectCall}
             />
           </>
         ) : (
@@ -112,7 +118,7 @@ export default function IncomingCallPopup({ isGroup }) {
               muted={muted}
               toggleMute={toggleMute}
               callerName={callerName}
-              handleCancel={handleCancel}
+              handleCancel={disconnectCall}
             />
           )
         )}

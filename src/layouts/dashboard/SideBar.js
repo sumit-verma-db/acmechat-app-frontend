@@ -30,7 +30,9 @@ const getPath = (index) => {
     case 2:
       return "/group";
     case 3:
-      return "/call";
+      return "/admin";
+    // case 3:
+    //   return "/call";
     case 4:
       return "/admin";
     case 5:
@@ -214,7 +216,7 @@ const SideBar = ({ onToggleChat }) => {
 
           <Divider sx={{ width: "48px" }} />
 
-          <Tooltip title="Settings" placement="right">
+          {/* <Tooltip title="Settings" placement="right">
             <AnimatedSidebarIconButton
               active={selectedMenu === 5}
               onClick={() => {
@@ -224,7 +226,7 @@ const SideBar = ({ onToggleChat }) => {
             >
               <Gear />
             </AnimatedSidebarIconButton>
-          </Tooltip>
+          </Tooltip> */}
         </Stack>
 
         {/* Bottom User & Toggle */}

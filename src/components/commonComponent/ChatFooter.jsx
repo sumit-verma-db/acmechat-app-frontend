@@ -89,7 +89,7 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
       sendGroupMessage(selectedUser.group_id, newMessage);
     } else {
       // console.log("Test user");
-
+      console.log(newMessage, "newMessage");
       sendMessage(newMessage);
     }
 
@@ -132,7 +132,7 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
       ...metadata,
       file: filePreview.file,
     };
-
+    console.log(payload, "Payload");
     const sentMessage = sendMessage(payload); // Automatically joins and returns roomId
     // console.log(sentMessage, payload, "SENTMESSAGE------->");
 

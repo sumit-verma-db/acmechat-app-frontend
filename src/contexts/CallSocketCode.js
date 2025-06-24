@@ -1,5 +1,3 @@
-// src/contexts/CallSocketProvider.jsx
-
 import React, {
   createContext,
   useContext,
@@ -7,15 +5,14 @@ import React, {
   useRef,
   useState,
 } from "react";
+import Peer from "peerjs";
 import { useCall } from "./CallContext";
+import { useAuth } from "./useAuth";
 import { connectVoiceSocket } from "../voiceSocket";
-
 const CallSocketContext = createContext();
 export const useCallSocket = () => useContext(CallSocketContext);
-
 export function CallSocketProvider({ children }) {
   const {
-    peerConnection,
     setCallIncoming,
     setRemoteStream,
     remoteStream,
@@ -26,248 +23,184 @@ export function CallSocketProvider({ children }) {
     setCallerName,
     setCallAccepted,
     setCallEnded,
-    callIncoming,
     setActiveCall,
+    setCallScreen,
+    callIncoming,
   } = useCall();
-
-  const [socket, setSocket] = useState(null);
-  const pendingCandidates = useRef([]);
-
-  const TURN_CONFIG = {
-    iceServers: [
-      { urls: "stun:stun.l.google.com:19302" },
-      {
-        urls: "turn:openrelay.metered.ca:80",
-        username: "openrelayproject",
-        credential: "openrelayproject",
-      },
-    ],
+  const { authToken, userId } = useAuth();
+  const [peer, setPeer] = useState(null);
+  const peerInstance = useRef(null);
+  const voiceSocket = useRef(null);
+  const ringtoneRef = useRef(null);
+  const dialtoneRef = useRef(null);
+  const playRingtone = () => {
+    stopDialtone();
+    if (!ringtoneRef.current) {
+      ringtoneRef.current = new Audio("/audio/ringtone.mp3");
+      ringtoneRef.current.loop = true;
+    }
+    ringtoneRef.current.play().catch(() => {});
   };
-
-  // Clean up everything
+  const stopRingtone = () => {
+    if (ringtoneRef.current) {
+      ringtoneRef.current.pause();
+      ringtoneRef.current.currentTime = 0;
+    }
+  };
+  const playDialtone = () => {
+    stopRingtone();
+    if (!dialtoneRef.current) {
+      dialtoneRef.current = new Audio("/audio/dialing.mp3");
+      dialtoneRef.current.loop = true;
+    }
+    dialtoneRef.current.play().catch(() => {});
+  };
+  const stopDialtone = () => {
+    if (dialtoneRef.current) {
+      dialtoneRef.current.pause();
+      dialtoneRef.current.currentTime = 0;
+    }
+  };
+  useEffect(() => {
+    const id = userId;
+    const peer = new Peer(id, {
+      host: "apps.acme.in",
+      port: 443,
+      path: "/peerjs",
+      secure: true,
+      config: {
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+      },
+    });
+    peerInstance.current = peer;
+    setPeer(peer);
+    peer.on("open", (id) => console.log("Peer open:", id));
+    peer.on("call", async (call) => {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      setLocalStream(stream);
+      setCallIncoming({ from: call.peer, roomId: call.metadata?.roomId });
+      setIsIncomingCall(true);
+      setShowCallPopup(true);
+      playRingtone();
+      call.answer(stream);
+      call.on("stream", (remote) => {
+        setRemoteStream(remote);
+        setCallAccepted(true);
+        setActiveCall(true);
+        stopRingtone();
+        setCallScreen("active");
+      });
+    });
+    return () => peer.destroy();
+  }, []);
+  useEffect(() => {
+    if (!authToken) return;
+    const socket = connectVoiceSocket(authToken);
+    voiceSocket.current = socket;
+    socket.emit("register-user", userId);
+    socket.on("incoming-call", ({ fromUserId, roomId }) => {
+      setCallIncoming({ from: fromUserId, roomId });
+      setIsIncomingCall(true);
+      setShowCallPopup(true);
+      playRingtone();
+    });
+    socket.on("call-accepted", ({ roomId }) => {
+      const receiverId = localStorage.getItem("receiverId");
+      const call = peerInstance.current.call(receiverId, localStream, {
+        metadata: { roomId },
+      });
+      call.on("stream", (remote) => {
+        setRemoteStream(remote);
+        setCallAccepted(true);
+        setActiveCall(true);
+        setCallScreen("active");
+      });
+      stopDialtone();
+    });
+    socket.on("user-disconnected", (peerId) => {
+      console.log("Call ended by other user:", peerId);
+      cleanupCall();
+      alert("Call was ended by the other user.");
+    });
+    return () => {
+      socket.disconnect();
+    };
+  }, [authToken, localStream]);
+  const callUser = async (userId, receiverId, receiverName, roomId) => {
+    const socket = voiceSocket.current;
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    setLocalStream(stream);
+    setCallerName(receiverName);
+    setCallIncoming({ from: userId, roomId });
+    setShowCallPopup(true);
+    setCallScreen("dialing");
+    playDialtone();
+    localStorage.setItem("receiverId", receiverId);
+    socket.emit("call-user", {
+      fromUserId: userId,
+      toUserId: receiverId,
+      callType: "audio",
+      roomId,
+      name: receiverName,
+    });
+    setTimeout(() => {
+      if (!remoteStream) {
+        cleanupCall();
+        alert("No response from user.");
+      }
+    }, 30000);
+  };
+  const answerCall = async (roomId) => {
+    const socket = voiceSocket.current;
+    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+    setLocalStream(stream);
+    setCallAccepted(true);
+    setActiveCall(true);
+    setShowCallPopup(false);
+    stopRingtone();
+    socket.emit("join-room", { roomId, userId });
+    socket.emit("call-accepted", { roomId });
+  };
+  const disconnectCall = () => {
+    const socket = voiceSocket.current;
+    if (callIncoming?.roomId) {
+      socket.emit("disconnectuser", {
+        userId,
+        roomId: callIncoming.roomId,
+      });
+    }
+    cleanupCall();
+  };
+  const rejectCall = () => {
+    stopRingtone();
+    setCallIncoming(null);
+    setShowCallPopup(false);
+    setCallAccepted(false);
+    setActiveCall(false);
+  };
   const cleanupCall = () => {
-    if (peerConnection.current) {
-      peerConnection.current.close();
-      peerConnection.current = null;
-    }
-    localStream?.getTracks().forEach((t) => t.stop());
+    localStream?.getTracks().forEach((track) => track.stop());
+    remoteStream?.getTracks().forEach((track) => track.stop());
+    stopRingtone();
+    stopDialtone();
     setLocalStream(null);
-    remoteStream?.getTracks().forEach((t) => t.stop());
     setRemoteStream(null);
-
-    if (socket && callIncoming?.from) {
-      socket.emit("end_call", { peerId: callIncoming.from });
-    }
-
     setCallIncoming(null);
     setShowCallPopup(false);
     setActiveCall(false);
     setCallAccepted(false);
     setCallEnded(true);
+    setCallScreen("idle");
   };
-
-  // Check mic permission
-  const checkMic = async () => {
-    try {
-      const status = await navigator.permissions.query({ name: "microphone" });
-      return ["granted", "prompt"].includes(status.state);
-    } catch {
-      return true;
-    }
-  };
-
-  // Connect socket once
-  useEffect(() => {
-    const token = localStorage.getItem("authToken");
-    setSocket(connectVoiceSocket(token));
-  }, []);
-
-  // 1) Caller side: initiate call
-  const callUser = async (receiverId, receiverName) => {
-    if (!(await checkMic())) {
-      return alert("Microphone access is required.");
-    }
-    setCallerName(receiverName);
-    setShowCallPopup(true);
-    setIsIncomingCall(false);
-
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      setLocalStream(stream);
-
-      const pc = new RTCPeerConnection(TURN_CONFIG);
-      peerConnection.current = pc;
-
-      // 1.a add our mic track
-      stream.getTracks().forEach((track) => {
-        pc.addTrack(track, stream);
-        console.log("Caller: added track", track.kind);
-      });
-
-      // 1.b ICE ? signaling
-      pc.onicecandidate = (e) => {
-        if (e.candidate) {
-          socket.emit("ice_candidate", {
-            toUserId: receiverId,
-            candidate: e.candidate,
-          });
-        }
-      };
-
-      // 1.c incoming remote streams
-      pc.ontrack = (e) => {
-        const remote = new MediaStream();
-        e.streams[0].getTracks().forEach((t) => remote.addTrack(t));
-        setRemoteStream(remote);
-      };
-      pc.oniceconnectionstatechange = () => {
-        console.log("Caller ICE state:", pc.iceConnectionState);
-
-        if (pc.iceConnectionState === "connected") {
-          console.log("Call connected!");
-          // setCallAccepted(true);
-          setActiveCall(true); // Also start activeCall
-          setShowCallPopup(true); // In case popup was hidden
-        }
-
-        if (
-          pc.iceConnectionState === "failed" ||
-          pc.iceConnectionState === "disconnected"
-        ) {
-          console.log("Call disconnected or failed");
-          cleanupCall(); // Optional: End call if ICE fails
-        }
-      };
-      pc.oniceconnectionstatechange = () =>
-        console.log("Caller ICE state:", pc.iceConnectionState);
-      // setCallAccepted(true);
-      // 1.d create & send offer
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      console.log("Caller: setLocalDescription");
-
-      socket.emit("call_user", { receiverId, signal: offer });
-    } catch (err) {
-      console.error("callUser error:", err);
-      setShowCallPopup(false);
-      alert("Cannot access mic.");
-    }
-  };
-
-  // 2) Receiver side: answer incoming call
-  const answerCall = async () => {
-    // 0?? get the mic
-    console.log("ANSWER CALL----");
-
-    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-    setLocalStream(stream);
-
-    // 1?? new peer
-    const pc = new RTCPeerConnection(TURN_CONFIG);
-    peerConnection.current = pc;
-
-    // 2?? handlers first
-    pc.onicecandidate = (e) => {
-      if (e.candidate) {
-        socket.emit("ice_candidate", {
-          toUserId: callIncoming.from,
-          candidate: e.candidate,
-        });
-      }
-    };
-    pc.ontrack = (e) => {
-      console.log("Receiver got a track:", e.track.kind);
-      const remote = new MediaStream(e.streams[0].getTracks());
-      setRemoteStream(remote);
-    };
-
-    // 3?? add your mic track
-    stream.getTracks().forEach((t) => {
-      console.log("Receiver: adding track", t.kind);
-      pc.addTrack(t, stream);
-    });
-
-    // 4?? set the caller’s offer
-    await pc.setRemoteDescription(
-      new RTCSessionDescription(callIncoming.signal)
-    );
-    console.log("Receiver: remoteDescription set");
-
-    // 5?? drain any early ICE candidates
-    pendingCandidates.current.forEach((c) =>
-      pc.addIceCandidate(new RTCIceCandidate(c)).catch(console.error)
-    );
-    pendingCandidates.current = [];
-
-    // 6?? create & send your answer
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    console.log("Receiver: localDescription (answer) set");
-
-    socket.emit("answer_call", {
-      callerId: callIncoming.from,
-      signal: answer,
-    });
-
-    setActiveCall(true);
-    // setCallAccepted(true);
-    setCallAccepted(true); // this must update state/context
-
-    // DON’T hide the modal here—keep <audio> mounted
-  };
-
-  const rejectCall = () => {
-    cleanupCall();
-    socket?.emit("end_call", { peerId: callIncoming?.from });
-  };
-
-  // 3) Socket listeners (for BOTH sides)
-  useEffect(() => {
-    if (!socket) return;
-
-    socket.on("incoming_call", ({ from, signal }) => {
-      setCallIncoming({ from, signal });
-      setIsIncomingCall(true);
-      setShowCallPopup(true);
-      setCallerName(`${from}`);
-    });
-
-    socket.on("answer_call", async ({ answer }) => {
-      const pc = peerConnection.current;
-      if (!pc) return;
-      await pc.setRemoteDescription(new RTCSessionDescription(answer));
-      console.log("Caller: received remoteDescription (answer)=====>");
-      setCallAccepted(true);
-      pendingCandidates.current.forEach((c) =>
-        pc.addIceCandidate(new RTCIceCandidate(c)).catch(console.error)
-      );
-      pendingCandidates.current = [];
-    });
-
-    socket.on("ice_candidate", ({ candidate }) => {
-      const pc = peerConnection.current;
-      if (!pc) return;
-
-      if (pc.remoteDescription?.type) {
-        pc.addIceCandidate(new RTCIceCandidate(candidate)).catch(console.error);
-      } else {
-        pendingCandidates.current.push(candidate);
-      }
-    });
-
-    socket.on("call_ended", cleanupCall);
-
-    return () => {
-      socket.off("incoming_call");
-      socket.off("answer_call");
-      socket.off("ice_candidate");
-      socket.off("call_ended");
-    };
-  }, [socket]);
-
   return (
     <CallSocketContext.Provider
-      value={{ callUser, answerCall, rejectCall, cleanupCall }}
+      value={{
+        callUser,
+        answerCall,
+        rejectCall,
+        disconnectCall,
+        cleanupCall,
+      }}
     >
       {children}
     </CallSocketContext.Provider>

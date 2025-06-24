@@ -56,9 +56,11 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
 
         callGroup(chat.group_id, chat.group_name);
       } else {
-        // console.log("callUser");
+        const userId = localStorage.getItem("userId");
 
-        callUser(chat.user_id, chat.first_name);
+        // console.log("callUser");
+        const roomId = `room-${Date.now()}-${userId}-${chat.user_id}`;
+        callUser(userId, chat.user_id, roomId, chat.first_name);
       }
     } catch (err) {
       console.error("Call initiation failed:", err);

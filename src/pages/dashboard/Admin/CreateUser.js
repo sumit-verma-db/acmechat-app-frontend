@@ -19,6 +19,7 @@ import {
   TableCell,
   TableBody,
   Paper,
+  TablePagination,
 } from "@mui/material";
 import {
   axiosGet,
@@ -74,6 +75,8 @@ function CreateUser() {
   });
 
   const [users, setUsers] = useState([]);
+  const [page, setPage] = useState(0);
+  const [rowsPerPage, setRowsPerPage] = useState(5);
 
   const handleOpen = () => setOpen(true);
   const handleClose = () => {
@@ -184,7 +187,7 @@ function CreateUser() {
 
       //   const createdUser = await res.json();
       if (res.status) {
-        setUsers((prev) => [...prev, res.data]);
+        await fetchUsers(); // <-- call function to refresh list
         handleClose();
       }
     } catch (err) {
@@ -193,16 +196,19 @@ function CreateUser() {
       setLoading(false);
     }
   };
-  useEffect(() => {
+  const fetchUsers = async () => {
     setLoading(true);
-    AxiosGetWithParams("/api/auth/search") // API call for all chats
-      .then((data) => {
-        // console.log(data, "/api/auth/search");
-
-        setUsers(data.users);
-      })
-      .catch((error) => console.error("Chat API Error:", error))
-      .finally(() => setLoading(false));
+    try {
+      const data = await AxiosGetWithParams("/api/auth/search");
+      setUsers(data.users);
+    } catch (error) {
+      console.error("User fetch error:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+  useEffect(() => {
+    fetchUsers();
   }, []);
   return (
     <Box sx={{ p: 1 }}>
@@ -228,28 +234,43 @@ function CreateUser() {
         <Typography>No users created yet.</Typography>
       ) : (
         <Paper>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>ID</TableCell>
-                <TableCell>First Name</TableCell>
-                <TableCell>Last Name</TableCell>
-                <TableCell>Email</TableCell>
-                <TableCell>Role</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {users.map(({ user_id, first_name, last_name, email, role }) => (
-                <TableRow key={user_id}>
-                  <TableCell>{user_id}</TableCell>
-                  <TableCell>{first_name}</TableCell>
-                  <TableCell>{last_name}</TableCell>
-                  <TableCell>{email}</TableCell>
-                  <TableCell>{role}</TableCell>
+          <Box sx={{ maxHeight: 400, overflowY: "auto" }}>
+            <Table stickyHeader>
+              <TableHead>
+                <TableRow>
+                  <TableCell>ID</TableCell>
+                  <TableCell>First Name</TableCell>
+                  <TableCell>Last Name</TableCell>
+                  <TableCell>Email</TableCell>
+                  <TableCell>Role</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHead>
+              <TableBody>
+                {users
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map(({ user_id, first_name, last_name, email, role }) => (
+                    <TableRow key={user_id}>
+                      <TableCell>{user_id}</TableCell>
+                      <TableCell>{first_name}</TableCell>
+                      <TableCell>{last_name}</TableCell>
+                      <TableCell>{email}</TableCell>
+                      <TableCell>{role}</TableCell>
+                    </TableRow>
+                  ))}
+              </TableBody>
+            </Table>
+          </Box>
+          <TablePagination
+            component="div"
+            count={users.length}
+            page={page}
+            onPageChange={(event, newPage) => setPage(newPage)}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={(event) => {
+              setRowsPerPage(parseInt(event.target.value, 10));
+              setPage(0);
+            }}
+          />
         </Paper>
       )}
 

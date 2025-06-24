@@ -22,6 +22,7 @@ export const CallProvider = ({ children }) => {
   const [showCallPopup, setShowCallPopup] = useState(false);
   const [isIncomingCall, setIsIncomingCall] = useState(false);
   const [callerName, setCallerName] = useState("");
+  const [callScreen, setCallScreen] = useState("idle"); // 'idle', 'dialing', 'receiving', 'active'
 
   // useEffect(() => {
   //   console.log("callIncoming:", callIncoming);
@@ -73,6 +74,9 @@ export const CallProvider = ({ children }) => {
         peerConnection,
         setSocket,
         socket,
+        // ✅ New:
+        callScreen,
+        setCallScreen,
       }}
     >
       {children}

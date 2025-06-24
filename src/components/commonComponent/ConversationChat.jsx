@@ -22,11 +22,13 @@ import IncomingCallPopupGroup from "../ConversationGroup/IncomingCallPopupGroup"
 import { connectVoiceSocket, getVoiceSocket } from "../../voiceSocket";
 import { useAuth } from "../../contexts/useAuth";
 
-const ConversationChat = ({ selectedUser, isGroup }) => {
+const ConversationChat = ({ selectedUser }) => {
+  // console.log(selectedUser, "SELECTED user");
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { chatData, setChatData, groupList, chatList } = useChat();
-
+  let isGroup = selectedUser?.group_id ? true : false;
+  // console.log(isGroup, "IS GROUP");
   const currentUserId = parseInt(localStorage.getItem("userId"));
 
   const {
@@ -93,7 +95,10 @@ const ConversationChat = ({ selectedUser, isGroup }) => {
 
   useEffect(() => {
     if (isGroup) {
-      fetchGroupMessages(selectedUser?.group_id);
+      if (selectedUser?.group_id) {
+        fetchGroupMessages(selectedUser?.group_id);
+        // fetchGroupMessages(selectedUser?.group_id);
+      }
     } else if (selectedUser?.user_id) {
       fetchUserMessages(selectedUser.user_id);
     }

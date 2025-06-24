@@ -7,6 +7,9 @@ import Conversation from "../../components/Conversation";
 import socket from "../../socket";
 import { useChat } from "../../contexts/ChatContext";
 import useSettings from "../../hooks/useSettings";
+import ChatListPane from "../../components/commonComponent/ChatListPane";
+import { useNavigate } from "react-router-dom";
+import ConversationChat from "../../components/commonComponent/ConversationChat";
 
 export default function AllContacts() {
   const theme = useTheme();
@@ -15,8 +18,9 @@ export default function AllContacts() {
     setChatList,
     selectedUser,
     setSelectedUser,
-    setSelecteMenu,
+
     selectedMenu,
+    setSelectedMenu,
   } = useChat();
   const { sidebar } = useSelector((store) => store.app); // access our store inside component
   // const [chatList, setChatList] = useState([]); // Stores all chats
@@ -29,7 +33,7 @@ export default function AllContacts() {
   // const [onlineUsers, setOnlineUsers] = useState([]);
 
   const [filteredChats, setFilteredChats] = useState([]); // Stores search results
-
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const currentUserId = localStorage.getItem("userId");
 
@@ -110,18 +114,40 @@ export default function AllContacts() {
       setFilteredChats(chatList); // Reset search results when query is cleared
     }
   }, [searchQuery, chatList]);
-
+  const handleUserClick = (user) => {
+    // console.log(user, "SELECTED ISER_---");
+    setSelectedUser(user);
+    setSelectedMenu(1);
+    navigate("/app");
+    // if (isMobile) onToggleChatCollapse(); // auto-close on mobile
+    if (isMobile) onToggleChatDrawer();
+  };
   return (
     <>
       {isMobile ? (
         chatDrawer ? (
-          <Chats chatList={chatList} setChatList={setChatList} />
+          // <Chats chatList={chatList} setChatList={setChatList} />
+          <ChatListPane
+            mode="user"
+            title="Chats"
+            data={chatList}
+            selectedId={selectedUser?.user_id}
+            onSelect={handleUserClick}
+          />
         ) : (
-          <Conversation selectedUser={selectedUser} />
+          <ConversationChat selectedUser={selectedUser} isGroup={false} />
+          // <Conversation selectedUser={selectedUser} />
         )
       ) : (
         <Stack direction="row" sx={{ width: "100%" }}>
-          <Chats chatList={chatList} setChatList={setChatList} />
+          {/* <Chats chatList={chatList} setChatList={setChatList} /> */}
+          <ChatListPane
+            mode="user"
+            title="Chats"
+            data={chatList}
+            selectedId={selectedUser?.user_id}
+            onSelect={handleUserClick}
+          />
           <Box
             sx={{
               height: "100%",
@@ -134,7 +160,8 @@ export default function AllContacts() {
                   : theme.palette.background.default,
             }}
           >
-            <Conversation selectedUser={selectedUser} />
+            <ConversationChat selectedUser={selectedUser} isGroup={false} />
+            {/* <Conversation selectedUser={selectedUser} /> */}
           </Box>
           {/* {sidebar.open &&
             (() => {

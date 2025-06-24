@@ -49,13 +49,13 @@ function App() {
       <ThemeSettings>
         <AuthProvider>
           <ChatProvider>
-            <CallProvider>
-              <CallSocketProvider>
-                <SocketProvider>
+            <SocketProvider>
+              <CallProvider>
+                <CallSocketProvider>
                   <Router />
-                </SocketProvider>
-              </CallSocketProvider>
-            </CallProvider>
+                </CallSocketProvider>
+              </CallProvider>
+            </SocketProvider>
           </ChatProvider>
         </AuthProvider>
       </ThemeSettings>

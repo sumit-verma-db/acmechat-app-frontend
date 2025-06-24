@@ -3,27 +3,25 @@ import { io } from "socket.io-client";
 
 let voiceSocket = null;
 
-export const connectVoiceSocket = (accessToken, user_id) => {
-  if (voiceSocket && voiceSocket.connected) {
-    console.warn("⚠️ Voice socket already connected");
-    return voiceSocket;
-  }
-  // console.log("🔍 Connecting voice socket to:OUT SIDE", accessToken);
-  if (accessToken) {
+export const connectVoiceSocket = (authToken) => {
+  // if (!authToken || typeof authToken !== "string") {
+  //   console.warn(
+  //     "⛔ No valid auth token provided. Skipping voice socket connection."
+  //   );
+  //   return null;
+  // }
+  if (!voiceSocket) {
     const socketUrl = process.env.REACT_APP_CALL_URL1;
-    console.log("🔍 Connecting voice socket to:", socketUrl);
+    // console.log("🔍 Connecting voice socket to:", socketUrl);
     voiceSocket = io(socketUrl, {
       autoConnect: true,
-      auth: { token: accessToken },
-
+      auth: { token: authToken },
       timeout: 20000, // 10 seconds timeout for connection attempt
       reconnectionAttempts: 2, // Retry 5 times
       reconnectionDelay: 2000, // 2 seconds delay between retries
     });
-    // console.log(voiceSocket, "CHJECK ===================");
 
     voiceSocket.on("connect", () => {
-      // voiceSocket.emit("register-user", user_id);
       console.log("🎙️ Voice socket connected:", voiceSocket.id);
     });
 
@@ -34,10 +32,9 @@ export const connectVoiceSocket = (accessToken, user_id) => {
     voiceSocket.on("disconnect", (reason) => {
       console.warn("⚠️ Voice socket disconnected:", reason);
     });
-
-    return voiceSocket;
   }
+
+  return voiceSocket;
 };
 
 export const getVoiceSocket = () => voiceSocket;
-export { voiceSocket };
