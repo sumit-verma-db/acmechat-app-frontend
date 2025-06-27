@@ -22,16 +22,26 @@ export default function IncomingCallPopup({ isGroup }) {
 
   const { answerCall, rejectCall, cleanupCall, disconnectCall } =
     useCallSocket();
-  const audioRef = useRef(null);
+  const remoteAudioRef = useRef(null);
+  const localAudioRef = useRef(null);
   const [muted, setMuted] = useState(false);
+  console.log(remoteStream, "REMOTE STREAM");
 
   // when remoteStream arrives, hook up audio
   useEffect(() => {
-    if (remoteStream && audioRef.current) {
-      audioRef.current.srcObject = remoteStream;
-      audioRef.current.play().catch((e) => console.warn("Autoplay blocked", e));
+    if (remoteStream && remoteAudioRef.current) {
+      console.log(remoteStream, remoteAudioRef, "remoteStream,remoteAudioRef");
+
+      remoteAudioRef.current.srcObject = remoteStream;
     }
   }, [remoteStream]);
+  useEffect(() => {
+    if (localStream && localAudioRef.current) {
+      console.log(localStream, localAudioRef, "localStream, localAudioRef");
+
+      localAudioRef.current.srcObject = localStream;
+    }
+  }, [localStream]);
 
   const toggleMute = () => {
     if (!localStream) return;
@@ -53,6 +63,7 @@ export default function IncomingCallPopup({ isGroup }) {
       // setShowCallPopup(false);
       return;
     }
+    setMuted(false);
     disconnectCall();
     // console.log("User cancelled call actively");
     // cleanupCall();
@@ -85,21 +96,37 @@ export default function IncomingCallPopup({ isGroup }) {
         }}
       >
         {/* hidden audio element stays mounted the whole time */}
-        <audio
+        {/* <audio
           ref={audioRef}
+          autoPlay
+          playsInline
+          style={{ display: "none" }}
+        /> */}
+        {/* Remote audio (hear the other person) */}
+        <audio
+          ref={remoteAudioRef}
           autoPlay
           playsInline
           style={{ display: "none" }}
         />
 
+        {/* Local audio (monitor mic – optional for testing) */}
+        {/* <audio
+          ref={localAudioRef}
+          autoPlay
+          muted
+          playsInline
+          style={{ display: "none" }}
+        /> */}
+
         {/* 1) Caller UI */}
-        {!isIncomingCall && (
+        {!isIncomingCall && !activeCall && (
           <Dialing
             muted={muted}
             activeCall={callAccepted}
             toggleMute={toggleMute}
             callerName={callerName}
-            handleCancel={disconnectCall}
+            handleCancel={handleCancel}
           />
         )}
 
@@ -109,7 +136,7 @@ export default function IncomingCallPopup({ isGroup }) {
             <Receiving
               callerName={callerName}
               answerCall={handleAccept}
-              rejectCall={disconnectCall}
+              rejectCall={handleCancel}
             />
           </>
         ) : (
@@ -118,7 +145,7 @@ export default function IncomingCallPopup({ isGroup }) {
               muted={muted}
               toggleMute={toggleMute}
               callerName={callerName}
-              handleCancel={disconnectCall}
+              handleCancel={handleCancel}
             />
           )
         )}

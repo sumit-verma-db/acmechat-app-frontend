@@ -11,7 +11,9 @@ export const AuthProvider = ({ children }) => {
   const [refreshToken, setRefreshToken] = useState(() =>
     localStorage.getItem("refreshToken")
   );
-  const [userId, setUserId] = useState(() => localStorage.getItem("userId"));
+  const [userId, setUserId] = useState(() =>
+    Number(localStorage.getItem("userId"))
+  );
   const [userData, setUserData] = useState({
     userName: "",
     userEmail: "",
@@ -84,12 +86,12 @@ export const AuthProvider = ({ children }) => {
     console.log(user_id, "USER ID USER AUTH");
     let voiceSocket = await connectVoiceSocket(accessToken, user_id);
     console.log(voiceSocket, "LoginPAge");
-    if (voiceSocket) {
-      voiceSocket.on("connect", () => {
-        console.log("🎙️ Voice socket connected:", voiceSocket.id);
-        voiceSocket.emit("register-user", user_id);
-      });
-    }
+    // if (voiceSocket) {
+    //   voiceSocket.on("connect", () => {
+    //     console.log("🎙️ Voice socket connected:", voiceSocket.id);
+    //     voiceSocket.emit("register-user", user_id);
+    //   });
+    // }
     // ✅ Wait for voiceSocket to be connected BEFORE registering
   };
 

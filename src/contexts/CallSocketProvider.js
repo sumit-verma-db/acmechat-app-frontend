@@ -35,15 +35,34 @@ export function CallSocketProvider({ children }) {
   } = useCall();
   const { chatList = [] } = useChat() || {};
   const { authToken, userId } = useAuth();
+  const peerRef = useRef(null);
+  const currentCallRef = useRef(null);
+  const localStreamRef = useRef(null);
+  const remoteStreamRef = useRef(null);
 
   const [peer, setPeer] = useState(null); // PeerJS peer instance
+  const [peerReady, setPeerReady] = useState(false);
+
   const pendingCandidates = useRef([]);
 
   var socket = getVoiceSocket();
+  // console.log(socket, "SOCKET");
 
+  // useEffect(() => {
+  //   socket = connectVoiceSocket(authToken);
+  // }, []);
   useEffect(() => {
-    socket = connectVoiceSocket(authToken);
-  }, []);
+    if (!socket) {
+      socket = connectVoiceSocket(authToken, userId);
+    }
+    // socket.on("connect", () => {
+    //   console.log("✅ Socket connected:", socket.id);
+    //   if (userId) {
+    //     socket.emit("register-user", userId); // ✅ Fix: register yourself after reconnect
+    //     console.log("📌 Registered user after reconnect:", userId);
+    //   }
+    // });
+  }, [authToken, userId]); // make sure this fires on refresh
 
   const ringtoneRef = useRef(null);
   const dialtoneRef = useRef(null);
@@ -83,73 +102,81 @@ export function CallSocketProvider({ children }) {
       dialtoneRef.current = null;
     }
   };
-  useEffect(() => {
-    // const token = localStorage.getItem("authToken");
 
-    // Initialize PeerJS
-    const newPeer = new Peer(userId, {
-      host: "apps.acme.in", // PeerJS server address
-      port: 443,
+  // Initialize PeerJS
+  useEffect(() => {
+    if (!userId) return;
+
+    const newPeer = new Peer(String(userId), {
+      host: "apps.acme.in",
+      port: 5001,
       path: "/peerjs",
       secure: true,
       config: {
-        iceServers: [{ urls: "stun:stun.l.google.com:19302" }], // STUN server
+        iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
       },
     });
+    peerRef.current = newPeer;
+    console.log(newPeer, "NEW PEER");
 
     setPeer(newPeer);
 
     newPeer.on("open", (id) => {
-      console.log("PeerJS connection established with ID:", id);
+      console.log("✅ PeerJS connected:", id, typeof id);
+      setPeerReady(true); // <-- MARK AS READY
     });
-
-    newPeer.on("call", (call) => {
-      console.log("Received incoming call:", call);
-      call.answer(localStream);
-      call.on("stream", (remoteStream) => {
-        setRemoteStream(remoteStream);
-      });
+    newPeer.on("error", (err) => {
+      console.error("❌ PeerJS error:", err);
     });
-  }, []);
-  const setupPeerConnection = (stream, toUserId = null) => {
-    const pc = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
-    });
+    // MODIFIED: Improved on('call') logic with consistent mic access and autoplay audio
+    newPeer.on("call", async (call) => {
+      console.log(":telephone_receiver: Incoming call...", call);
+      currentCallRef.current = call;
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        // Fix: assign directly to ref so it's instantly usable
+        setLocalStream(stream);
+        localStreamRef.current = stream;
+        // setLocalStream(stream);
+        call.answer(stream);
 
-    peerConnection.current = pc;
+        call.on("stream", (remoteStream) => {
+          console.log(
+            ":satellite_antenna: Received remote stream",
+            remoteStream
+          );
+          setRemoteStream(remoteStream);
+          remoteStreamRef.current = remoteStream; // ✅ Save for fallback cleanup
+        });
 
-    stream.getTracks().forEach((track) => {
-      pc.addTrack(track, stream);
-    });
-
-    pc.onicecandidate = (e) => {
-      if (e.candidate) {
-        const candidateData = {
-          toUserId: toUserId || callIncoming?.from,
-          candidate: e.candidate,
-        };
-        socket.emit("ice-candidate", candidateData);
+        call.on("close", () => {
+          console.log(":x: PeerJS call closed");
+          stopRingtone();
+          stopDialtone();
+          setCallIncoming(null);
+          setShowCallPopup(false);
+          setActiveCall(false);
+          setCallAccepted(false);
+          setCallEnded(true);
+          cleanupCall();
+        });
+        call.on("error", console.error);
+      } catch (err) {
+        console.error("Error answering call:", err);
       }
-    };
+    });
 
-    pc.ontrack = (e) => {
-      const remote = new MediaStream(e.streams[0].getTracks());
-      setRemoteStream(remote);
+    return () => {
+      newPeer.destroy();
     };
+  }, [userId]);
 
-    pc.oniceconnectionstatechange = () => {
-      const state = pc.iceConnectionState;
-      if (state === "connected") {
-        setActiveCall(true);
-        setShowCallPopup(true);
-      }
-      if (["failed", "disconnected"].includes(state)) {
-        cleanupCall();
-      }
-    };
-
-    return pc;
-  };
+  useEffect(() => {
+    console.log("localStream---", localStream);
+    console.log("remoteStream---", remoteStream);
+  }, [localStream, remoteStream]);
 
   const checkMic = async () => {
     try {
@@ -185,18 +212,78 @@ export function CallSocketProvider({ children }) {
 
       const handleCallRejected = ({ roomId, rejectedBy, message }) => {
         console.log(`🚫 Call was rejected by ${rejectedBy} in room ${roomId}`);
+        if (currentCallRef.current) {
+          console.log("📞 Closing current outgoing call from caller side");
+          currentCallRef.current.close(); // ✅ Explicitly stop call
+          currentCallRef.current = null;
+        } else {
+          console.warn("No active PeerJS call found, forcing cleanup");
+        }
+
+        cleanupCall();
         setIsRinging(false);
         setCallIncoming(null);
         setShowCallPopup(false);
         setActiveCall(false);
         setCallAccepted(false);
         setCallEnded(true);
-        cleanupCall();
       };
-      const handleCallAccept = ({ roomId, acceptedBy, message }) => {
-        console.log(roomId, acceptedBy, message, "handleCallAccept");
-        socket.emit("join-room", { roomId, userId: acceptedBy });
+      const handleCallAccept = async ({ roomId, acceptedBy }) => {
+        console.log("✅ Receiver accepted the call");
+
+        stopRingtone();
+        stopDialtone();
+        setCallAccepted(true);
+        setActiveCall(true);
+
+        try {
+          const stream = await navigator.mediaDevices.getUserMedia({
+            audio: true,
+          });
+          setLocalStream(stream);
+          localStreamRef.current = stream;
+
+          const call = peerRef.current.call(String(acceptedBy), stream);
+          currentCallRef.current = call;
+
+          call.on("stream", (remoteStream) => {
+            setRemoteStream(remoteStream);
+            remoteStreamRef.current = remoteStream;
+          });
+
+          call.on("close", () => {
+            console.log("📴 Call closed");
+            cleanupCall();
+          });
+
+          call.on("error", (err) => {
+            console.error("🚨 Error in call:", err);
+          });
+
+          socket.emit("join-room", { roomId, userId });
+        } catch (err) {
+          console.error("❌ Failed to call after accept", err);
+        }
       };
+
+      // const handleCallAccept = ({ roomId, acceptedBy, message }) => {
+      //   // console.log(
+      //   //   roomId,
+      //   //   "====" + acceptedBy + "====",
+      //   //   message,
+      //   //   "handleCallAccept"
+      //   // );
+      //   stopRingtone();
+      //   stopDialtone();
+      //   setCallAccepted(true);
+      //   setActiveCall(true);
+      //   socket.emit("join-room", { roomId, userId: userId });
+      //   // const call = peer.call(String(callIncoming.toUserId), localStream);
+      //   // call.on("stream", (remoteStream) => {
+      //   //   console.log("📡 Received remote audio stream");
+      //   //   setRemoteStream(remoteStream);
+      //   // });
+      // };
       const handleUserConnected = ({ userId }) => {
         console.log(userId, "handleUserConnected");
       };
@@ -212,47 +299,127 @@ export function CallSocketProvider({ children }) {
       };
     }
   }, [socket]);
+  useEffect(() => {
+    const handleBeforeUnload = () => {
+      // Clean everything before refresh
+      if (currentCallRef.current) {
+        currentCallRef.current.close();
+      }
+      cleanupCall(); // 🧹 Stop mic, peer, etc.
 
-  const cleanupCall = () => {
-    peerConnection.current?.close();
-    peerConnection.current = null;
+      // Optional: notify the other user
+      if (socket && callIncoming?.roomId && userId) {
+        socket.emit("call-rejected", {
+          roomId: callIncoming.roomId,
+          fromUserId: userId,
+          toUserId: callIncoming?.fromUserId,
+        });
+      }
+    };
 
-    localStream?.getTracks().forEach((t) => t.stop());
-    setLocalStream(null);
+    window.addEventListener("beforeunload", handleBeforeUnload);
 
-    remoteStream?.getTracks().forEach((t) => t.stop());
-    setRemoteStream(null);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [socket, callIncoming, userId]);
 
-    if (socket && callIncoming?.from) {
-      socket.emit("call-ended", { peerId: callIncoming.from });
+  const cleanupCall = async () => {
+    console.log("🧹 Starting cleanup call...");
+
+    // Close RTCPeerConnection if exists
+    if (peerConnection.current) {
+      peerConnection.current.close();
+      peerConnection.current = null;
     }
+
+    if (localStream || localStreamRef.current) {
+      const stream = localStream || localStreamRef.current;
+      console.log("🎤 Stopping local stream tracks");
+      stream.getTracks().forEach((track) => {
+        console.log(`Stopping track: ${track.kind} - ${track.label}`);
+        track.stop();
+      });
+      setLocalStream(null);
+      localStreamRef.current = null;
+    } else {
+      console.warn("⚠️ No local stream found, trying fallback mic stop");
+      try {
+        const tempStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        tempStream.getTracks().forEach((track) => {
+          console.log("[cleanupCall] Fallback: forcibly stopping mic track");
+          track.stop();
+        });
+      } catch (err) {
+        console.warn("⚠️ Could not access fallback mic stream:", err);
+      }
+    }
+
+    if (remoteStream || remoteStreamRef.current) {
+      const stream = remoteStream || remoteStreamRef.current;
+
+      console.log("🔊 Stopping remote stream tracks");
+      stream.getTracks().forEach((track) => {
+        console.log(`Stopping remote track: ${track.kind} - ${track.label}`);
+        track.stop();
+      });
+
+      setRemoteStream(null);
+      remoteStreamRef.current = null;
+    } else {
+      console.warn(
+        "⚠️ No remote stream found, trying fallback remote mic stop"
+      );
+      try {
+        const tempStream = await navigator.mediaDevices.getUserMedia({
+          audio: true,
+        });
+        tempStream.getTracks().forEach((track) => {
+          console.log(
+            "[cleanupCall] Fallback: forcibly stopped remote mic track"
+          );
+          track.stop();
+        });
+      } catch (err) {
+        console.warn("⚠️ Could not access fallback remote mic stream:", err);
+      }
+    }
+
+    // Remove any audio elements that might be playing
+    document.querySelectorAll("audio").forEach((audio) => {
+      if (audio.srcObject) {
+        const stream = audio.srcObject;
+        if (stream && stream.getTracks) {
+          stream.getTracks().forEach((track) => track.stop());
+        }
+        audio.srcObject = null;
+      }
+      audio.pause();
+    });
+
+    // Close PeerJS call if active
+    if (peerRef.current && !peerRef.current.destroyed) {
+      // Get all active calls and close them
+      Object.values(peerRef.current.connections).forEach((connections) => {
+        connections.forEach((connection) => {
+          if (connection.type === "media") {
+            connection.close();
+          }
+        });
+      });
+    }
+
+    // Stop audio playback
     stopRingtone();
     stopDialtone();
-    // setCallIncoming(null);
-    // setShowCallPopup(false);
-    // setActiveCall(false);
-    // setCallAccepted(false);
-    // setCallEnded(true);
+
+    console.log("✅ Cleanup completed");
   };
 
   const answerCall = async () => {
     try {
-      // const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      // setLocalStream(stream);
-
-      // const pc = setupPeerConnection(stream);
-      // await pc.setRemoteDescription(
-      //   new RTCSessionDescription(callIncoming.signal)
-      // );
-
-      // pendingCandidates.current.forEach((c) =>
-      //   pc.addIceCandidate(new RTCIceCandidate(c)).catch(console.error)
-      // );
-      // pendingCandidates.current = [];
-
-      // const answer = await pc.createAnswer();
-      // await pc.setLocalDescription(answer);
-
       socket.emit("call-accepted", {
         fromUserId: userId,
         toUserId: callIncoming.fromUserId,
@@ -271,7 +438,7 @@ export function CallSocketProvider({ children }) {
       // alert("Could not answer the call.");
     }
   };
-  const disconnectCall = () => {
+  const disconnectCall = async () => {
     rejectCall();
   };
   const rejectCall = () => {
@@ -293,20 +460,16 @@ export function CallSocketProvider({ children }) {
     setActiveCall(false);
     setCallAccepted(false);
     setCallEnded(true);
-    // const findCallerId =
-    //   chatList.length > 0 &&
-    //   chatList?.find((ele) => ele.first_name === callerName)?.user_id;
-    // if (findCallerId) {
-    //   socket?.emit("call-rejected", {
-    //     roomId: findCallerId,
-    //     fromUserId: findCallerId,
-    //     toUserId: callIncoming?.from,
-    //   });
+
     cleanupCall();
     // }
   };
 
   const callUser = async (userId, receiverId, roomId, callerName) => {
+    if (!peerRef.current || peerRef.current.disconnected) {
+      console.warn("PeerJS not ready or disconnected");
+      return;
+    }
     console.log(
       userId,
       receiverId,
@@ -331,21 +494,35 @@ export function CallSocketProvider({ children }) {
     try {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       setLocalStream(stream);
+      localStreamRef.current = stream; // ✅ THIS IS MISSING
 
-      const pc = setupPeerConnection(stream, receiverId);
-      const offer = await pc.createOffer();
-      await pc.setLocalDescription(offer);
-      // {
-      //   "fromUserId": "16",
-      //   "toUserId": "15",
-      //   "callType": "video",
-      //   "roomId": "room123"
+      // // ✅ Only call after setting peer and getting stream
+      // if (peerReady) {
+      //   const call = peerRef.current.call(String(receiverId), stream);
+      //   currentCallRef.current = call; // ✅ Save this reference
+
+      //   if (!call) {
+      //     console.error(
+      //       "❌ peer.call() failed: peer is null or connection not ready"
+      //     );
+      //     return;
+      //   }
+
+      //   call.on("stream", (remoteStream) => {
+      //     console.log("📡 Got remote stream in callUser");
+      //     setRemoteStream(remoteStream); // <-- NOW works
+      //   });
+
+      //   call.on("error", (err) => {
+      //     console.error("🚨 Error in call:", err);
+      //   });
+      // } else {
+      //   console.warn("Peer not ready yet — delaying call...");
       // }
-      console.log("socket.emit(call-user)", socket);
 
       socket.emit("call-user", {
-        fromUserId: userId,
-        toUserId: receiverId,
+        fromUserId: Number(userId),
+        toUserId: Number(receiverId),
         callType: "audio",
         roomId: roomId,
       });

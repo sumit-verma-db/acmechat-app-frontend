@@ -501,7 +501,7 @@ export const SocketProvider = ({ children }) => {
   }, [authToken, refreshToken, userId]);
 
   const sock = getSocket();
-  console.log(sock, "TEST SOCKET PROVIDER");
+  // console.log(sock, "TEST SOCKET PROVIDER");
   const joinRoom = (otherUserId) => {
     if (!sock || !userId || !otherUserId) return;
     const roomId = [userId, otherUserId].sort((a, b) => a - b).join("-");

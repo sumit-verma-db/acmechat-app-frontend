@@ -34,6 +34,7 @@ import { SocketProvider } from "./contexts/SocketProvider";
 import { ChatProvider } from "./contexts/ChatContext";
 import { CallProvider } from "./contexts/CallContext";
 import { CallSocketProvider } from "./contexts/CallSocketProvider";
+import CallDebugger from "./contexts/CallDebugger";
 
 function App() {
   // useEffect(() => {
@@ -52,6 +53,8 @@ function App() {
             <SocketProvider>
               <CallProvider>
                 <CallSocketProvider>
+                  {/* <CallDebugger /> */}
+
                   <Router />
                 </CallSocketProvider>
               </CallProvider>
