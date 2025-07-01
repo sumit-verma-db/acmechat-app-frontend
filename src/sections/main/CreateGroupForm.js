@@ -9,8 +9,15 @@ import FormProvider from "../../components/hook-form/FormProvider";
 import { RHFTextField } from "../../components/hook-form";
 import RHFAutocomplete from "../../components/hook-form/RHFAutocomplete";
 import { AxiosGetWithParams, postFetch } from "../../services/apiServices";
-const CreateGroupForm = ({ handleClose, open, policyOptions = [] }) => {
-  const [members, setMembers] = useState([]);
+const CreateGroupForm = ({
+  handleClose,
+  open,
+  policyOptions = [],
+  members,
+  setMembers,
+  isEdit,
+}) => {
+  // const [members, setMembers] = useState([]);
   const [fetched, setFetched] = useState(false);
 
   const NewGroupSchema = Yup.object().shape({
@@ -19,11 +26,22 @@ const CreateGroupForm = ({ handleClose, open, policyOptions = [] }) => {
     policy_id: Yup.string().required("Policy is required"),
   });
 
+  // const defaultValues = {
+  //   title: "",
+  //   members: [],
+  //   policy_id: "",
+  //   policy_name: "",
+  // };
   const defaultValues = {
-    title: "",
-    members: [],
-    policy_id: "",
-    policy_name: "",
+    group_id: members.group_id,
+    title: members?.title || "",
+    members:
+      members?.members?.map((m) => ({
+        label: m.full_name || `${m.first_name} ${m.last_name}`,
+        value: m.user_id,
+      })) || [],
+    policy_id: members?.policy_id || "",
+    policy_name: members?.policy_name || "",
   };
 
   const methods = useForm({
@@ -37,9 +55,22 @@ const CreateGroupForm = ({ handleClose, open, policyOptions = [] }) => {
   } = methods;
 
   const onSubmit = async (data) => {
-    // console.log("Group Create Payload:", data);
+    console.log("Group Create Payload:", data);
     try {
-      const response = await postFetch("/api/auth/create-group", data);
+      const payload = {
+        group_id: data.group_id,
+        group_name: data.title,
+        members: data.members,
+        policy_id: data.policy_id,
+        policy_name: data.policy_name,
+      };
+
+      const endpoint = isEdit
+        ? "/api/auth/edit/group"
+        : "/api/auth/create-group";
+      const finalPayload = isEdit ? { ...payload } : payload;
+      const response = await postFetch(endpoint, finalPayload);
+      // const response = await postFetch("/api/auth/create-group", data);
       // console.log("Group Created Successfully:", response.data);
       handleCloseModal(); // close modal on success
     } catch (error) {
@@ -75,7 +106,7 @@ const CreateGroupForm = ({ handleClose, open, policyOptions = [] }) => {
   return (
     <FormProvider methods={methods} onSubmit={handleSubmit(onSubmit)}>
       <Stack spacing={3}>
-        <RHFTextField name="title" label="Title" />
+        <RHFTextField name="title" label="Group Name" />
         <RHFAutocomplete
           name="members"
           label="Members"
@@ -115,7 +146,7 @@ const CreateGroupForm = ({ handleClose, open, policyOptions = [] }) => {
         <Stack direction="row" justifyContent="flex-end" spacing={2}>
           <Button onClick={handleCloseModal}>Cancel</Button>
           <Button type="submit" variant="contained" disabled={isSubmitting}>
-            Create
+            {isEdit ? "Update" : "Create"}
           </Button>
         </Stack>
       </Stack>

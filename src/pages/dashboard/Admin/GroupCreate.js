@@ -3,6 +3,11 @@ import CreateGroup from "../../../sections/main/CreateGroup";
 import {
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogTitle,
+  IconButton,
   Paper,
   Table,
   TableBody,
@@ -11,16 +16,22 @@ import {
   TableRow,
   Typography,
 } from "@mui/material";
-import { axiosGet } from "../../../services/apiServices";
+import { axiosGet, postFetch } from "../../../services/apiServices";
+import { Pencil, Trash } from "phosphor-react";
 
 export default function GroupCreate() {
   const [groups, setGroups] = useState([]);
+  const [isEdit, setIsEdit] = useState(false);
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedGroup, setSelectedGroup] = useState(null);
+  const [members, setMembers] = useState([]);
   const [openDialog, setOpenDialog] = useState(false);
   const [policyOptions, setPolicyOptions] = useState([]);
 
   const handleOpen = () => setOpenDialog(true);
   const handleCloseDialog = () => {
     setOpenDialog(false);
+    setIsEdit(false);
     // resetForm();
   };
   useEffect(() => {
@@ -46,6 +57,48 @@ export default function GroupCreate() {
   useEffect(() => {
     fetchGroups();
   }, []);
+
+  const handleEdit = (item) => {
+    console.log(item, "handleEdit");
+
+    //  title: "",
+    // members: [],
+    // policy_id: "",
+    // policy_name: "",
+    setMembers({
+      group_id: item.group_id,
+      title: item.group_name,
+      members: item.members,
+      policy_id: item.group_policy.policy_id,
+      policy_name: item.group_policy.policy_name,
+    });
+    // setMembers({
+    //   ...item,
+    // });
+    setIsEdit(true);
+    setOpenDialog(true);
+  };
+
+  const handleDelete = async (item) => {
+    setSelectedGroup(item);
+    setConfirmOpen(true);
+  };
+  const confirmDelete = async () => {
+    if (!selectedGroup) return;
+
+    try {
+      const res = await postFetch("/api/auth/delete/group", {
+        group_id: selectedGroup.group_id,
+      });
+      if (res.status) {
+        fetchGroups();
+        setConfirmOpen(false);
+        setSelectedGroup(null);
+      }
+    } catch (error) {
+      console.error("Delete failed", error);
+    }
+  };
   return (
     <>
       <Box sx={{ p: 1 }}>
@@ -77,6 +130,7 @@ export default function GroupCreate() {
                   <TableCell>Created By</TableCell>
                   <TableCell>Members</TableCell>
                   <TableCell>Created At</TableCell>
+                  <TableCell>Action</TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
@@ -105,6 +159,20 @@ export default function GroupCreate() {
                         ? new Date(group.created_at).toLocaleString()
                         : "-"}
                     </TableCell>
+                    <TableCell>
+                      <IconButton
+                        color="primary"
+                        onClick={() => handleEdit(group)}
+                      >
+                        <Pencil size={15} />
+                      </IconButton>
+                      <IconButton
+                        color="error"
+                        onClick={() => handleDelete(group)}
+                      >
+                        <Trash size={15} />
+                      </IconButton>
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -117,8 +185,26 @@ export default function GroupCreate() {
           open={openDialog}
           handleClose={handleCloseDialog}
           policyOptions={policyOptions}
+          members={members}
+          setMembers={setMembers}
+          isEdit={isEdit}
         />
       )}
+      <Dialog open={confirmOpen} onClose={() => setConfirmOpen(false)}>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent>
+          <Typography>
+            Are you sure you want to delete Group{" "}
+            <strong>{selectedGroup?.group_name}</strong>?
+          </Typography>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmOpen(false)}>Cancel</Button>
+          <Button variant="contained" color="error" onClick={confirmDelete}>
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
     </>
   );
 }

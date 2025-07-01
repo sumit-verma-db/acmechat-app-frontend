@@ -45,7 +45,9 @@ const getPath = (index) => {
 const getMenuPath = (index, logout) => {
   switch (index) {
     case 0:
-      return "/profile";
+      logout();
+      return "/auth/login";
+    // return "/profile";
     case 1:
       return "/settings";
     case 2:
@@ -246,11 +248,20 @@ const SideBar = ({ onToggleChat }) => {
               >
                 <Avatar
                   sx={{
-                    bgcolor:
-                      !userData.img && userData?.username
-                        ? getPastelColor(userData.username)
-                        : undefined,
+                    width: 48,
+                    height: 48,
+                    bgcolor: "#fff", // white background
+                    color: getPastelColor(userData.username), // initials color
+                    border: `2px solid ${getPastelColor(userData.username)}`, // colored border
+                    fontWeight: 500,
+                    fontSize: "0.9rem", // adjust as needed
                   }}
+                  // sx={{
+                  //   bgcolor:
+                  //     !userData.img && userData?.username
+                  //       ? getPastelColor(userData.username)
+                  //       : undefined,
+                  // }}
                   alt={userData?.username?.[0] || "U"}
                   src={userData.img}
                 />

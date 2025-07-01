@@ -93,7 +93,9 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
             </IconButton>
           )}
 
-          <Box onClick={() => dispatch(ToggleSidebar())}>
+          <Box
+          // onClick={() => dispatch(ToggleSidebar())}
+          >
             {isGroup ? (
               <Avatar>{chat.group_name?.[0]}</Avatar>
             ) : (

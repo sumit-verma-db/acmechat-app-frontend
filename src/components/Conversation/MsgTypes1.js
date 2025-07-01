@@ -396,12 +396,15 @@ const TextMsg = ({ el, menu, fromMe = false, isGroup = false }) => {
         sx={{
           backgroundColor: bgColor,
           borderRadius: 2,
-          maxWidth: "85%",
+          // width: "50%",
+          minWidth: "7rem",
+          maxWidth: "50%",
           boxShadow: fromMe
             ? "0 1px 5px rgba(0,0,0,0.2)"
             : "0 1px 3px rgba(0,0,0,0.1)",
-          width: "max-content",
-          whiteSpace: "pre-wrap",
+          width: "fit-content",
+          whiteSpace: "normal",
+          overflowWrap: "break-word", // ✅ additional browser support
           wordBreak: "break-word",
         }}
       >
@@ -430,13 +433,17 @@ const TextMsg = ({ el, menu, fromMe = false, isGroup = false }) => {
         <Box
           sx={{
             display: "flex",
-            justifyContent: "flex-end",
+            justifyContent: fromMe ? "flex-end" : "flex-start",
             alignItems: "center",
             gap: 0.5,
           }}
         >
           <Typography variant="caption" sx={{ color: "#555" }}>
-            {new Date(el.sent_at).toLocaleTimeString()}
+            {new Date(el.sent_at).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+            {/* {new Date(el.sent_at).toLocaleTimeString()} */}
           </Typography>
           {fromMe && (
             <>

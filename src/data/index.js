@@ -12,14 +12,14 @@ import {
 } from "phosphor-react";
 
 const Profile_Menu = [
-  {
-    title: "Profile",
-    icon: <User />,
-  },
-  {
-    title: "Settings",
-    icon: <Gear />,
-  },
+  // {
+  //   title: "Profile",
+  //   icon: <User />,
+  // },
+  // {
+  //   title: "Settings",
+  //   icon: <Gear />,
+  // },
   {
     title: "Logout",
     icon: <SignOut />,

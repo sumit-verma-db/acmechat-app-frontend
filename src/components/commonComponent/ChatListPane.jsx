@@ -13,6 +13,7 @@ import {
 import { Search, SearchIconWrapper, StyledInputBase } from "../Search";
 import { MagnifyingGlass } from "phosphor-react";
 import ChatListItem from "./ChatListItem";
+import { useChat } from "../../contexts/ChatContext";
 
 const ChatListPane = ({
   mode = "user", // 'user' or 'group'
@@ -24,6 +25,14 @@ const ChatListPane = ({
 }) => {
   // console.log(data, "DDDDDAADAFDAFAF");
   const [searchTerm, setSearchTerm] = useState("");
+  const {
+    // setChatData,
+    // selectedUser,
+
+    // setChatList,
+    onlineUsers,
+    setOnlineUsers,
+  } = useChat();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
@@ -32,6 +41,7 @@ const ChatListPane = ({
       .toLowerCase()
       .includes(searchTerm.toLowerCase())
   );
+  console.log(filteredList, onlineUsers, "FILTEREDLIST =========");
 
   return (
     <Box
@@ -77,9 +87,14 @@ const ChatListPane = ({
           className="scrollbar"
           spacing={2}
           direction="column"
-          sx={{ flexGrow: 1, overflow: "auto", height: "100%" }}
+          sx={{
+            flexGrow: 1,
+            overflow: "auto",
+            height: "100%",
+            p: "0rem 1rem 0rem 1rem",
+          }}
         >
-          <Stack spacing={2.5}>
+          <Stack spacing={2}>
             <Typography variant="subtitle2" color="textSecondary">
               {mode === "group" ? "All Groups" : "All Chats"}
             </Typography>
@@ -104,7 +119,8 @@ const ChatListPane = ({
                   //       : "No messages yet"
                   //     : item.email
                   // }
-                  // online={item.online}
+                  online={onlineUsers?.includes(item.user_id)}
+                  // online={item.user_id === onlineUsers.map((usr) => usr)}
                   // unread={item.unread}
                   // message={item.message}
                   // time={item.sent_at}

@@ -548,7 +548,7 @@ export const SocketProvider = ({ children }) => {
     sock.emit("get_recent_chats", currentUserId);
 
     sock.on("recent_chats", (chats) => {
-      // console.log(chats, "RECENT CHATS__SOCKET");
+      console.log(chats, "RECENT CHATS__SOCKET");
       setChatList(chats);
     });
 
@@ -563,10 +563,13 @@ export const SocketProvider = ({ children }) => {
     sock.emit("get_online_users");
 
     sock.on("online_users", (ids) => {
+      console.log(ids, "online_users----ids");
+
       setOnlineUsers(ids);
     });
 
     sock.on("user_online", ({ userId }) => {
+      console.log(userId, "user_online----ids");
       setOnlineUsers((prev) => [...prev, userId]);
     });
 

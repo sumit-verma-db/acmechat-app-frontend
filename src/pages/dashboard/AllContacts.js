@@ -122,6 +122,9 @@ export default function AllContacts() {
     // if (isMobile) onToggleChatCollapse(); // auto-close on mobile
     if (isMobile) onToggleChatDrawer();
   };
+
+  console.log(chatList, "ALLCONTACT PAGE CHAT LIST");
+
   return (
     <>
       {isMobile ? (

@@ -468,6 +468,37 @@ export function CallSocketProvider({ children }) {
   const callUser = async (userId, receiverId, roomId, callerName) => {
     if (!peerRef.current || peerRef.current.disconnected) {
       console.warn("PeerJS not ready or disconnected");
+      // Destroy old peer (safe)
+      if (peerRef.current) {
+        peerRef.current.destroy();
+      }
+
+      // Re-initialize Peer
+      const newPeer = new Peer(String(userId), {
+        host: "apps.acme.in",
+        port: 5001,
+        path: "/peerjs",
+        secure: true,
+        config: {
+          iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+        },
+      });
+
+      peerRef.current = newPeer;
+      setPeer(newPeer);
+
+      // Setup listeners again
+      newPeer.on("open", (id) => {
+        console.log("✅ Reconnected PeerJS:", id);
+        setPeerReady(true);
+        // You may now retry call after reconnect
+        setTimeout(() => callUser(userId, receiverId, roomId, callerName), 500); // retry after 0.5s
+      });
+
+      newPeer.on("error", (err) => {
+        console.error("❌ PeerJS error after reconnect:", err);
+      });
+
       return;
     }
     console.log(

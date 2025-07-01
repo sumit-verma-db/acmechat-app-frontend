@@ -79,7 +79,7 @@ const ChatListItem = ({
           boxShadow: "0 4px 18px 0 rgba(25,118,210,0.14)",
         },
       }}
-      p={2}
+      p={1}
       onClick={onSelect}
 
       // onClick={() =>
@@ -96,11 +96,12 @@ const ChatListItem = ({
     >
       <Stack direction="row" alignItems="center" justifyContent="space-between">
         <Stack direction="row" spacing={2}>
-          {online ? (
+          {/* {online ? (
             <StyledBadge
               overlap="circular"
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
+              isOnline={online}
             >
               <Avatar src={img}>
                 {mode === "group"
@@ -114,8 +115,27 @@ const ChatListItem = ({
                 ? getInitials(group_name)
                 : getInitials(first_name, last_name)}
             </Avatar>
+          )} */}
+          {mode === "group" ? (
+            <Avatar src={img}>
+              {mode === "group"
+                ? getInitials(group_name)
+                : getInitials(first_name, last_name)}
+            </Avatar>
+          ) : (
+            <StyledBadge
+              overlap="circular"
+              anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
+              variant="dot"
+              isOnline={online}
+            >
+              <Avatar src={img}>
+                {mode === "group"
+                  ? getInitials(group_name)
+                  : getInitials(first_name, last_name)}
+              </Avatar>
+            </StyledBadge>
           )}
-
           <Stack spacing={0.3} sx={{ minWidth: 0 }}>
             <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
               {mode === "group" ? group_name : `${first_name} ${last_name}`}

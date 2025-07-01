@@ -22,7 +22,16 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="up" ref={ref} {...props} />;
 });
 
-const CreateGroup = ({ open, handleClose, policyOptions }) => {
+const CreateGroup = ({
+  open,
+  handleClose,
+  policyOptions,
+  members,
+  setMembers,
+  isEdit,
+}) => {
+  console.log(members, "MEMBERS");
+
   return (
     <Dialog
       fullWidth
@@ -33,7 +42,10 @@ const CreateGroup = ({ open, handleClose, policyOptions }) => {
       sx={{ p: 4 }}
     >
       {/* Title */}
-      <DialogTitle sx={{ mb: 3 }}>Create New Group</DialogTitle>
+      <DialogTitle sx={{ mb: 3 }}>
+        {" "}
+        {isEdit ? "Edit Group" : "Create New Group"}
+      </DialogTitle>
       {/* Content */}
       <DialogContent>
         {/* Form */}
@@ -41,6 +53,9 @@ const CreateGroup = ({ open, handleClose, policyOptions }) => {
           handleClose={handleClose}
           open={open}
           policyOptions={policyOptions}
+          members={members}
+          setMembers={setMembers}
+          isEdit={isEdit}
         />
       </DialogContent>
     </Dialog>
