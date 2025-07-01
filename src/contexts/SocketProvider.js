@@ -685,10 +685,10 @@ export const SocketProvider = ({ children }) => {
     };
 
     const handleSeenUpdate = ({ message_id }) => {
-      // console.log(
-      //   message_id,
-      //   "handleSeenUpdate======================================================================================================================================"
-      // );
+      console.log(
+        message_id,
+        "handleSeenUpdate======================================================================================================================================"
+      );
 
       setChatData((prevData) =>
         prevData.map((msg) =>
