@@ -66,7 +66,8 @@ const Dialing = ({
     return { bg: "#1e3a8a", hover: "#1d4ed8" }; // blue (for video)
   };
   return (
-    <Box
+    <>
+      {/* <Box
       sx={{
         // height: "100vh",
         // background: "linear-gradient(135deg, #3a1c71, #d76d77, #ffaf7b)",
@@ -84,7 +85,7 @@ const Dialing = ({
         alignItems: "center",
         justifyContent: "space-between",
       }}
-    >
+    > */}
       {/* Background Overlay */}
       <Box
         sx={{
@@ -227,7 +228,8 @@ const Dialing = ({
           </Stack>
         </Stack>
       </Box>
-    </Box>
+      {/* </Box> */}
+    </>
   );
 };
 

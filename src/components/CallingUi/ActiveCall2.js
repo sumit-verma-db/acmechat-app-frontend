@@ -5,7 +5,7 @@ import {
   MicrophoneSlash,
   VideoCamera,
   Microphone,
-  PhoneSlash,
+  VideoCameraSlash,
 } from "phosphor-react";
 import {
   Box,
@@ -14,7 +14,6 @@ import {
   IconButton,
   Stack,
   Container,
-  Button,
 } from "@mui/material";
 import { keyframes } from "@emotion/react";
 import { useChat } from "../../contexts/ChatContext";
@@ -34,13 +33,17 @@ const pulseRing = keyframes`
     box-shadow: 0 0 0 0 rgba(255,255,255, 0);
   }
 `;
-const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
+const ActiveCall = ({
+  callerName = "John Doe",
+  handleCancel,
+  muted,
+  toggleMute,
+}) => {
   const [callDuration, setCallDuration] = useState(0);
   const { chatList } = useChat();
   const findCallerName = chatList.find(
     (ele) => ele.user_id == callerName
   )?.first_name;
-  // console.log(chatList, "CHAT LIST", findCallerName);
   useEffect(() => {
     const timer = setInterval(() => {
       setCallDuration((prev) => prev + 1);
@@ -84,6 +87,7 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
         sx={{
           position: "absolute",
           inset: 0,
+          // backgroundColor: "#15803d",
           background: `radial-gradient(circle at 40% 20%, rgba(255,255,255,0.05), transparent 70%)`,
 
           // backgroundColor: "#15803d", // green-700
@@ -98,9 +102,9 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
         <Typography variant="h6" color="white" fontWeight="bold">
           Call
         </Typography>
-        {/* <Typography variant="body2" color="white">
+        <Typography variant="body2" color="white">
           {formatTime(callDuration)}
-        </Typography> */}
+        </Typography>
       </Box>
 
       {/* Caller Section */}
@@ -109,7 +113,6 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
           sx={{
             width: 112,
             height: 112,
-            border: "4px solid rgba(255, 255, 255, 0.5)",
             bgcolor: "#0ea5e9",
 
             // bgcolor: "#4ade80", // green-400
@@ -118,8 +121,9 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
             fontSize: 36,
             fontWeight: "bold",
             color: "#fff",
-            // color: "white",
+            color: "#fff",
             animation: `${pulseRing} 1.5s infinite`,
+
             boxShadow: "0 0 0 5px rgba(255,255,255,0.3)",
           }}
         >
@@ -127,9 +131,6 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
         </Avatar>
         <Typography variant="h5" color="white" fontWeight="bold">
           {findCallerName}
-        </Typography>
-        <Typography variant="h7" color="white">
-          Voice Call
         </Typography>
         {/* <Typography
           variant="body2"
@@ -149,71 +150,10 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
       </Box>
 
       {/* Action Buttons */}
-      <Box
-        sx={{ zIndex: 1, mb: 4, flexDirection: "row", alignItems: "center" }}
-      >
-        <Stack direction="row" spacing={8} sx={{ zIndex: 1 }}>
-          <Stack alignItems="center">
-            <Box
-              sx={{
-                borderRadius: "50%",
-                animation: `${pulseRing} 1.6s infinite`,
-              }}
-            >
-              <IconButton
-                onClick={answerCall}
-                sx={{
-                  bgcolor: "#22c55e",
-                  color: "white",
-                  "&:hover": { bgcolor: "#16a34a" },
-                  width: 64,
-                  height: 64,
-                }}
-              >
-                <Phone size={28} />
-              </IconButton>
-            </Box>
-            <Typography variant="caption" color="white">
-              Accept
-            </Typography>
-          </Stack>
-          <Stack alignItems="center">
-            <IconButton
-              onClick={rejectCall}
-              sx={{
-                bgcolor: "#ef4444",
-                color: "white",
-                "&:hover": { bgcolor: "#dc2626" },
-                width: 64,
-                height: 64,
-              }}
-            >
-              <PhoneSlash size={28} />
-            </IconButton>
-            <Typography variant="caption" color="white">
-              Decline
-            </Typography>
-          </Stack>
-        </Stack>
-      </Box>
-      {/* <Box sx={{ zIndex: 1, mb: 8 }}>
+      <Box sx={{ zIndex: 1, mb: 8 }}>
         <Stack direction="row" spacing={4} justifyContent="center">
           <IconButton
-            onClick={answerCall}
-            sx={{
-              bgcolor: "#374151", // gray-700
-              color: "white",
-              "&:hover": { bgcolor: "#1f2937" }, // gray-800
-              p: 2,
-              //   px: 8,
-              //   py: 4,
-            }}
-          >
-            <Phone size={28} />
-          </IconButton>
-          
-          <IconButton
-            onClick={rejectCall}
+            onClick={handleCancel}
             sx={{
               bgcolor: "#ef4444", // red-500
               color: "white",
@@ -221,14 +161,38 @@ const Receiving = ({ callerName = "John Doe", answerCall, rejectCall }) => {
               p: 2,
             }}
           >
-            <PhoneSlash size={28} />
-           
+            <X size={28} />
+          </IconButton>
+          <IconButton
+            onClick={toggleMute}
+            sx={{
+              bgcolor: "#374151", // gray-700
+              color: "white",
+              "&:hover": { bgcolor: "#1f2937" }, // gray-800
+              p: 2,
+            }}
+          >
+            {muted ? <MicrophoneSlash size={28} /> : <Microphone size={28} />}
+            {/* <MicrophoneSlash size={28} /> */}
+          </IconButton>
+          <IconButton
+            sx={{
+              bgcolor: "#374151",
+              color: "white",
+              "&:hover": { bgcolor: "#1f2937" },
+              p: 2,
+            }}
+          >
+            <VideoCamera size={28} />
+            {/* {muted ? <VideoCameraSlash size={28} /> : <VideoCamera size={28} />} */}
+            {/* <VideoCamera size={28} /> */}
+            {/* <VideoCameraSlash size={28} /> */}
           </IconButton>
         </Stack>
-      </Box> */}
+      </Box>
       {/* </Box> */}
     </>
   );
 };
 
-export default Receiving;
+export default ActiveCall;

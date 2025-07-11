@@ -475,10 +475,10 @@ export const SocketProvider = ({ children }) => {
     if (!authToken || !refreshToken) return;
 
     const socket = connectSocketWithAuth(authToken, refreshToken);
-    socket.on("connect", () => {
-      // console.log("?? Socket connected. Registering user...");
-      socket.emit("register_user");
-    });
+    // socket.on("connect", () => {
+    //   // console.log("?? Socket connected. Registering user...");
+    //   socket.emit("register_user");
+    // });
 
     socket.on("user_online", ({ userId }) => {
       // console.log(userId, "user_online");

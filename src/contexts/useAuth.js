@@ -80,12 +80,13 @@ export const AuthProvider = ({ children }) => {
     setUserId(user_id);
     setIsAuthenticated(true);
     let socket = await connectSocketWithAuth(accessToken);
+    console.log(socket, "socket LoginPAge");
 
-    socket.emit("register_user");
+    // socket.emit("register_user");
 
     console.log(user_id, "USER ID USER AUTH");
     let voiceSocket = await connectVoiceSocket(accessToken, user_id);
-    console.log(voiceSocket, "LoginPAge");
+    console.log(voiceSocket, " voiceSocket LoginPAge");
     // if (voiceSocket) {
     //   voiceSocket.on("connect", () => {
     //     console.log("🎙️ Voice socket connected:", voiceSocket.id);
@@ -104,8 +105,13 @@ export const AuthProvider = ({ children }) => {
     localStorage.clear();
 
     try {
-      socket?.disconnect();
+      // socket?.disconnect();
       const voiceSocket = getVoiceSocket();
+      const Socket = getSocket();
+      if (Socket?.connected) {
+        Socket.disconnect();
+        console.log(" socket disconnected on logout");
+      }
       if (voiceSocket?.connected) {
         voiceSocket.disconnect();
         console.log("🎙️ Voice socket disconnected on logout");

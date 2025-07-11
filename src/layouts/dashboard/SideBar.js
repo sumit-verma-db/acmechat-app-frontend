@@ -238,7 +238,19 @@ const SideBar = ({ onToggleChat }) => {
           </Tooltip>
 
           <Box position="relative">
-            <Tooltip title={userData?.username || "Username"} placement="right">
+            <Tooltip
+              title={
+                <Box>
+                  <div>
+                    <strong>{userData?.username || "Username"}</strong>
+                  </div>
+                  <div style={{ fontSize: "0.8rem", color: "#ccc" }}>
+                    {userData?.email || "user@example.com"}
+                  </div>
+                </Box>
+              }
+              placement="right"
+            >
               <StyledBadge
                 overlap="circular"
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
@@ -277,7 +289,7 @@ const SideBar = ({ onToggleChat }) => {
             </Tooltip>
           </Box>
 
-          <Box sx={{ textAlign: "center" }}>
+          {/* <Box sx={{ textAlign: "center" }}>
             <Box sx={{ fontSize: 12, fontWeight: 600 }}>
               {userData?.username || "Username"}
             </Box>
@@ -297,7 +309,7 @@ const SideBar = ({ onToggleChat }) => {
                 {userData?.email || "email@example.com"}
               </Box>
             </Tooltip>
-          </Box>
+          </Box> */}
 
           <Menu
             id="basic-menu"

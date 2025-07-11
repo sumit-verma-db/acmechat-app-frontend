@@ -29,7 +29,7 @@ const getPath = (index) => {
     case 2:
       return "/group";
     case 3:
-      return "/call";
+      return "/admin";
     case 4:
       return "/admin";
     default:

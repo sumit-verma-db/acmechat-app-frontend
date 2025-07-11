@@ -1,194 +1,153 @@
-import { useState, useEffect } from "react";
-import {
-  Phone,
-  X,
-  MicrophoneSlash,
-  VideoCamera,
-  Microphone,
-  VideoCameraSlash,
-} from "phosphor-react";
+// src/components/CallingUi/ActiveCall.jsx
+import React, { useEffect, useRef, useState } from "react";
 import {
   Box,
   Typography,
   Avatar,
-  IconButton,
   Stack,
-  Container,
+  IconButton,
+  CircularProgress,
 } from "@mui/material";
+import {
+  MicrophoneSlash,
+  Microphone,
+  Phone,
+  Waveform,
+  SpeakerSimpleSlash,
+  SpeakerSimpleHigh,
+} from "phosphor-react";
+import { useCall } from "../../contexts/CallContext";
 import { keyframes } from "@emotion/react";
-import { useChat } from "../../contexts/ChatContext";
 
-const dots = keyframes`0% { content: ''; }
-  33% { content: '.'; }
-  66% { content: '..'; }
-  100% { content: '...'; }`;
-const pulseRing = keyframes`
-  0% {
-    box-shadow: 0 0 0 0 rgba(255,255,255, 0.5);
-  }
-  70% {
-    box-shadow: 0 0 0 20px rgba(255,255,255, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255,255,255, 0);
-  }
+const pulse = keyframes`
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
 `;
-const ActiveCall = ({
-  callerName = "John Doe",
-  handleCancel,
-  muted,
-  toggleMute,
-}) => {
-  const [callDuration, setCallDuration] = useState(0);
-  const { chatList } = useChat();
-  const findCallerName = chatList.find(
-    (ele) => ele.user_id == callerName
-  )?.first_name;
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCallDuration((prev) => prev + 1);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
 
-  const formatTime = (seconds) => {
-    const mins = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${mins.toString().padStart(2, "0")}:${secs
-      .toString()
-      .padStart(2, "0")}`;
-  };
+const wave = keyframes`
+  0% { transform: scaleY(0.1); }
+  50% { transform: scaleY(1); }
+  100% { transform: scaleY(0.1); }
+`;
 
-  //   const handleCancel = () => {
-  //     console.log("Call cancelled");
-  //   };
+const AudioWave = ({ active }) => (
+  <Box
+    sx={{
+      display: "flex",
+      alignItems: "end",
+      gap: "2px",
+      height: 20,
+      mb: 1,
+    }}
+  >
+    {[...Array(5)].map((_, i) => (
+      <Box
+        key={i}
+        sx={{
+          width: 2,
+          height: 10,
+          bgcolor: active ? "#10b981" : "#d1d5db",
+          animation: active
+            ? `${wave} 0.8s ease-in-out ${i * 0.1}s infinite`
+            : "none",
+        }}
+      />
+    ))}
+  </Box>
+);
+
+const ActiveCall = ({ muted, toggleMute, callerName, handleCancel }) => {
+  const {
+    micActive,
+    callerProfileImg,
+    receiverProfileImg,
+    isIncomingCall,
+    remoteMicActive,
+    remoteMuted,
+  } = useCall();
 
   return (
     <Box
       sx={{
-        // height: "100vh",
-        background: "linear-gradient(135deg, #60a5fa,rgb(233, 226, 241))",
-
-        // background: "linear-gradient(135deg, #3b82f6, #9333ea)", // blue to violet
-        // backgroundColor: "#16a34a", // tailwind's green-600
-        position: "relative",
-        overflow: "hidden",
-        borderRadius: 2,
-        // p: 3,
+        p: 3,
         display: "flex",
         flexDirection: "column",
         alignItems: "center",
-        justifyContent: "space-between",
+        justifyContent: "center",
+        textAlign: "center",
+        height: 300,
       }}
     >
-      {/* Background Overlay */}
-      <Box
-        sx={{
-          position: "absolute",
-          inset: 0,
-          // backgroundColor: "#15803d",
-          background: `radial-gradient(circle at 40% 20%, rgba(255,255,255,0.05), transparent 70%)`,
-
-          // backgroundColor: "#15803d", // green-700
-          opacity: 0.2,
-          transform: "rotate(45deg)",
-          zIndex: 0,
-        }}
-      />
-
-      {/* Top Section */}
-      <Box sx={{ zIndex: 1, textAlign: "center", mt: 4 }}>
-        <Typography variant="h6" color="white" fontWeight="bold">
-          Call
-        </Typography>
-        <Typography variant="body2" color="white">
-          {formatTime(callDuration)}
-        </Typography>
-      </Box>
-
-      {/* Caller Section */}
-      <Box sx={{ zIndex: 1, textAlign: "center", mt: 4, mb: 6 }}>
-        <Avatar
-          sx={{
-            width: 112,
-            height: 112,
-            bgcolor: "#0ea5e9",
-
-            // bgcolor: "#4ade80", // green-400
-            mb: 2,
-            border: "4px solid white",
-            fontSize: 36,
-            fontWeight: "bold",
-            color: "#fff",
-            color: "#fff",
-            animation: `${pulseRing} 1.5s infinite`,
-
-            boxShadow: "0 0 0 5px rgba(255,255,255,0.3)",
-          }}
-        >
-          {findCallerName?.charAt(0)}
-        </Avatar>
-        <Typography variant="h5" color="white" fontWeight="bold">
-          {findCallerName}
-        </Typography>
-        {/* <Typography
-          variant="body2"
-          color="white"
-          sx={{
-            display: "inline-block",
-            "&::after": {
-              display: "inline-block",
-              animation: `${dots} 1.2s steps(4, end) infinite`,
-              content: '""',
-              whiteSpace: "pre",
-            },
-          }}
-        >
-          Calling
-        </Typography> */}
-      </Box>
-
-      {/* Action Buttons */}
-      <Box sx={{ zIndex: 1, mb: 8 }}>
-        <Stack direction="row" spacing={4} justifyContent="center">
-          <IconButton
-            onClick={handleCancel}
+      <Stack direction="row" spacing={5} alignItems="center" mb={3}>
+        {/* Caller Avatar */}
+        <Stack alignItems="center">
+          <Avatar
             sx={{
-              bgcolor: "#ef4444", // red-500
-              color: "white",
-              "&:hover": { bgcolor: "#dc2626" }, // red-600
-              p: 2,
+              width: 64,
+              height: 64,
+              bgcolor: "#0ea5e9",
+              animation: `${pulse} 2s infinite`,
             }}
           >
-            <X size={28} />
-          </IconButton>
-          <IconButton
-            onClick={toggleMute}
-            sx={{
-              bgcolor: "#374151", // gray-700
-              color: "white",
-              "&:hover": { bgcolor: "#1f2937" }, // gray-800
-              p: 2,
-            }}
-          >
-            {muted ? <MicrophoneSlash size={28} /> : <Microphone size={28} />}
-            {/* <MicrophoneSlash size={28} /> */}
-          </IconButton>
-          <IconButton
-            sx={{
-              bgcolor: "#374151",
-              color: "white",
-              "&:hover": { bgcolor: "#1f2937" },
-              p: 2,
-            }}
-          >
-            <VideoCamera size={28} />
-            {/* {muted ? <VideoCameraSlash size={28} /> : <VideoCamera size={28} />} */}
-            {/* <VideoCamera size={28} /> */}
-            {/* <VideoCameraSlash size={28} /> */}
-          </IconButton>
+            Y
+          </Avatar>
+          <AudioWave active={!muted && micActive} />
+          <Typography variant="caption" display="flex" alignItems="center">
+            You
+            {muted ? <MicrophoneSlash size={12} /> : <Microphone size={12} />}
+          </Typography>
         </Stack>
-      </Box>
+
+        {/* Receiver Avatar */}
+        <Stack alignItems="center">
+          <Avatar
+            sx={{
+              width: 64,
+              height: 64,
+              bgcolor: "#6366f1",
+              animation: `${pulse} 2s infinite`,
+            }}
+          >
+            {callerName?.charAt(0)}
+          </Avatar>
+          <AudioWave active={!remoteMuted && remoteMicActive} />
+          <Typography variant="caption" display="flex" alignItems="center">
+            {callerName}
+            {remoteMuted ? (
+              <MicrophoneSlash size={12} />
+            ) : (
+              <Microphone size={12} />
+            )}
+          </Typography>
+        </Stack>
+      </Stack>
+
+      <Stack direction="row" spacing={2}>
+        <IconButton
+          onClick={toggleMute}
+          sx={{
+            bgcolor: "#a855f7",
+            color: "white",
+            "&:hover": { bgcolor: "#9333ea" },
+            p: 1.5,
+          }}
+        >
+          {muted ? <MicrophoneSlash /> : <Microphone />}
+        </IconButton>
+
+        <IconButton
+          onClick={handleCancel}
+          sx={{
+            bgcolor: "#ef4444",
+            color: "white",
+            "&:hover": { bgcolor: "#dc2626" },
+            p: 1.5,
+          }}
+        >
+          <Phone />
+        </IconButton>
+      </Stack>
     </Box>
   );
 };

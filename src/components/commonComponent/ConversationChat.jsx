@@ -21,6 +21,7 @@ import ChatFooter from "./ChatFooter";
 import IncomingCallPopupGroup from "../ConversationGroup/IncomingCallPopupGroup";
 import { connectVoiceSocket, getVoiceSocket } from "../../voiceSocket";
 import { useAuth } from "../../contexts/useAuth";
+import CallSidebar from "./CallSidebar";
 
 const ConversationChat = ({ selectedUser }) => {
   // console.log(selectedUser, "SELECTED user");
@@ -147,14 +148,14 @@ const ConversationChat = ({ selectedUser }) => {
       width="100%"
       sx={{
         maxHeight: { xs: "94vh", sm: "100vh" },
-        overflow: "hidden",
+        // overflow: "hidden",
         [theme.breakpoints.down("sm")]: {
           width: "100vw",
         },
       }}
     >
       <audio id="remoteAudio" autoPlay style={{ display: "none" }} />
-      {isGroup ? (
+      {/* {isGroup ? (
         <IncomingCallPopupGroup
           open={showCallPopup}
           onClose={onClose}
@@ -165,16 +166,27 @@ const ConversationChat = ({ selectedUser }) => {
           remoteStream={remoteStream}
         />
       ) : (
-        <IncomingCallPopup
-          open={showCallPopup}
-          onClose={onClose}
-          onAccept={handleUserAccept}
-          onReject={handleReject}
-          isIncoming={isIncomingCall}
-          callerName={callerName}
-          remoteStream={remoteStream} // Pass the remote stream here
-        />
-      )}
+        <>
+          <CallSidebar
+            open={showCallPopup}
+            onClose={onClose}
+            onAccept={handleUserAccept}
+            onReject={handleReject}
+            isIncoming={isIncomingCall}
+            callerName={callerName}
+            remoteStream={remoteStream}
+          /> */}
+      {/* // <IncomingCallPopup
+        //   open={showCallPopup}
+        //   onClose={onClose}
+        //   onAccept={handleUserAccept}
+        //   onReject={handleReject}
+        //   isIncoming={isIncomingCall}
+        //   callerName={callerName}
+        //   remoteStream={remoteStream} // Pass the remote stream here
+        // /> */}
+      {/* </> */}
+      {/* )} */}
       {/* HEADER */}
       {showChat ? (
         <ChatHeader

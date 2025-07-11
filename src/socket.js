@@ -12,6 +12,7 @@ export const connectSocketWithAuth = (authToken, refreshToken) => {
   });
 
   socket.on("connect", () => {
+    socket.emit("register_user");
     console.log("✅ Socket connected:", socket.id);
   });
 

@@ -5,6 +5,7 @@ import {
   IconButton,
   Stack,
   useMediaQuery,
+  Tooltip,
 } from "@mui/material";
 import {
   ArrowLeft,
@@ -25,6 +26,8 @@ import { useAuth } from "../../contexts/useAuth";
 import useSettings from "../../hooks/useSettings";
 import { useChat } from "../../contexts/ChatContext";
 import { connectVoiceSocket } from "../../voiceSocket";
+import { useMicControl } from "../../contexts/useMicControl";
+import { useCall } from "../../contexts/CallContext";
 
 const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
   // console.log(isGroup, "ISGROUP=======>");
@@ -32,7 +35,22 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
   const dispatch = useDispatch();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
+  const {
+    // Mic state
+    micList,
+    currentMicId,
+    setCurrentMicId,
+    currentMicLabel,
+    setCurrentMicLabel,
+    setMicActive,
+    micActive,
 
+    // Speaker state
+    speakerList,
+    currentSpeakerId,
+    setCurrentSpeakerId,
+    setCurrentSpeakerLabel,
+  } = useCall();
   const { onlineUsers } = useChat();
   const { chatDrawer, onToggleChatDrawer } = useSettings();
   const { callUser, callGroup, initializeVoiceSocket } = useCallSocket();
@@ -60,7 +78,9 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
 
         // console.log("callUser");
         const roomId = `room-${Date.now()}-${userId}-${chat.user_id}`;
-        callUser(userId, chat.user_id, roomId, chat.first_name);
+        console.log(chat, "CHAT------------");
+
+        callUser(userId, chat.user_id, roomId, chat.first_name, chat.email);
       }
     } catch (err) {
       console.error("Call initiation failed:", err);
@@ -93,9 +113,7 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
             </IconButton>
           )}
 
-          <Box
-          // onClick={() => dispatch(ToggleSidebar())}
-          >
+          <Box onClick={() => dispatch(ToggleSidebar())}>
             {isGroup ? (
               <Avatar>{chat.group_name?.[0]}</Avatar>
             ) : (
@@ -142,6 +160,75 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
           <IconButton>
             <MagnifyingGlass />
           </IconButton>
+          <Tooltip title={micActive ? `Mic On: ${currentMicLabel}` : "Mic Off"}>
+            <IconButton size="small" sx={{ p: 0.5 }}>
+              <Box
+                sx={{
+                  width: 10,
+                  height: 10,
+                  borderRadius: "50%",
+                  bgcolor: micActive ? "green" : "red",
+                  boxShadow: micActive
+                    ? "0 0 6px 2px rgba(0,255,0,0.6)"
+                    : "0 0 2px 1px rgba(255,0,0,0.3)",
+                  transition: "all 0.3s ease-in-out",
+                }}
+              />
+            </IconButton>
+          </Tooltip>
+          {/* 🎤 Mic Status Toggle */}
+          {/* <Tooltip title={micActive ? `Mic: ${currentMicLabel}` : "Mic Off"}>
+            <IconButton
+            // onClick={toggleMic}
+            >
+              {micActive ? (
+                <Box
+                  component="span"
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    bgcolor: "green",
+                    display: "inline-block",
+                    mr: 1,
+                  }}
+                />
+              ) : (
+                <Box
+                  component="span"
+                  sx={{
+                    width: 8,
+                    height: 8,
+                    borderRadius: "50%",
+                    bgcolor: "red",
+                    display: "inline-block",
+                    mr: 1,
+                  }}
+                />
+              )}
+            </IconButton>
+          </Tooltip> */}
+
+          {/* 🎧 Mic Selector Dropdown */}
+          {/* <Box sx={{ minWidth: 160 }}>
+            <select
+              value={currentMicId}
+              onChange={(e) => changeMic(e.target.value)}
+              style={{
+                fontSize: "0.75rem",
+                padding: "4px 6px",
+                borderRadius: 6,
+                border: "1px solid #ccc",
+                backgroundColor: "#fff",
+              }}
+            >
+              {micList.map((mic) => (
+                <option key={mic.deviceId} value={mic.deviceId}>
+                  {mic.label || `Mic ${mic.deviceId.slice(-4)}`}
+                </option>
+              ))}
+            </select>
+          </Box> */}
         </Stack>
       </Stack>
     </Box>

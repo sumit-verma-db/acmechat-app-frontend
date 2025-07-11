@@ -23,7 +23,19 @@ export const CallProvider = ({ children }) => {
   const [isIncomingCall, setIsIncomingCall] = useState(false);
   const [callerName, setCallerName] = useState("");
   const [callScreen, setCallScreen] = useState("idle"); // 'idle', 'dialing', 'receiving', 'active'
+  // MIC STATUS and MIC SELECTION
+  const [micActive, setMicActive] = useState(false);
+  const [micList, setMicList] = useState([]);
+  const [currentMicId, setCurrentMicId] = useState("");
+  const [currentMicLabel, setCurrentMicLabel] = useState("");
+  const [remoteMuted, setRemoteMuted] = useState(false);
+  // participant logic
 
+  const [participants, setParticipants] = useState([]);
+  // 🎧 Speaker Selection
+  const [speakerList, setSpeakerList] = useState([]);
+  const [currentSpeakerId, setCurrentSpeakerId] = useState("");
+  const [currentSpeakerLabel, setCurrentSpeakerLabel] = useState("");
   // useEffect(() => {
   //   console.log("callIncoming:", callIncoming);
   //   console.log("localStream:", localStream);
@@ -77,6 +89,26 @@ export const CallProvider = ({ children }) => {
         // ✅ New:
         callScreen,
         setCallScreen,
+        // Mic status & Mic Selector
+        micActive,
+        setMicActive,
+        micList,
+        setMicList,
+        currentMicId,
+        setCurrentMicId,
+        currentMicLabel,
+        setCurrentMicLabel,
+        remoteMuted,
+        setRemoteMuted,
+        // 🔊 Speaker selector
+        speakerList,
+        setSpeakerList,
+        currentSpeakerId,
+        setCurrentSpeakerId,
+        currentSpeakerLabel,
+        setCurrentSpeakerLabel,
+        participants,
+        setParticipants,
       }}
     >
       {children}

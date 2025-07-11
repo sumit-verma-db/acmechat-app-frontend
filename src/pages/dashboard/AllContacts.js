@@ -10,9 +10,25 @@ import useSettings from "../../hooks/useSettings";
 import ChatListPane from "../../components/commonComponent/ChatListPane";
 import { useNavigate } from "react-router-dom";
 import ConversationChat from "../../components/commonComponent/ConversationChat";
+import IncomingCallPopupGroup from "../../components/ConversationGroup/IncomingCallPopupGroup";
+import CallSidebar from "../../components/commonComponent/CallSidebar";
+import { useCall } from "../../contexts/CallContext";
+import { useCallSocket } from "../../contexts/CallSocketProvider";
 
 export default function AllContacts() {
   const theme = useTheme();
+  const {
+    showCallPopup,
+    setShowCallPopup,
+    isIncomingCall,
+    callerName,
+    remoteStream,
+
+    setSelectedGroup,
+
+    setSocket,
+    socket,
+  } = useCall();
   const {
     chatList,
     setChatList,
@@ -36,7 +52,8 @@ export default function AllContacts() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const currentUserId = localStorage.getItem("userId");
-
+  const { answerCall, rejectCall, rejectGroupCall, cleanupCall } =
+    useCallSocket();
   // Fetch all chat list on mount
   useEffect(() => {
     setLoading(true);
@@ -122,9 +139,23 @@ export default function AllContacts() {
     // if (isMobile) onToggleChatCollapse(); // auto-close on mobile
     if (isMobile) onToggleChatDrawer();
   };
-
+  let isGroup = selectedUser?.group_id ? true : false;
   console.log(chatList, "ALLCONTACT PAGE CHAT LIST");
-
+  const onClose = () => {
+    cleanupCall(); // You can also pass it down as a prop
+    setShowCallPopup(false);
+  };
+  const handleAccept = () => answerCall();
+  const handleUserAccept = () => {
+    answerCall();
+  };
+  const handleReject = () => {
+    if (isGroup) {
+      rejectCall();
+    } else {
+      rejectGroupCall();
+    }
+  };
   return (
     <>
       {isMobile ? (
@@ -181,6 +212,29 @@ export default function AllContacts() {
             })()} */}
         </Stack>
       )}
+      {/* {isGroup ? (
+        <IncomingCallPopupGroup
+          open={showCallPopup}
+          onClose={onClose}
+          onAccept={handleAccept}
+          onReject={handleReject}
+          isIncoming={isIncomingCall}
+          callerName={callerName}
+          remoteStream={remoteStream}
+        />
+      ) : (
+        <>
+          <CallSidebar
+            open={showCallPopup}
+            onClose={onClose}
+            onAccept={handleUserAccept}
+            onReject={handleReject}
+            isIncoming={isIncomingCall}
+            callerName={callerName}
+            remoteStream={remoteStream}
+          />
+        </>
+      )} */}
     </>
     // <>
     //   <Stack direction="row" sx={{ width: "100%" }}>

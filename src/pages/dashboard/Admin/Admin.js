@@ -5,6 +5,7 @@ import CreateUser from "./CreateUser";
 import GroupCreate from "./GroupCreate";
 import NoChat from "../../../assets/Illustration/NoChat";
 import PolicyPage from "./PolicyPage";
+import CallLogs from "./CallLogs";
 
 function Admin() {
   const [tabIndex, setTabIndex] = useState(0);
@@ -32,6 +33,7 @@ function Admin() {
         <Tab label="Create User" />
         <Tab label="Group Create" />
         <Tab label="Policies" />
+        <Tab label="Call Logs" />
       </Tabs>
 
       {tabIndex === 0 && (
@@ -83,6 +85,11 @@ function Admin() {
       {tabIndex === 2 && (
         <>
           <PolicyPage />
+        </>
+      )}
+      {tabIndex === 3 && (
+        <>
+          <CallLogs />
         </>
       )}
     </Box>

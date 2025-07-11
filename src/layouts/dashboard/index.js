@@ -4,6 +4,7 @@ import { useTheme } from "@mui/material/styles";
 import SideBar from "./SideBar";
 import { useAuth } from "../../contexts/useAuth";
 import BottomNavBar from "./BottomNavBar";
+import CallSidebar from "../../components/commonComponent/CallSidebar";
 
 const DashboardLayout = () => {
   const { isAuthenticated, authToken } = useAuth();
@@ -35,6 +36,8 @@ const DashboardLayout = () => {
       </Stack>
 
       {isMobile && <BottomNavBar />}
+      {/* GLOBAL CALL UI */}
+      <CallSidebar />
     </>
   );
 };
