@@ -480,19 +480,19 @@ export const SocketProvider = ({ children }) => {
     //   socket.emit("register_user");
     // });
 
-    socket.on("user_online", ({ userId }) => {
-      // console.log(userId, "user_online");
-      setOnlineUsers((prev) => new Set([...prev, userId]));
-    });
+    // socket.on("user_online", ({ userId }) => {
+    //   console.log(userId, "user_online-----------");
+    //   setOnlineUsers((prev) => new Set([...prev, userId]));
+    // });
 
-    socket.on("user_offline", ({ userId }) => {
-      // console.log(userId, "user_offline");
-      setOnlineUsers((prev) => {
-        const updated = new Set(prev);
-        updated.delete(userId);
-        return updated;
-      });
-    });
+    // socket.on("user_offline", ({ userId }) => {
+    //   console.log(userId, "user_offline-----------");
+    //   setOnlineUsers((prev) => {
+    //     const updated = new Set(prev);
+    //     updated.delete(userId);
+    //     return updated;
+    //   });
+    // });
 
     return () => {
       socket.disconnect();
@@ -588,7 +588,7 @@ export const SocketProvider = ({ children }) => {
       sock.off("user_online");
       sock.off("user_offline");
     };
-  }, [currentUserId, selectedUser, location.pathname === "/app"]);
+  }, [currentUserId, selectedUser]);
 
   // get user group users
   useEffect(() => {
@@ -685,10 +685,10 @@ export const SocketProvider = ({ children }) => {
     };
 
     const handleSeenUpdate = ({ message_id }) => {
-      console.log(
-        message_id,
-        "handleSeenUpdate======================================================================================================================================"
-      );
+      // console.log(
+      //   message_id,
+      //   "handleSeenUpdate======================================================================================================================================"
+      // );
 
       setChatData((prevData) =>
         prevData.map((msg) =>

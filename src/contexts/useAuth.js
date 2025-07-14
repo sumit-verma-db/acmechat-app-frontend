@@ -33,8 +33,8 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const socket = getSocket();
-  const voiceSocket = getVoiceSocket();
+  // const socket = getSocket();
+  // const voiceSocket = getVoiceSocket();
   // const voiceSocket = connectVoiceSocket();
   // console.log(voiceSocket, "VOICE SOCKET");
 
@@ -80,13 +80,13 @@ export const AuthProvider = ({ children }) => {
     setUserId(user_id);
     setIsAuthenticated(true);
     let socket = await connectSocketWithAuth(accessToken);
-    console.log(socket, "socket LoginPAge");
+    // console.log(socket, "socket LoginPAge");
 
     // socket.emit("register_user");
 
-    console.log(user_id, "USER ID USER AUTH");
+    // console.log(user_id, "USER ID USER AUTH");
     let voiceSocket = await connectVoiceSocket(accessToken, user_id);
-    console.log(voiceSocket, " voiceSocket LoginPAge");
+    // console.log(voiceSocket, " voiceSocket LoginPAge");
     // if (voiceSocket) {
     //   voiceSocket.on("connect", () => {
     //     console.log("🎙️ Voice socket connected:", voiceSocket.id);
@@ -110,11 +110,11 @@ export const AuthProvider = ({ children }) => {
       const Socket = getSocket();
       if (Socket?.connected) {
         Socket.disconnect();
-        console.log(" socket disconnected on logout");
+        // console.log(" socket disconnected on logout");
       }
       if (voiceSocket?.connected) {
         voiceSocket.disconnect();
-        console.log("🎙️ Voice socket disconnected on logout");
+        // console.log("🎙️ Voice socket disconnected on logout");
       }
     } catch (err) {
       console.warn("Socket disconnect error:", err);

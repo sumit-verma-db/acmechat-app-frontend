@@ -127,7 +127,7 @@ const ChatListItem = ({
               overlap="circular"
               anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
               variant="dot"
-              isOnline={online}
+              isonline={online}
             >
               <Avatar src={img}>
                 {mode === "group"

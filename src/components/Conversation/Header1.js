@@ -106,7 +106,7 @@ const Header1 = () => {
                 horizontal: "right",
               }}
               variant="dot"
-              isOnline={
+              isonline={
                 selectedUser
                   ? onlineUsers?.includes(selectedUser.user_id)
                   : null

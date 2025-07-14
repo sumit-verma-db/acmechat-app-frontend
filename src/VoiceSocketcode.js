@@ -22,7 +22,7 @@ export const connectVoiceSocket = (authToken) => {
     });
 
     voiceSocket.on("connect", () => {
-      console.log("🎙️ Voice socket connected:", voiceSocket.id);
+      // console.log("🎙️ Voice socket connected:", voiceSocket.id);
     });
 
     voiceSocket.on("connect_error", (err) => {

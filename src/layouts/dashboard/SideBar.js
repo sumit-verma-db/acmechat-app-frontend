@@ -255,7 +255,7 @@ const SideBar = ({ onToggleChat }) => {
                 overlap="circular"
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 variant="dot"
-                isOnline={true}
+                isonline={"true"}
                 onClick={handleClick}
               >
                 <Avatar

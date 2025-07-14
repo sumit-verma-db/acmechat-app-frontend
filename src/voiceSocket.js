@@ -8,12 +8,18 @@ export const connectVoiceSocket = (accessToken, user_id) => {
     console.warn("⚠️ Voice socket already connected");
     return voiceSocket;
   }
+  // Always disconnect old socket if exists
+  if (voiceSocket) {
+    voiceSocket.disconnect();
+    voiceSocket = null;
+  }
   // console.log("🔍 Connecting voice socket to:OUT SIDE", accessToken);
   if (accessToken) {
     const socketUrl = process.env.REACT_APP_CALL_URL1;
-    console.log("🔍 Connecting voice socket to:", socketUrl);
+    // console.log("🔍 Connecting voice socket to1:", socketUrl);
     voiceSocket = io(socketUrl, {
       autoConnect: true,
+      // transports: ["websocket"],
       auth: { token: accessToken },
 
       timeout: 20000, // 10 seconds timeout for connection attempt

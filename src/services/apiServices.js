@@ -141,33 +141,33 @@ api.interceptors.response.use(
     // console.log(error, data, status, "APIIIIII====>");
     const token = localStorage.getItem("authToken");
 
-    if (status === 401 && !error.config._retry) {
-      error.config._retry = true;
+    // if (status === 401 && !error.config._retry) {
+    //   error.config._retry = true;
 
-      try {
-        const refreshToken = localStorage.getItem("refreshToken");
+    //   try {
+    //     const refreshToken = localStorage.getItem("refreshToken");
 
-        const res = await axios.post(`${BASE_URL}/auth/refresh-token`, {
-          refreshToken,
-        });
+    //     const res = await axios.post(`${BASE_URL}/auth/refresh-token`, {
+    //       refreshToken,
+    //     });
 
-        if (res.data?.accessToken) {
-          localStorage.setItem("authToken", res.data.accessToken);
-          error.config.headers[
-            "Authorization"
-          ] = `Bearer ${res.data.accessToken}`;
-          return api(error.config); // retry original request
-        }
-      } catch (refreshError) {
-        console.error("🔁 Refresh token failed. Logging out...");
-        localStorage.removeItem("authToken");
-        localStorage.removeItem("refreshToken");
-        localStorage.removeItem("userId");
-        if (window.location.pathname !== "/signin") {
-          window.location.href = "/signin";
-        }
-      }
-    }
+    //     if (res.data?.accessToken) {
+    //       localStorage.setItem("authToken", res.data.accessToken);
+    //       error.config.headers[
+    //         "Authorization"
+    //       ] = `Bearer ${res.data.accessToken}`;
+    //       return api(error.config); // retry original request
+    //     }
+    //   } catch (refreshError) {
+    //     console.error("🔁 Refresh token failed. Logging out...");
+    //     localStorage.removeItem("authToken");
+    //     localStorage.removeItem("refreshToken");
+    //     localStorage.removeItem("userId");
+    //     if (window.location.pathname !== "/signin") {
+    //       window.location.href = "/signin";
+    //     }
+    //   }
+    // }
 
     return Promise.reject({
       status,

@@ -89,7 +89,7 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
       sendGroupMessage(selectedUser.group_id, newMessage);
     } else {
       // console.log("Test user");
-      console.log(newMessage, "newMessage");
+      // console.log(newMessage, "newMessage");
       sendMessage(newMessage);
     }
 
@@ -210,7 +210,11 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
                     }}
                   >
                     {Actions.map((el) => (
-                      <Tooltip placement="right" title={el.title}>
+                      <Tooltip
+                        key={el.title}
+                        placement="right"
+                        title={el.title}
+                      >
                         <Fab
                           sx={{
                             position: "absolute",
@@ -235,7 +239,7 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
                       </Tooltip>
                     ))}
                   </Stack>
-                  <InputAdornment>
+                  <InputAdornment position="start">
                     <IconButton
                       onClick={() => {
                         setOpenAction((prev) => !prev);

@@ -55,7 +55,7 @@ const CreateGroupForm = ({
   } = methods;
 
   const onSubmit = async (data) => {
-    console.log("Group Create Payload:", data);
+    // console.log("Group Create Payload:", data);
     try {
       const payload = {
         group_id: data.group_id,

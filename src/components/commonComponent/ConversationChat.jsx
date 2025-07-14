@@ -154,7 +154,7 @@ const ConversationChat = ({ selectedUser }) => {
         },
       }}
     >
-      <audio id="remoteAudio" autoPlay style={{ display: "none" }} />
+      {/* <audio id="remoteAudio" autoPlay style={{ display: "none" }} /> */}
       {/* {isGroup ? (
         <IncomingCallPopupGroup
           open={showCallPopup}

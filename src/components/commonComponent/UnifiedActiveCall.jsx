@@ -53,13 +53,13 @@ const UnifiedActiveCall = ({
     callIncoming,
     participants,
   } = useCall();
-  console.log(callIncoming, "CALLINCOMMING");
+  // console.log(callIncoming, "CALLINCOMMING");
   // Ensure local user appears first
   const sortedParticipants = [...participants].sort((a, b) =>
     a.isLocal ? -1 : 1
   );
 
-  console.log(sortedParticipants, "PARTICIPANTS LIST");
+  // console.log(sortedParticipants, "PARTICIPANTS LIST");
 
   return (
     <Box sx={{ textAlign: "center", mt: 2 }}>

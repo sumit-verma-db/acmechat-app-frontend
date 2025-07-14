@@ -1,14 +1,14 @@
-import React from 'react';
-import { FormProvider as Form } from 'react-hook-form';
+import React from "react";
+import { FormProvider as Form } from "react-hook-form";
 
-const FormProvider = ({children, onSubmit, methods}) => {
+const FormProvider = ({ children, onSubmit, methods }) => {
   return (
     <Form {...methods}>
-        <form onSubmit={onSubmit}>
-            {children}
-        </form>
+      <form onSubmit={onSubmit} noValidate>
+        {children}
+      </form>
     </Form>
-  )
-}
+  );
+};
 
-export default FormProvider
+export default FormProvider;

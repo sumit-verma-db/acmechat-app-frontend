@@ -1,5 +1,5 @@
 import { Navigate, Outlet } from "react-router-dom";
-import { CircularProgress, Stack, useMediaQuery } from "@mui/material";
+import { Box, CircularProgress, Stack, useMediaQuery } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import SideBar from "./SideBar";
 import { useAuth } from "../../contexts/useAuth";
@@ -30,14 +30,27 @@ const DashboardLayout = () => {
 
   return (
     <>
-      <Stack direction="row" sx={{ width: "100%", height: "100vh" }}>
-        {!isMobile && <SideBar />}
-        <Outlet />
-      </Stack>
+      <Box
+        sx={{
+          width: "100vw",
+          height: "100vh",
+          overflowX: "hidden", // 👈 prevent horizontal scroll
+          display: "flex",
+          flexDirection: "column",
+          backgroundColor: "#f5f7fa", // optional, to match your theme
+        }}
+      >
+        <Stack direction="row" sx={{ flexGrow: 1, overflow: "hidden" }}>
+          {!isMobile && <SideBar />}
+          <Box sx={{ flexGrow: 1, overflow: "hidden" }}>
+            <Outlet />
+          </Box>
+        </Stack>
 
-      {isMobile && <BottomNavBar />}
-      {/* GLOBAL CALL UI */}
-      <CallSidebar />
+        {isMobile && <BottomNavBar />}
+        {/* GLOBAL CALL UI */}
+        <CallSidebar />
+      </Box>
     </>
   );
 };

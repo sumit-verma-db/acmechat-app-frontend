@@ -58,12 +58,21 @@ export default function CallSidebar({ isGroup }) {
   const [muted, setMuted] = useState(false);
   const [isMinimized, setIsMinimized] = useState(false);
 
+  // useEffect(() => {
+  //   if (remoteStream && remoteAudioRef.current) {
+  //     remoteAudioRef.current.srcObject = remoteStream;
+  //   }
+  // }, [remoteStream]);
   useEffect(() => {
     if (remoteStream && remoteAudioRef.current) {
-      remoteAudioRef.current.srcObject = remoteStream;
+      const audioEl = remoteAudioRef.current;
+      audioEl.srcObject = remoteStream;
+      // make sure it actually starts
+      const p = audioEl.play();
+      if (p && p.catch)
+        p.catch((err) => console.warn("Remote audio play blocked:", err));
     }
   }, [remoteStream]);
-
   useEffect(() => {
     if (localStream && localAudioRef.current) {
       localAudioRef.current.srcObject = localStream;
@@ -132,10 +141,20 @@ export default function CallSidebar({ isGroup }) {
               border: "1px solid #e2e8f0", // soft border for separation
             }}
           >
+            {/* <audio
+              ref={localAudioRef}
+              autoPlay
+              muted 
+              playsInline
+              style={{ display: "none" }}
+            /> */}
             <audio
               ref={remoteAudioRef}
               autoPlay
               playsInline
+              onLoadedMetadata={() =>
+                remoteAudioRef.current.play().catch(() => {})
+              }
               style={{ display: "none" }}
             />
 

@@ -78,7 +78,7 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
 
         // console.log("callUser");
         const roomId = `room-${Date.now()}-${userId}-${chat.user_id}`;
-        console.log(chat, "CHAT------------");
+        // console.log(chat, "CHAT------------");
 
         callUser(userId, chat.user_id, roomId, chat.first_name, chat.email);
       }
@@ -113,7 +113,9 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
             </IconButton>
           )}
 
-          <Box onClick={() => dispatch(ToggleSidebar())}>
+          <Box
+          // onClick={() => dispatch(ToggleSidebar())}
+          >
             {isGroup ? (
               <Avatar>{chat.group_name?.[0]}</Avatar>
             ) : (
@@ -121,7 +123,7 @@ const ChatHeader = ({ selectedUser, selectedGroup, isGroup = true }) => {
                 overlap="circular"
                 anchorOrigin={{ vertical: "bottom", horizontal: "right" }}
                 variant="dot"
-                isOnline={onlineUsers?.includes(chat.user_id)}
+                isonline={onlineUsers?.includes(chat.user_id)}
               >
                 <Avatar alt={chat.first_name} src={chat.img} />
               </StyledBadge>

@@ -94,7 +94,7 @@ const LoginForm = () => {
       const response = await postFetch("/api/auth/login", payload);
       if (response.status) {
         const { accessToken, refreshToken, user_id } = response.data;
-        console.log(accessToken, refreshToken, user_id, "RESPONSE");
+        // console.log(accessToken, refreshToken, user_id, "RESPONSE");
 
         login({
           accessToken,
