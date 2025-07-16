@@ -20,61 +20,61 @@ const CallDebugger = () => {
   const [debugInfo, setDebugInfo] = useState({});
   const [showDebug, setShowDebug] = useState(false);
 
-  useEffect(() => {
-    const updateDebugInfo = () => {
-      setDebugInfo({
-        timestamp: new Date().toLocaleTimeString(),
-        socketConnected,
-        authToken: !!authToken,
-        userId,
-        callIncoming: !!callIncoming,
-        callIncomingData: callIncoming,
-        localStream: !!localStream,
-        remoteStream: !!remoteStream,
-        isIncomingCall,
-        callAccepted,
-        activeCall,
-        isRinging,
-        callerName,
-        microphonePermission: "checking...",
-      });
+  // useEffect(() => {
+  //   const updateDebugInfo = () => {
+  //     setDebugInfo({
+  //       timestamp: new Date().toLocaleTimeString(),
+  //       socketConnected,
+  //       authToken: !!authToken,
+  //       userId,
+  //       callIncoming: !!callIncoming,
+  //       callIncomingData: callIncoming,
+  //       localStream: !!localStream,
+  //       remoteStream: !!remoteStream,
+  //       isIncomingCall,
+  //       callAccepted,
+  //       activeCall,
+  //       isRinging,
+  //       callerName,
+  //       microphonePermission: "checking...",
+  //     });
 
-      // Check microphone permission
-      if (navigator.permissions) {
-        navigator.permissions
-          .query({ name: "microphone" })
-          .then((status) => {
-            setDebugInfo((prev) => ({
-              ...prev,
-              microphonePermission: status.state,
-            }));
-          })
-          .catch(() => {
-            setDebugInfo((prev) => ({
-              ...prev,
-              microphonePermission: "unknown",
-            }));
-          });
-      }
-    };
+  //     // Check microphone permission
+  //     if (navigator.permissions) {
+  //       navigator.permissions
+  //         .query({ name: "microphone" })
+  //         .then((status) => {
+  //           setDebugInfo((prev) => ({
+  //             ...prev,
+  //             microphonePermission: status.state,
+  //           }));
+  //         })
+  //         .catch(() => {
+  //           setDebugInfo((prev) => ({
+  //             ...prev,
+  //             microphonePermission: "unknown",
+  //           }));
+  //         });
+  //     }
+  //   };
 
-    updateDebugInfo();
-    const interval = setInterval(updateDebugInfo, 1000);
+  //   updateDebugInfo();
+  //   const interval = setInterval(updateDebugInfo, 1000);
 
-    return () => clearInterval(interval);
-  }, [
-    socketConnected,
-    authToken,
-    userId,
-    callIncoming,
-    localStream,
-    remoteStream,
-    isIncomingCall,
-    callAccepted,
-    activeCall,
-    isRinging,
-    callerName,
-  ]);
+  //   return () => clearInterval(interval);
+  // }, [
+  //   socketConnected,
+  //   authToken,
+  //   userId,
+  //   callIncoming,
+  //   localStream,
+  //   remoteStream,
+  //   isIncomingCall,
+  //   callAccepted,
+  //   activeCall,
+  //   isRinging,
+  //   callerName,
+  // ]);
 
   if (!showDebug) {
     return (

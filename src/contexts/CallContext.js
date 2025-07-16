@@ -58,8 +58,6 @@ export const CallProvider = ({ children }) => {
   //   callerName,
   // ]);
 
-  const peerConnection = useRef(null);
-
   return (
     <CallContext.Provider
       value={{
@@ -83,7 +81,7 @@ export const CallProvider = ({ children }) => {
         setCallAccepted,
         callEnded,
         setCallEnded,
-        peerConnection,
+
         setSocket,
         socket,
         // ✅ New:

@@ -13,16 +13,16 @@ export const useMicControl = () => {
     setCurrentMicLabel,
   } = useCall();
 
-  useEffect(() => {
-    navigator.mediaDevices.enumerateDevices().then((devices) => {
-      const mics = devices.filter((d) => d.kind === "audioinput");
-      setMicList(mics);
-      if (!currentMicId && mics.length > 0) {
-        setCurrentMicId(mics[0].deviceId);
-        setCurrentMicLabel(mics[0].label);
-      }
-    });
-  }, []);
+  // useEffect(() => {
+  //   navigator.mediaDevices.enumerateDevices().then((devices) => {
+  //     const mics = devices.filter((d) => d.kind === "audioinput");
+  //     setMicList(mics);
+  //     if (!currentMicId && mics.length > 0) {
+  //       setCurrentMicId(mics[0].deviceId);
+  //       setCurrentMicLabel(mics[0].label);
+  //     }
+  //   });
+  // }, []);
 
   const toggleMic = async () => {
     if (!micActive) {

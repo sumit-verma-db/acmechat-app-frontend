@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Box, Typography, Avatar, Stack, IconButton } from "@mui/material";
 import { MicrophoneSlash, Microphone, Phone } from "phosphor-react";
 import { useCall } from "../../contexts/CallContext";
@@ -58,6 +58,9 @@ const UnifiedActiveCall = ({
   const sortedParticipants = [...participants].sort((a, b) =>
     a.isLocal ? -1 : 1
   );
+  useEffect(() => {
+    console.log(sortedParticipants, "sortedParticipants LIST");
+  }, [sortedParticipants]);
 
   // console.log(sortedParticipants, "PARTICIPANTS LIST");
 

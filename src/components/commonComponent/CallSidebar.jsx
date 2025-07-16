@@ -50,9 +50,9 @@ export default function CallSidebar({ isGroup }) {
     setCurrentSpeakerLabel,
   } = useCall();
 
-  const { answerCall, rejectCall, disconnectCall, IndicateMic } =
+  const { answerCall, rejectCall, disconnectCall, IndicateMic, checkMic } =
     useCallSocket();
-
+  const micStreamRef = useRef(null);
   const remoteAudioRef = useRef(null);
   const localAudioRef = useRef(null);
   const [muted, setMuted] = useState(false);
@@ -73,6 +73,8 @@ export default function CallSidebar({ isGroup }) {
         p.catch((err) => console.warn("Remote audio play blocked:", err));
     }
   }, [remoteStream]);
+  // console.log(remoteAudioRef, "REMOTE AUDIO REF");
+
   useEffect(() => {
     if (localStream && localAudioRef.current) {
       localAudioRef.current.srcObject = localStream;
@@ -91,10 +93,39 @@ export default function CallSidebar({ isGroup }) {
     setMuted(false);
     disconnectCall();
     setShowCallPopup(false);
+    const stream = micStreamRef.current;
+    stream.getTracks().forEach((track) => track.stop());
+
+    micStreamRef.current = null;
   };
 
-  const handleAccept = () => {
-    answerCall(callIncoming?.roomId, callIncoming.fromUserId);
+  const handleAccept = async () => {
+    // 1. Check permission using your utility
+    const micAllowed = await checkMic();
+    console.log(micAllowed, "CHECK MIC ALOWS");
+
+    if (micAllowed) {
+      // Permission already granted or can be prompted
+      answerCall(callIncoming?.roomId, callIncoming.fromUserId);
+      return;
+    }
+
+    // 2. If not allowed, try requesting mic using getUserMedia as a fallback
+    try {
+      const tempStream = await navigator.mediaDevices.getUserMedia({
+        audio: true,
+      });
+      micStreamRef.current = tempStream;
+
+      tempStream.getTracks().forEach((track) => track.stop());
+      // If user grants now, proceed
+      answerCall(callIncoming?.roomId, callIncoming.fromUserId);
+    } catch (err) {
+      // User blocked, closed, or denied mic
+      alert(
+        "Microphone access is required to make or receive a call. Please enable your mic in browser settings and try again."
+      );
+    }
   };
 
   const setMicById = (deviceId) => {
@@ -312,7 +343,7 @@ export default function CallSidebar({ isGroup }) {
                 ) : isIncomingCall && !activeCall ? (
                   <Stack direction="row" spacing={3} justifyContent="center">
                     <IconButton
-                      onClick={rejectCall}
+                      onClick={handleCancel}
                       sx={{
                         bgcolor: "#ef4444",
                         color: "white",
@@ -323,7 +354,7 @@ export default function CallSidebar({ isGroup }) {
                       <PhoneX size={22} />
                     </IconButton>
                     <IconButton
-                      onClick={answerCall}
+                      onClick={handleAccept}
                       sx={{
                         bgcolor: "#10b981",
                         color: "white",
@@ -368,7 +399,7 @@ export default function CallSidebar({ isGroup }) {
                   )
                 )}
                 {/* ✅ Bottom Audio Settings */}
-                <Box
+                {/* <Box
                   sx={{
                     // position: "absolute",
                     // bottom: 0,
@@ -455,7 +486,7 @@ export default function CallSidebar({ isGroup }) {
                       </Select>
                     </FormControl>
                   </Stack>
-                </Box>
+                </Box> */}
               </Stack>
             )}
           </Box>
