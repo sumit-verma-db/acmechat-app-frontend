@@ -10,11 +10,19 @@ import { DEFAULT_PATH } from "../config";
 import LoadingScreen from "../components/LoadingScreen";
 import AllContacts from "../pages/dashboard/AllContacts";
 import Admin from "../pages/dashboard/Admin/Admin";
+import AuthLoadingScreen from "../components/AuthLoadingScreen";
 //import Settings from "../pages/dashboard/Settings";
 
 const Loadable = (Component) => (props) => {
   return (
     <Suspense fallback={<LoadingScreen />}>
+      <Component {...props} />
+    </Suspense>
+  );
+};
+const AuthLoadable = (Component) => (props) => {
+  return (
+    <Suspense fallback={<AuthLoadingScreen />}>
       <Component {...props} />
     </Suspense>
   );
@@ -56,15 +64,15 @@ const GeneralApp = Loadable(
   lazy(() => import("../pages/dashboard/GeneralApp"))
 );
 
-const LoginPage = Loadable(lazy(() => import("../pages/auth/Login")));
+const LoginPage = AuthLoadable(lazy(() => import("../pages/auth/Login")));
 
-const RegisterPage = Loadable(lazy(() => import("../pages/auth/Register")));
+const RegisterPage = AuthLoadable(lazy(() => import("../pages/auth/Register")));
 
-const ResetPasswordPage = Loadable(
+const ResetPasswordPage = AuthLoadable(
   lazy(() => import("../pages/auth/ResetPassword"))
 );
 
-const NewPasswordPage = Loadable(
+const NewPasswordPage = AuthLoadable(
   lazy(() => import("../pages/auth/NewPassword"))
 );
 

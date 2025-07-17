@@ -30,9 +30,9 @@ export const connectVoiceSocket = (accessToken, user_id) => {
 
     voiceSocket.on("connect", () => {
       // voiceSocket.emit("register-user", user_id);
-      console.log("🎙️ Voice socket connected:", voiceSocket.id);
+      // console.log("🎙️ Voice socket connected:", voiceSocket.id);
       voiceSocket.emit("register-user", Number(user_id));
-      console.log("📌 Registered user after reconnect:", user_id);
+      // console.log("📌 Registered user after reconnect:", user_id);
     });
 
     voiceSocket.on("connect_error", (err) => {

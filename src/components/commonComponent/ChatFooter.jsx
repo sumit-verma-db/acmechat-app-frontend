@@ -134,7 +134,7 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
     };
     console.log(payload, "Payload");
     const sentMessage = sendMessage(payload); // Automatically joins and returns roomId
-    // console.log(sentMessage, payload, "SENTMESSAGE------->");
+    console.log(sentMessage, payload, "SENTMESSAGE------->");
 
     setFilePreview(null);
     setCaption("");

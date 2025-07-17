@@ -73,13 +73,15 @@ export const AuthProvider = ({ children }) => {
 
     setIsAuthenticated(!!authToken);
   }, [authToken, refreshToken, userId]);
-
-  const login = async ({ accessToken, refreshToken, user_id }) => {
+  console.log(userData, "USER DATA-----");
+  const login = async ({ email, accessToken, refreshToken, user_id }) => {
     setAuthToken(accessToken);
     setRefreshToken(refreshToken);
     setUserId(user_id);
     setIsAuthenticated(true);
-    let socket = await connectSocketWithAuth(accessToken);
+
+    let socket = await connectSocketWithAuth(accessToken, refreshToken, email);
+    // socket.emit("login-check", email);
     // console.log(socket, "socket LoginPAge");
 
     // socket.emit("register_user");

@@ -50,8 +50,15 @@ export default function CallSidebar({ isGroup }) {
     setCurrentSpeakerLabel,
   } = useCall();
 
-  const { answerCall, rejectCall, disconnectCall, IndicateMic, checkMic } =
-    useCallSocket();
+  const {
+    answerCall,
+    rejectCall,
+    disconnectCall,
+    IndicateMic,
+    checkMic,
+    switchMicDevice,
+    switchSpeakerDevice,
+  } = useCallSocket();
   const micStreamRef = useRef(null);
   const remoteAudioRef = useRef(null);
   const localAudioRef = useRef(null);
@@ -73,6 +80,17 @@ export default function CallSidebar({ isGroup }) {
         p.catch((err) => console.warn("Remote audio play blocked:", err));
     }
   }, [remoteStream]);
+  useEffect(() => {
+    if (remoteAudioRef.current && currentSpeakerId) {
+      console.log("Remote check--=======");
+
+      if (typeof remoteAudioRef.current.setSinkId === "function") {
+        remoteAudioRef.current.setSinkId(currentSpeakerId).catch((err) => {
+          console.warn("Failed to set speaker:", err);
+        });
+      }
+    }
+  }, [currentSpeakerId]);
   // console.log(remoteAudioRef, "REMOTE AUDIO REF");
 
   useEffect(() => {
@@ -128,16 +146,25 @@ export default function CallSidebar({ isGroup }) {
     }
   };
 
-  const setMicById = (deviceId) => {
-    const mic = micList.find((m) => m.deviceId === deviceId);
+  const handleMicChange = (e) => {
+    const deviceId = e.target.value;
     setCurrentMicId(deviceId);
-    setCurrentMicLabel(mic?.label || "");
+    console.log(deviceId, "handleMicChange");
+
+    setCurrentMicLabel(
+      micList.find((m) => m.deviceId === deviceId)?.label || ""
+    );
+    switchMicDevice(deviceId); // <-- Swap in real time!
   };
 
-  const setSpeakerById = (deviceId) => {
-    const speaker = speakerList.find((s) => s.deviceId === deviceId);
+  const handleSpeakerChange = (e) => {
+    const deviceId = e.target.value;
     setCurrentSpeakerId(deviceId);
-    setCurrentSpeakerLabel(speaker?.label || "");
+    setCurrentSpeakerLabel(
+      speakerList.find((s) => s.deviceId === deviceId)?.label || ""
+    );
+    console.log(deviceId, "handleSpeakerChange");
+    switchSpeakerDevice(deviceId, remoteAudioRef); // <-- Route audio!
   };
 
   const trimLabel = (label = "") =>
@@ -399,13 +426,12 @@ export default function CallSidebar({ isGroup }) {
                   )
                 )}
                 {/* ✅ Bottom Audio Settings */}
-                {/* <Box
+                <Box
                   sx={{
                     // position: "absolute",
                     // bottom: 0,
                     // width: "100%",
                     p: 2,
-
                     // px: 2,
                     // py: 2,
                     bgcolor: "#f8fafc",
@@ -428,7 +454,8 @@ export default function CallSidebar({ isGroup }) {
                       <InputLabel sx={{ fontSize: "0.75rem" }}>Mic</InputLabel>
                       <Select
                         value={currentMicId || ""}
-                        onChange={(e) => setMicById(e.target.value)}
+                        // onChange={(e) => setMicById(e.target.value)}
+                        onChange={handleMicChange}
                         label="Mic"
                         sx={{ fontSize: "0.75rem", height: 36 }}
                         MenuProps={{
@@ -460,7 +487,8 @@ export default function CallSidebar({ isGroup }) {
                       </InputLabel>
                       <Select
                         value={currentSpeakerId || ""}
-                        onChange={(e) => setSpeakerById(e.target.value)}
+                        // onChange={(e) => setSpeakerById(e.target.value)}
+                        onChange={handleSpeakerChange}
                         label="Speaker"
                         sx={{ fontSize: "0.75rem", height: 36 }}
                         MenuProps={{
@@ -486,7 +514,7 @@ export default function CallSidebar({ isGroup }) {
                       </Select>
                     </FormControl>
                   </Stack>
-                </Box> */}
+                </Box>
               </Stack>
             )}
           </Box>

@@ -45,6 +45,7 @@ export function CallSocketProvider({ children }) {
     setRemoteMuted,
     participants,
     setParticipants,
+    showCallPopup,
   } = useCall();
   const { chatList = [] } = useChat() || {};
   const { authToken, userId } = useAuth();
@@ -515,6 +516,9 @@ export function CallSocketProvider({ children }) {
     callerName,
     receiverEmail
   ) => {
+    if (userId == receiverId) {
+      return;
+    }
     console.log(userId, receiverId, "CHECK USERID RECEIVER ID");
     console.log(checkMic, "CHECK MIC");
 
@@ -669,48 +673,83 @@ export function CallSocketProvider({ children }) {
       setMicActive(false);
     }
   };
+  const ListAllAudioMic = async () => {
+    try {
+      const devices = await navigator.mediaDevices.enumerateDevices();
 
+      const mics = devices.filter((d) => d.kind === "audioinput");
+      const speakers = devices.filter((d) => d.kind === "audiooutput");
+      console.log(mics, speakers, "MICS----Speakers");
+      setMicList(mics);
+      setSpeakerList(speakers);
+
+      // Set default mic if not set
+      if (mics.length > 0 && !currentMicId) {
+        setCurrentMicId(mics[0].deviceId);
+        setCurrentMicLabel(mics[0].label || "Mic");
+      }
+      // Set default speaker if not set
+      if (speakers.length > 0 && !currentSpeakerId) {
+        setCurrentSpeakerId(speakers[0].deviceId);
+        setCurrentSpeakerLabel(speakers[0].label || "Speaker");
+      }
+    } catch (err) {
+      console.warn("🎤 Failed to get audio devices:", err);
+    }
+  };
   useEffect(() => {
-    const updateAudioDevices = async () => {
-      try {
-        const devices = await navigator.mediaDevices.enumerateDevices();
-
-        const mics = devices.filter((d) => d.kind === "audioinput");
-        const speakers = devices.filter((d) => d.kind === "audiooutput");
-
-        setMicList(mics);
-        setSpeakerList(speakers);
-
-        if (mics.length > 0 && !currentMicId) {
-          setCurrentMicId(mics[0].deviceId);
-          setCurrentMicLabel(mics[0].label || "Mic");
-        }
-
-        if (speakers.length > 0 && !currentSpeakerId) {
-          setCurrentSpeakerId(speakers[0].deviceId);
-          setCurrentSpeakerLabel(speakers[0].label || "Speaker");
-        }
-      } catch (err) {
-        console.warn("🎤 Failed to get audio devices:", err);
+    if (showCallPopup) {
+      ListAllAudioMic();
+      // Listen for device hot-plug
+      navigator.mediaDevices.addEventListener("devicechange", ListAllAudioMic);
+    }
+    return () => {
+      navigator.mediaDevices.removeEventListener(
+        "devicechange",
+        ListAllAudioMic
+      );
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((track) => track.stop());
+        localStreamRef.current = null;
       }
     };
+    // eslint-disable-next-line
+  }, [showCallPopup]);
+  const switchMicDevice = async (deviceId) => {
+    // Stop old tracks
+    if (localStream) {
+      localStream.getTracks().forEach((track) => track.stop());
+    }
+    // Get new stream with selected mic
+    const newStream = await navigator.mediaDevices.getUserMedia({
+      audio: { deviceId: { exact: deviceId } },
+    });
+    setLocalStream(newStream);
+    localStreamRef.current = newStream;
 
-    // Permission must be granted to access mic/speaker labels
-    // navigator.mediaDevices
-    //   .getUserMedia({ audio: true })
-    //   .then(() => updateAudioDevices())
-    //   .catch((err) => {
-    //     console.warn("Microphone permission denied:", err);
-    //   });
+    // If using SimplePeer, replace the audio track (hot-swap)
+    if (currentPeer.current) {
+      const [newAudioTrack] = newStream.getAudioTracks();
+      const sender = currentPeer.current._pc
+        .getSenders()
+        .find((s) => s.track && s.track.kind === "audio");
+      if (sender && newAudioTrack) {
+        sender.replaceTrack(newAudioTrack);
+      }
+    }
+  };
 
-    // navigator.mediaDevices.addEventListener("devicechange", updateAudioDevices);
+  const switchSpeakerDevice = (deviceId, audioElementRef) => {
+    if (
+      audioElementRef.current &&
+      typeof audioElementRef.current.setSinkId === "function"
+    ) {
+      audioElementRef.current.setSinkId(deviceId).catch((err) => {
+        console.warn("Failed to set audio output device:", err);
+      });
+    }
+  };
 
-    // return () =>
-    //   navigator.mediaDevices.removeEventListener(
-    //     "devicechange",
-    //     updateAudioDevices
-    //   );
-  }, []);
   const IndicateMic = () => {
     const newMuteState = !remoteMuted;
     setRemoteMuted(newMuteState);
@@ -735,6 +774,8 @@ export function CallSocketProvider({ children }) {
         cleanupCall,
         disconnectCall,
         IndicateMic,
+        switchMicDevice,
+        switchSpeakerDevice,
       }}
     >
       {children}
