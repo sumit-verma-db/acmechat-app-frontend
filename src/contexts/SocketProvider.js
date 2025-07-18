@@ -450,7 +450,7 @@ const SocketContext = createContext();
 
 export const SocketProvider = ({ children }) => {
   const location = useLocation();
-  const { authToken, refreshToken, userId } = useAuth();
+  const { authToken, refreshToken, userId, logout, userData } = useAuth();
   const {
     setChatData,
     selectedUser,
@@ -475,6 +475,16 @@ export const SocketProvider = ({ children }) => {
     if (!authToken || !refreshToken) return;
 
     const socket = connectSocketWithAuth(authToken, refreshToken);
+
+    socket.on("connect", () => {
+      let email = localStorage.getItem("email");
+      // console.log(authToken, "CHECK BEFORE EMIT", email);
+
+      socket.emit("login-check", {
+        email: email,
+        token: authToken,
+      });
+    });
     // socket.on("connect", () => {
     //   // console.log("?? Socket connected. Registering user...");
     //   socket.emit("register_user");
@@ -548,7 +558,7 @@ export const SocketProvider = ({ children }) => {
     sock.emit("get_recent_chats", currentUserId);
 
     sock.on("recent_chats", (chats) => {
-      console.log(chats, "RECENT CHATS__SOCKET");
+      // console.log(chats, "RECENT CHATS__SOCKET");
       setChatList(chats);
     });
 
@@ -563,7 +573,7 @@ export const SocketProvider = ({ children }) => {
     sock.emit("get_online_users");
 
     sock.on("online_users", (ids) => {
-      console.log(ids, "online_users----ids");
+      // console.log(ids, "online_users----ids");
 
       setOnlineUsers(ids);
     });
@@ -581,8 +591,15 @@ export const SocketProvider = ({ children }) => {
         Array.isArray(prev) ? prev.filter((id) => id !== userId) : []
       );
     });
+    const handleLogout = () => {
+      console.log("handleLogout=============");
+
+      logout();
+    };
+    sock.on("force-logout", handleLogout);
     return () => {
       sock.off("recent_chats");
+      sock.off("force-logout", handleLogout);
       sock.off("refresh_recent");
       sock.off("online_users");
       sock.off("user_online");

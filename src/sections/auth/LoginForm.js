@@ -97,7 +97,7 @@ const LoginForm = () => {
         let email = response.data.user.email;
         const { accessToken, refreshToken, user_id } = response.data;
         // console.log(accessToken, refreshToken, user_id, "RESPONSE");
-
+        localStorage.setItem("email", email);
         login({
           email,
           accessToken,

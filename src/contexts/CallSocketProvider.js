@@ -328,7 +328,7 @@ export function CallSocketProvider({ children }) {
     };
   }, [socket, currentMicId]); // 🔥 add currentMicId so correct mic is used
   useEffect(() => {
-    console.log("handleBeforeUnload");
+    // console.log("handleBeforeUnload");
 
     const handleBeforeUnload = () => {
       if (currentCallRef.current) {
@@ -351,9 +351,9 @@ export function CallSocketProvider({ children }) {
       window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, [socket, callIncoming, userId]);
-  useEffect(() => {
-    console.log(participants, "PARTICIPANTS");
-  }, [participants]);
+  // useEffect(() => {
+  //   console.log(participants, "PARTICIPANTS");
+  // }, [participants]);
 
   const cleanupCall = async () => {
     setParticipants([]);

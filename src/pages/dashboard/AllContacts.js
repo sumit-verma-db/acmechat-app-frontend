@@ -140,7 +140,7 @@ export default function AllContacts() {
     if (isMobile) onToggleChatDrawer();
   };
   let isGroup = selectedUser?.group_id ? true : false;
-  console.log(chatList, "ALLCONTACT PAGE CHAT LIST");
+  // console.log(chatList, "ALLCONTACT PAGE CHAT LIST");
   const onClose = () => {
     cleanupCall(); // You can also pass it down as a prop
     setShowCallPopup(false);
