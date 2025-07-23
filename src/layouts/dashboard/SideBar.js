@@ -85,7 +85,7 @@ const SideBar = ({ onToggleChat }) => {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
   const { logout, userData } = useAuth();
-  const { setSelectedMenu, selectedMenu } = useChat();
+  const { setSelectedMenu, selectedMenu, resetSelectedUser } = useChat();
   const { onToggleMode, chatCollapsed, onToggleChatCollapse } = useSettings();
 
   const [anchorEl, setAnchorEl] = useState(null);
@@ -102,6 +102,7 @@ const SideBar = ({ onToggleChat }) => {
 
   const handleClick = (event) => {
     setAnchorEl(event.currentTarget);
+    resetSelectedUser();
   };
 
   const handleClose = () => setAnchorEl(null);

@@ -7,6 +7,7 @@ import {
   LinkMsg,
   MediaMsg,
   ReplyMsg,
+  CallMsg,
 } from "../Conversation/MsgTypes1";
 // import { DocMsg, LinkMsg, MediaMsg, ReplyMsg, TextMsg } from "./MsgTypes1";
 
@@ -24,20 +25,22 @@ const ChatMessages = ({ chatData, selectedUser, isGroup }) => {
   useEffect(() => {
     scrollToBottom();
   }, [chatData]);
-
+  // console.log(chatData, "CHAT DATA---------");
   const filteredMessages = chatData.filter((msg) => {
     if (isGroup) {
       return msg.group_id && msg.group_id === selectedUser.group_id;
     } else {
       return (
-        (msg.sender_id === selectedUser?.user_id &&
+        msg.sender_id === selectedUser?.user_id ||
+        (msg.fromUserId === selectedUser?.user_id &&
           msg.receiver_id === currentUserId) ||
-        (msg.sender_id === currentUserId &&
+        msg.sender_id === currentUserId ||
+        (msg.fromUserId === currentUserId &&
           msg.receiver_id === selectedUser?.user_id)
       );
     }
   });
-  // console.log(filteredMessages, "FILTERED MESSAGEG__-");
+
   const groupedByDate = {};
   filteredMessages.forEach((msg) => {
     const key = new Date(msg.sent_at).toISOString().split("T")[0];
@@ -45,6 +48,7 @@ const ChatMessages = ({ chatData, selectedUser, isGroup }) => {
     groupedByDate[key].push(msg);
   });
 
+  // console.log(filteredMessages, "FILTERED MESSAGEG__----");
   const getReadableDate = (dateStr) => {
     const today = new Date();
     const date = new Date(dateStr);
@@ -66,6 +70,7 @@ const ChatMessages = ({ chatData, selectedUser, isGroup }) => {
   };
 
   const renderMessage = (el, fromMe) => {
+    // console.log("Rendering message of type:", el.type, el);
     switch (el.type) {
       case "text":
         return <TextMsg el={el} fromMe={fromMe} menu={false} />;
@@ -78,69 +83,76 @@ const ChatMessages = ({ chatData, selectedUser, isGroup }) => {
         return <LinkMsg el={el} fromMe={fromMe} menu={false} />;
       case "reply":
         return <ReplyMsg el={el} fromMe={fromMe} menu={false} />;
+      case "audio":
+        return <CallMsg el={el} fromMe={fromMe} menu={false} />;
       default:
         return <TextMsg el={el} fromMe={fromMe} menu={false} />;
     }
   };
 
   return (
-    <Box
-      p={3}
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        justifyContent: "flex-end",
-        minHeight: "100%",
-        minWidth: "2rem",
-        overflowY: "auto",
-      }}
-    >
-      <Stack spacing={2}>
-        {Object.entries(groupedByDate).map(([date, messages]) => (
-          <React.Fragment key={date}>
-            <Typography
-              align="center"
-              sx={{ fontSize: 13, color: "#888", my: 1 }}
-            >
-              {getReadableDate(date)}
-            </Typography>
+    <>
+      <Box
+        p={3}
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-end",
+          minHeight: "100%",
+          minWidth: "2rem",
+          overflowY: "auto",
+        }}
+      >
+        <Stack spacing={2}>
+          {Object.entries(groupedByDate).map(([date, messages]) => (
+            <React.Fragment key={date}>
+              <Typography
+                align="center"
+                sx={{ fontSize: 13, color: "#888", my: 1 }}
+              >
+                {getReadableDate(date)}
+              </Typography>
 
-            {messages.map((el, index) => {
-              const fromMe =
-                el.sender === currentUserId || el.sender_id === currentUserId;
+              {messages.map((el, index) => {
+                // console.log(el, "MEssages-------");
 
-              return (
-                <Box
-                  key={index}
-                  sx={{
-                    display: "flex",
-                    justifyContent: fromMe ? "flex-end" : "flex-start",
-                  }}
-                >
-                  <Box sx={{ maxWidth: "100%" }}>
-                    {isGroup && !fromMe && (
-                      <Typography
-                        variant="caption"
-                        sx={{
-                          fontWeight: "bold",
-                          color: "#1976d2",
-                          mb: 0.5,
-                          ml: 1,
-                        }}
-                      >
-                        {el.sender_name || `User ${el.sender_id}`}
-                      </Typography>
-                    )}
-                    {renderMessage(el, fromMe)}
+                const fromMe =
+                  el.fromUserId === currentUserId ||
+                  el.sender_id === currentUserId;
+
+                return (
+                  <Box
+                    key={index}
+                    sx={{
+                      display: "flex",
+                      justifyContent: fromMe ? "flex-end" : "flex-start",
+                    }}
+                  >
+                    <Box sx={{ maxWidth: "100%" }}>
+                      {isGroup && !fromMe && (
+                        <Typography
+                          variant="caption"
+                          sx={{
+                            fontWeight: "bold",
+                            color: "#1976d2",
+                            mb: 0.5,
+                            ml: 1,
+                          }}
+                        >
+                          {el.sender_name || `User ${el.sender_id}`}
+                        </Typography>
+                      )}
+                      {renderMessage(el, fromMe)}
+                    </Box>
                   </Box>
-                </Box>
-              );
-            })}
-          </React.Fragment>
-        ))}
-        <div ref={messagesEndRef} />
-      </Stack>
-    </Box>
+                );
+              })}
+            </React.Fragment>
+          ))}
+          <div ref={messagesEndRef} />
+        </Stack>
+      </Box>
+    </>
   );
 };
 

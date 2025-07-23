@@ -8,7 +8,7 @@ import {
   TextField,
   Tooltip,
 } from "@mui/material";
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useTheme } from "@mui/material/styles";
 import {
   Camera,
@@ -62,6 +62,8 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
   const [fileType, setFileType] = useState("");
   const fileInputRef = useRef(null);
   const [openAction, setOpenAction] = useState(false);
+  const actionRef = useRef(null);
+
   const currentUserId = parseInt(localStorage.getItem("userId"));
   const { sendMessage, sendGroupMessage } = useSocket();
   const [filePreview, setFilePreview] = useState(null); // { file, url }
@@ -132,14 +134,31 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
       ...metadata,
       file: filePreview.file,
     };
-    console.log(payload, "Payload");
+    // console.log(payload, "Payload");
     const sentMessage = sendMessage(payload); // Automatically joins and returns roomId
-    console.log(sentMessage, payload, "SENTMESSAGE------->");
+    // console.log(sentMessage, payload, "SENTMESSAGE------->");
 
     setFilePreview(null);
     setCaption("");
     setShowFileModal(false);
   };
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (actionRef.current && !actionRef.current.contains(event.target)) {
+        setOpenAction(false);
+      }
+    };
+
+    if (openAction) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [openAction]);
+
   return (
     <>
       <Box
@@ -202,7 +221,7 @@ const ChatFooter = ({ selectedUser, setChatData, isGroup }) => {
                 },
               },
               startAdornment: (
-                <Stack sx={{ width: "max-content" }}>
+                <Stack ref={actionRef} sx={{ width: "max-content" }}>
                   <Stack
                     sx={{
                       position: "relative",

@@ -3,31 +3,49 @@ import { io } from "socket.io-client";
 let socket = null;
 
 export const connectSocketWithAuth = (authToken, refreshToken, email) => {
-  socket = io(process.env.REACT_APP_API_URL, {
-    autoConnect: true,
-    auth: {
-      token: authToken,
-      refreshToken,
-    },
-  });
+  if (socket && socket.connected) {
+    console.warn("⚠️ Message socket already connected");
+    return socket;
+  }
+  // Always disconnect old socket if exists
+  if (socket) {
+    socket.disconnect();
+    socket = null;
+  }
+  if ((authToken, refreshToken)) {
+    socket = io(process.env.REACT_APP_API_URL, {
+      autoConnect: true,
+      auth: {
+        token: authToken,
+        refreshToken,
+      },
+    });
 
-  socket.on("connect", () => {
-    socket.emit("register_user");
-    console.log("✅ Socket connected:", socket.id);
-    // console.log(authToken, refreshToken, email, "CHECKKKKKKK");
+    socket.on("connect", () => {
+      socket.emit("register_user");
+      console.log("✅ Socket connected:", socket.id);
+      // console.log(authToken, refreshToken, email, "CHECKKKKKKK");
 
-    // socket.emit("login-check", email);
-  });
+      // socket.emit("login-check", email);
+      let email = localStorage.getItem("email");
+      // console.log(authToken, "CHECK BEFORE EMIT", email);
 
-  socket.on("connect_error", (err) => {
-    console.error("❌ Socket connection error:", err.message);
-  });
+      socket.emit("login-check", {
+        email: email,
+        token: authToken,
+      });
+    });
 
-  socket.on("disconnect", (reason) => {
-    console.warn("⚠️ Socket disconnected:", reason);
-  });
+    socket.on("connect_error", (err) => {
+      console.error("❌ Socket connection error:", err.message);
+    });
 
-  return socket;
+    socket.on("disconnect", (reason) => {
+      console.warn("⚠️ Socket disconnected:", reason);
+    });
+
+    return socket;
+  }
 };
 
 export const getSocket = () => socket;

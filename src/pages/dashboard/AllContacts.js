@@ -60,77 +60,24 @@ export default function AllContacts() {
     AxiosGetWithParams("/api/auth/search") // API call for all chats
       .then((data) => {
         setChatList(data.users);
-        setFilteredChats(data.users); // Show all chats initially
+        // setFilteredChats(data.users);
       })
       .catch((error) => console.error("Chat API Error:", error))
       .finally(() => setLoading(false));
   }, []);
-  // useEffect(() => {
-  //   if (!currentUserId) return;
 
-  //   // Request recent chats
-  //   socket.emit("get_recent_chats", currentUserId);
-
-  //   // Listen for response
-  //   socket.on("recent_chats", (chats) => {
-  //     console.log(chats, "recent_chats");
-  //     setChatList(chats);
-  //   });
-
-  //   // Refresh recent chats if new message sent/received
-  //   socket.on("refresh_recent", ({ sender_id, receiver_id }) => {
-  //     if (sender_id === currentUserId || receiver_id === currentUserId) {
-  //       socket.emit("get_recent_chats", currentUserId);
-  //     }
-  //   });
-
-  //   // Get list of online users
-  //   socket.emit("get_online_users");
-
-  //   socket.on("online_users", (ids) => {
-  //     // console.log("Online Users:", ids);
-  //     setOnlineUsers(ids);
-
-  //     if (selectedUser) {
-  //       const isOnline = ids.includes(selectedUser.user_id);
-  //       console.log(
-  //         `Selected user (${selectedUser.user_id}) is ${
-  //           isOnline ? "online" : "offline"
-  //         }`
-  //       );
-  //     }
-  //   });
-
-  //   socket.on("user_online", ({ userId }) => {
-  //     console.log(`User ${userId} just came online`);
-  //     setOnlineUsers((prev) => [...prev, userId]);
-  //   });
-
-  //   socket.on("user_offline", ({ userId }) => {
-  //     console.log(`User ${userId} went offline`);
-  //     setOnlineUsers((prev) => prev.filter((id) => id !== userId));
-  //   });
-
-  //   return () => {
-  //     socket.off("recent_chats");
-  //     socket.off("refresh_recent");
-  //     socket.off("online_users");
-  //     socket.off("user_online");
-  //     socket.off("user_offline");
-  //   };
-  // }, [currentUserId, selectedUser]);
   //   Handle search dynamically
-  useEffect(() => {
-    if (searchQuery.length > 0) {
-      setLoading(true);
-      AxiosGetWithParams(`/api/auth/search`, { searchQuery })
-        .then((data) => setFilteredChats(data))
-        .catch((error) => console.error("Search API Error:", error))
-        .finally(() => setLoading(false));
-    } else {
-      setFilteredChats(chatList); // Reset search results when query is cleared
-    }
-  }, [searchQuery, chatList]);
+  // useEffect(() => {
+  //   if (searchQuery.length > 0) {
+  //     setLoading(true);
+  //     AxiosGetWithParams(`/api/auth/search`, { searchQuery })
+  //       .then((data) => setFilteredChats(data))
+  //       .catch((error) => console.error("Search API Error:", error))
+  //       .finally(() => setLoading(false));
+  //   } else {
+  //     setFilteredChats(chatList); // Reset search results when query is cleared
+  //   }
+  // }, [searchQuery, chatList]);
   const handleUserClick = (user) => {
     // console.log(user, "SELECTED ISER_---");
     setSelectedUser(user);
@@ -141,14 +88,7 @@ export default function AllContacts() {
   };
   let isGroup = selectedUser?.group_id ? true : false;
   // console.log(chatList, "ALLCONTACT PAGE CHAT LIST");
-  const onClose = () => {
-    cleanupCall(); // You can also pass it down as a prop
-    setShowCallPopup(false);
-  };
-  const handleAccept = () => answerCall();
-  const handleUserAccept = () => {
-    answerCall();
-  };
+
   const handleReject = () => {
     if (isGroup) {
       rejectCall();

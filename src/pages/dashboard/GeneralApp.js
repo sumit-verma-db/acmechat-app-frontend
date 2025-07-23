@@ -26,6 +26,7 @@ const GeneralApp = () => {
     setSelectedMenu,
   } = useChat();
   const navigate = useNavigate();
+  // console.log(chatList, "CHATLIST===========");
 
   const handleUserClick = (user) => {
     // console.log(user, "SELECTED ISER_---");

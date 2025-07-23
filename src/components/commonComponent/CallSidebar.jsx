@@ -82,7 +82,7 @@ export default function CallSidebar({ isGroup }) {
   }, [remoteStream]);
   useEffect(() => {
     if (remoteAudioRef.current && currentSpeakerId) {
-      console.log("Remote check--=======");
+      // console.log("Remote check--=======");
 
       if (typeof remoteAudioRef.current.setSinkId === "function") {
         remoteAudioRef.current.setSinkId(currentSpeakerId).catch((err) => {

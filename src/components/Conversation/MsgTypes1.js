@@ -14,6 +14,8 @@ import {
   File as FileIcon,
   Checks,
   Check,
+  VideoCamera,
+  Phone,
 } from "phosphor-react";
 import { Message_options } from "../../data";
 import { axiosGet } from "../../services/apiServices";
@@ -462,7 +464,68 @@ const TextMsg = ({ el, menu, fromMe = false, isGroup = false }) => {
     </Stack>
   );
 };
+const CallMsg = ({ el, fromMe }) => {
+  const theme = useTheme();
+  const bgColor = fromMe ? "#DCF8C6" : theme.palette.background.paper;
+  // console.log(el, fromMe, "callType=====");
 
+  const Icon = el.type === "video" ? VideoCamera : Phone;
+  const label =
+    (el.type === "video" ? "Video" : "Audio") +
+    " Call - " +
+    el.status.charAt(0).toUpperCase() +
+    el.status.slice(1);
+
+  return (
+    <Stack
+      direction="row"
+      justifyContent={fromMe ? "flex-end" : "flex-start"}
+      sx={{ width: "100%" }}
+    >
+      <Box
+        p={1.5}
+        sx={{
+          backgroundColor: bgColor,
+          borderRadius: 2,
+          minWidth: "7rem",
+          maxWidth: "50%",
+          boxShadow: fromMe
+            ? "0 1px 5px rgba(0,0,0,0.2)"
+            : "0 1px 3px rgba(0,0,0,0.1)",
+          width: "fit-content",
+          whiteSpace: "normal",
+          overflowWrap: "break-word", // ✅ additional browser support
+          wordBreak: "break-word",
+        }}
+      >
+        <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <Icon size={18} color="#1976d2" />
+          <Typography variant="body2">{label}</Typography>
+        </Box>
+        {/* Only show duration if call was accepted */}
+        {el.status === "accepted" && el.durationSeconds != null && (
+          <Typography variant="caption" color="text.secondary" mt={0.5}>
+            {el.durationSeconds} secs
+          </Typography>
+        )}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: fromMe ? "flex-end" : "flex-start",
+            mt: 1,
+          }}
+        >
+          <Typography variant="caption" color="text.secondary">
+            {new Date(el.sent_at).toLocaleTimeString([], {
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </Typography>
+        </Box>
+      </Box>
+    </Stack>
+  );
+};
 const TimeLine = ({ el }) => {
   const theme = useTheme();
   return (
@@ -477,6 +540,7 @@ const TimeLine = ({ el }) => {
 };
 
 export {
+  CallMsg,
   TimeLine,
   TextMsg,
   MediaMsg,

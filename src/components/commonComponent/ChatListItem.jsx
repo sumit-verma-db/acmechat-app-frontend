@@ -1,6 +1,6 @@
 import { Avatar, Badge, Box, Stack, Typography } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-import { Check, Checks } from "phosphor-react";
+import { Check, Checks, File, PhoneCall } from "phosphor-react";
 import StyledBadge from "../StyledBadge";
 
 const formatChatTime = (time) => {
@@ -25,7 +25,7 @@ const ChatListItem = ({
   img,
   email,
   online,
-  unread = 0,
+  unseen_count = 0,
   message,
   sent_at,
   isActive,
@@ -34,6 +34,8 @@ const ChatListItem = ({
   sender_id,
   onSelect,
   group_name,
+  file_name,
+  type,
 }) => {
   const theme = useTheme();
 
@@ -145,7 +147,7 @@ const ChatListItem = ({
               color="text.secondary"
               noWrap
               sx={{
-                maxWidth: 140,
+                maxWidth: 130,
                 overflow: "hidden",
                 textOverflow: "ellipsis",
                 display: "flex",
@@ -156,7 +158,18 @@ const ChatListItem = ({
               {mode === "user" &&
                 sender_id !== parseInt(localStorage.getItem("userId")) &&
                 getMessageStatusIcon(delivered, seen)}
-              {message || email}
+              {file_name ? (
+                <>
+                  <File size={32} style={{ marginRight: 8 }} />
+                  {file_name}
+                </>
+              ) : type === "audio" || type === "video" ? (
+                <PhoneCall size={24} style={{ marginRight: 8 }} />
+              ) : message ? (
+                message
+              ) : (
+                email
+              )}
             </Typography>
           </Stack>
         </Stack>
@@ -167,10 +180,27 @@ const ChatListItem = ({
           >
             {sent_at && formatChatTime(sent_at)}
           </Typography>
-          {!!unread && unread > 0 && (
+          {/* <Badge
+            color="primary"
+            badgeContent={9}
+            sx={{
+              "& .MuiBadge-badge": {
+                right: -3,
+                top: 4,
+                fontSize: 11,
+                padding: "0 5px",
+                minWidth: 18,
+                height: 18,
+                borderRadius: "8px",
+                boxShadow: "0 0 2px 1px #fff",
+                fontWeight: 700,
+              },
+            }}
+          /> */}
+          {!!unseen_count && unseen_count > 0 && (
             <Badge
               color="primary"
-              badgeContent={unread > 9 ? "9+" : unread}
+              badgeContent={unseen_count > 9 ? "9+" : unseen_count}
               sx={{
                 "& .MuiBadge-badge": {
                   right: -3,

@@ -58,9 +58,9 @@ const UnifiedActiveCall = ({
   const sortedParticipants = [...participants].sort((a, b) =>
     a.isLocal ? -1 : 1
   );
-  useEffect(() => {
-    console.log(sortedParticipants, "sortedParticipants LIST");
-  }, [sortedParticipants]);
+  // useEffect(() => {
+  //   console.log(sortedParticipants, "sortedParticipants LIST");
+  // }, [sortedParticipants]);
 
   // console.log(sortedParticipants, "PARTICIPANTS LIST");
 
